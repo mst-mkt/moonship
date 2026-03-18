@@ -1,6 +1,9 @@
 {
   "name": "mst-mkt/moonship",
   "version": "0.0.0",
+  "deps": {
+    "moonbitlang/x": "0.4.41"
+  },
   "readme": "README.md",
   "repository": "https://github.com/mst-mkt/moonship",
   "source": "src",

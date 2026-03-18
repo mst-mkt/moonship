@@ -1,3 +1,9 @@
+import {
+  "moonbitlang/x/sys" @sys,
+  "moonbitlang/core/strconv" @strconv,
+}
+
 options(
   "is-main": true,
+  "supported-targets": "native",
 )
