@@ -1,0 +1,8 @@
+{
+  "name": "mst-mkt/moonship",
+  "version": "0.0.0",
+  "readme": "README.md",
+  "repository": "https://github.com/mst-mkt/moonship",
+  "source": "src",
+  "preferred-target": "native"
+}
