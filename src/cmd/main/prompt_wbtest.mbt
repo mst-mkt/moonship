@@ -1,23 +1,23 @@
 ///|
-test "render_prompt: status 0 で緑のシンボル" {
+test "render: status 0 green symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=0)
   let output = render_prompt(ctx)
 
   assert_true(output.contains("❯"))
-  assert_true(output.contains("32")) // green
+  assert_true(output.contains("32"))
 }
 
 ///|
-test "render_prompt: status 1 で赤のシンボル" {
+test "render: status 1 red symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=1)
   let output = render_prompt(ctx)
 
   assert_true(output.contains("❯"))
-  assert_true(output.contains("31")) // red
+  assert_true(output.contains("31"))
 }
 
 ///|
-test "render_prompt: 全モジュール無効で空出力" {
+test "render: all disabled produces empty" {
   let config = @config.Config::from_toml(
     (
       #|[character]
@@ -32,7 +32,7 @@ test "render_prompt: 全モジュール無効で空出力" {
 }
 
 ///|
-test "render_prompt: 未知のモジュールはスキップ" {
+test "render: unknown module skipped" {
   let config = @config.Config::from_toml(
     (
       #|format = "$nonexistent$character"

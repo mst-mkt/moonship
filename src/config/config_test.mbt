@@ -1,5 +1,5 @@
 ///|
-test "デフォルト設定の to_toml が parse 可能" {
+test "default to_toml roundtrip" {
   let config = @config.Config::default()
   let toml_str = config.to_toml()
   let parsed = @config.Config::from_toml(toml_str)
@@ -9,7 +9,7 @@ test "デフォルト設定の to_toml が parse 可能" {
 }
 
 ///|
-test "TOML からモジュール設定を読み込み" {
+test "module config from TOML" {
   let toml =
     #|[character]
     #|success_symbol = "[→](bold blue)"
@@ -17,12 +17,11 @@ test "TOML からモジュール設定を読み込み" {
   let config = @config.Config::from_toml(toml)
   let ch = config.get_module("character")
   assert_eq(ch.get_prop("success_symbol"), "[→](bold blue)")
-  // error_symbol はデフォルトのまま
   assert_eq(ch.get_prop("error_symbol"), "[❯](bold red)")
 }
 
 ///|
-test "トップレベル設定の上書き" {
+test "top-level override" {
   let toml =
     #|format = "$character"
     #|scan_timeout = 2000
@@ -30,11 +29,11 @@ test "トップレベル設定の上書き" {
   let config = @config.Config::from_toml(toml)
   assert_eq(config.format, "$character")
   assert_eq(config.scan_timeout, 2000)
-  assert_eq(config.command_timeout, 500) // デフォルト値
+  assert_eq(config.command_timeout, 500)
 }
 
 ///|
-test "モジュールの disabled" {
+test "module disabled" {
   let toml =
     #|[git_branch]
     #|disabled = true
@@ -42,12 +41,11 @@ test "モジュールの disabled" {
   let config = @config.Config::from_toml(toml)
   let gb = config.get_module("git_branch")
   assert_true(gb.disabled)
-  // format はデフォルトのまま
   assert_eq(gb.format, "[$branch]($style) ")
 }
 
 ///|
-test "未知のモジュールを追加" {
+test "unknown module added" {
   let toml =
     #|[custom_module]
     #|format = "$text"
@@ -62,7 +60,7 @@ test "未知のモジュールを追加" {
 }
 
 ///|
-test "空 TOML はデフォルト設定" {
+test "empty TOML is default" {
   let config = @config.Config::from_toml("")
   let default = @config.Config::default()
   assert_eq(config.format, default.format)
@@ -70,7 +68,7 @@ test "空 TOML はデフォルト設定" {
 }
 
 ///|
-test "数値プロパティ" {
+test "numeric property" {
   let toml =
     #|[directory]
     #|truncation_length = 5

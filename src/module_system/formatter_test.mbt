@@ -1,5 +1,5 @@
 ///|
-test "extract_module_names: multiple" {
+test "extract names: multiple" {
   let names = @module_system.extract_module_names(
     "$directory$git_branch$character",
   )
@@ -7,22 +7,22 @@ test "extract_module_names: multiple" {
 }
 
 ///|
-test "extract_module_names: empty" {
+test "extract names: empty" {
   assert_eq(@module_system.extract_module_names("").length(), 0)
 }
 
 ///|
-test "extract_module_names: no $" {
+test "extract names: no $" {
   assert_eq(@module_system.extract_module_names("plain text").length(), 0)
 }
 
 ///|
-test "extract_module_names: bare $" {
+test "extract names: bare $" {
   assert_eq(@module_system.extract_module_names("$").length(), 0)
 }
 
 ///|
-test "format_string: variable substitution" {
+test "format: variable" {
   let vars : Map[String, String] = { "name": "world" }
   let segs = @module_system.format_string(
     "hello $name!",
@@ -33,7 +33,7 @@ test "format_string: variable substitution" {
 }
 
 ///|
-test "format_string: undefined var is skipped" {
+test "format: undefined var skipped" {
   let segs = @module_system.format_string(
     "hello $missing world",
     {},
@@ -43,7 +43,7 @@ test "format_string: undefined var is skipped" {
 }
 
 ///|
-test "format_string: [text](style)" {
+test "format: [text](style)" {
   let vars : Map[String, String] = { "path": "/home" }
   let segs = @module_system.format_string(
     "[$path](bold red) ",
@@ -56,7 +56,7 @@ test "format_string: [text](style)" {
 }
 
 ///|
-test "format_string: [$var]($style)" {
+test "format: [$var]($style)" {
   let vars : Map[String, String] = { "path": "test", "style": "bold green" }
   let segs = @module_system.format_string(
     "[$path]($style)",
@@ -69,7 +69,7 @@ test "format_string: [$var]($style)" {
 }
 
 ///|
-test "format_string: plain text only" {
+test "format: plain text only" {
   let segs = @module_system.format_string(
     "hello world",
     {},
@@ -80,7 +80,7 @@ test "format_string: plain text only" {
 }
 
 ///|
-test "format_string: inline styled value" {
+test "format: inline styled value" {
   let vars : Map[String, String] = { "symbol": "[❯](bold green)" }
   let segs = @module_system.format_string(
     "$symbol ",
@@ -93,7 +93,7 @@ test "format_string: inline styled value" {
 }
 
 ///|
-test "format_string: unclosed bracket" {
+test "format: unclosed bracket" {
   let segs = @module_system.format_string(
     "[unclosed",
     {},
@@ -103,19 +103,19 @@ test "format_string: unclosed bracket" {
 }
 
 ///|
-test "format_string: empty template" {
+test "format: empty template" {
   let segs = @module_system.format_string("", {}, @terminal.Style::default())
   assert_eq(segs.length(), 0)
 }
 
 ///|
-test "format_string: bare $" {
+test "format: bare $" {
   let segs = @module_system.format_string("$", {}, @terminal.Style::default())
   assert_eq(segs.length(), 0)
 }
 
 ///|
-test "format_string: nested brackets" {
+test "format: nested brackets" {
   let segs = @module_system.format_string(
     "[[inner]](bold)",
     {},
@@ -125,33 +125,7 @@ test "format_string: nested brackets" {
 }
 
 ///|
-test "ModuleOutput::render" {
-  let output = @module_system.ModuleOutput::new([
-    @module_system.Segment::new("hello"),
-    @module_system.Segment::new(" world"),
-  ])
-  assert_eq(output.render(), "hello world")
-}
-
-///|
-test "ModuleOutput::render with style" {
-  let style = @terminal.Style::default().with_bold()
-  let output = @module_system.ModuleOutput::new([
-    @module_system.Segment::new("bold", style~),
-  ])
-  let rendered = output.render()
-  assert_true(rendered.contains("\u001b["))
-  assert_true(rendered.contains("bold"))
-}
-
-///|
-test "ModuleOutput::render empty" {
-  let output = @module_system.ModuleOutput::new([])
-  assert_eq(output.render(), "")
-}
-
-///|
-test "format_string: [text] without (style)" {
+test "format: [text] without (style)" {
   let segs = @module_system.format_string(
     "[text] no style",
     {},
@@ -161,7 +135,7 @@ test "format_string: [text] without (style)" {
 }
 
 ///|
-test "format_string: multiple segments" {
+test "format: multiple segments" {
   let vars : Map[String, String] = { "a": "X", "b": "Y" }
   let segs = @module_system.format_string(
     "$a-$b",
@@ -172,8 +146,34 @@ test "format_string: multiple segments" {
 }
 
 ///|
-test "format_string: style inherits default" {
+test "format: inherits default style" {
   let style = @terminal.Style::default().with_bold()
   let segs = @module_system.format_string("text", {}, style)
   assert_true(segs[0].style.bold)
+}
+
+///|
+test "render: basic" {
+  let output = @module_system.ModuleOutput::new([
+    @module_system.Segment::new("hello"),
+    @module_system.Segment::new(" world"),
+  ])
+  assert_eq(output.render(), "hello world")
+}
+
+///|
+test "render: with style" {
+  let style = @terminal.Style::default().with_bold()
+  let output = @module_system.ModuleOutput::new([
+    @module_system.Segment::new("bold", style~),
+  ])
+  let rendered = output.render()
+  assert_true(rendered.contains("\u001b["))
+  assert_true(rendered.contains("bold"))
+}
+
+///|
+test "render: empty" {
+  let output = @module_system.ModuleOutput::new([])
+  assert_eq(output.render(), "")
 }

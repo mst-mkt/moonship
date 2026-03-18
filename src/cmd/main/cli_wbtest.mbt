@@ -1,5 +1,5 @@
 ///|
-test "prompt: オプション付き" {
+test "prompt: with options" {
   let cmd = parse_args(["prompt", "--status=1", "--cmd-duration=500"])
   match cmd {
     Prompt(pa) => {
@@ -13,13 +13,50 @@ test "prompt: オプション付き" {
 }
 
 ///|
-test "prompt: デフォルト値" {
+test "prompt: defaults" {
   let cmd = parse_args(["prompt"])
   match cmd {
     Prompt(pa) => {
       assert_eq(pa.status, 0)
       assert_eq(pa.cmd_duration, 0)
     }
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: all options" {
+  let cmd = parse_args([
+    "prompt", "--status=127", "--cmd-duration=1000", "--jobs=3", "--terminal-width=120",
+  ])
+  match cmd {
+    Prompt(pa) => {
+      assert_eq(pa.status, 127)
+      assert_eq(pa.cmd_duration, 1000)
+      assert_eq(pa.jobs, 3)
+      assert_eq(pa.terminal_width, 120)
+    }
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: invalid values fallback to default" {
+  let cmd = parse_args(["prompt", "--status=abc", "--jobs=-"])
+  match cmd {
+    Prompt(pa) => {
+      assert_eq(pa.status, 0)
+      assert_eq(pa.jobs, 0)
+    }
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: unknown flags ignored" {
+  let cmd = parse_args(["prompt", "--unknown=value", "--status=5"])
+  match cmd {
+    Prompt(pa) => assert_eq(pa.status, 5)
     _ => fail("Expected Prompt")
   }
 }
@@ -40,12 +77,12 @@ test "print-config" {
 }
 
 ///|
-test "引数なしは Help" {
+test "no args is Help" {
   assert_true(parse_args([]) is Help)
 }
 
 ///|
-test "不明なコマンド" {
+test "unknown command" {
   match parse_args(["foo"]) {
     UnknownCommand(name) => assert_eq(name, "foo")
     _ => fail("Expected UnknownCommand")
@@ -53,7 +90,7 @@ test "不明なコマンド" {
 }
 
 ///|
-test "フラグ: 正常" {
+test "flag: valid" {
   match extract_flag_value("--status=0") {
     Some(("status", "0")) => ()
     _ => fail("Expected Some((status, 0))")
@@ -65,53 +102,16 @@ test "フラグ: 正常" {
 }
 
 ///|
-test "フラグ: 不正" {
+test "flag: invalid" {
   assert_true(extract_flag_value("status=0") is None)
   assert_true(extract_flag_value("--status") is None)
   assert_true(extract_flag_value("") is None)
 }
 
 ///|
-test "整数パース" {
+test "parse int" {
   assert_eq(parse_int_arg("42"), 42)
   assert_eq(parse_int_arg("-1"), -1)
   assert_eq(parse_int_arg("abc"), 0)
   assert_eq(parse_int_arg(""), 0)
-}
-
-///|
-test "prompt: 全オプション" {
-  let cmd = parse_args([
-    "prompt", "--status=127", "--cmd-duration=1000", "--jobs=3", "--terminal-width=120",
-  ])
-  match cmd {
-    Prompt(pa) => {
-      assert_eq(pa.status, 127)
-      assert_eq(pa.cmd_duration, 1000)
-      assert_eq(pa.jobs, 3)
-      assert_eq(pa.terminal_width, 120)
-    }
-    _ => fail("Expected Prompt")
-  }
-}
-
-///|
-test "prompt: 不正な値はデフォルト" {
-  let cmd = parse_args(["prompt", "--status=abc", "--jobs=-"])
-  match cmd {
-    Prompt(pa) => {
-      assert_eq(pa.status, 0)
-      assert_eq(pa.jobs, 0)
-    }
-    _ => fail("Expected Prompt")
-  }
-}
-
-///|
-test "prompt: 未知のフラグは無視" {
-  let cmd = parse_args(["prompt", "--unknown=value", "--status=5"])
-  match cmd {
-    Prompt(pa) => assert_eq(pa.status, 5)
-    _ => fail("Expected Prompt")
-  }
 }

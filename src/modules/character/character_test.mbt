@@ -1,5 +1,5 @@
 ///|
-test "成功: status 0 で緑の太字シンボル" {
+test "status 0: bold green symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=0)
   let m : &@ms.PromptModule = CharacterModule::new()
 
@@ -7,11 +7,11 @@ test "成功: status 0 で緑の太字シンボル" {
 
   let rendered = out.render()
   assert_true(rendered.contains("❯"))
-  assert_true(rendered.contains("32")) // green
+  assert_true(rendered.contains("32"))
 }
 
 ///|
-test "失敗: 非ゼロ status で赤の太字シンボル" {
+test "non-zero status: bold red symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=1)
   let m : &@ms.PromptModule = CharacterModule::new()
 
@@ -19,11 +19,11 @@ test "失敗: 非ゼロ status で赤の太字シンボル" {
 
   let rendered = out.render()
   assert_true(rendered.contains("❯"))
-  assert_true(rendered.contains("31")) // red
+  assert_true(rendered.contains("31"))
 }
 
 ///|
-test "成功と失敗で異なる出力" {
+test "success and error differ" {
   let m : &@ms.PromptModule = CharacterModule::new()
 
   let ok = m
@@ -39,7 +39,7 @@ test "成功と失敗で異なる出力" {
 }
 
 ///|
-test "無効化されたモジュールは None" {
+test "disabled returns None" {
   let config = @config.Config::from_toml(
     (
       #|[character]
@@ -54,7 +54,7 @@ test "無効化されたモジュールは None" {
 }
 
 ///|
-test "設定でカスタムシンボル" {
+test "custom symbol via config" {
   let config = @config.Config::from_toml(
     (
       #|[character]
@@ -69,11 +69,11 @@ test "設定でカスタムシンボル" {
 
   let rendered = out.render()
   assert_true(rendered.contains("→"))
-  assert_true(rendered.contains("34")) // blue
+  assert_true(rendered.contains("34"))
 }
 
 ///|
-test "モジュール名" {
+test "name" {
   let m : &@ms.PromptModule = CharacterModule::new()
   assert_eq(m.name(), "character")
 }
