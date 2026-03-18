@@ -35,6 +35,11 @@ test "version / help" {
 }
 
 ///|
+test "print-config" {
+  assert_true(parse_args(["print-config"]) is PrintConfig)
+}
+
+///|
 test "引数なしは Help" {
   assert_true(parse_args([]) is Help)
 }

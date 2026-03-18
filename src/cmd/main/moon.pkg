@@ -1,6 +1,8 @@
 import {
   "moonbitlang/x/sys" @sys,
+  "moonbitlang/x/fs" @fs,
   "moonbitlang/core/strconv" @strconv,
+  "mst-mkt/moonship/config" @config,
 }
 
 options(

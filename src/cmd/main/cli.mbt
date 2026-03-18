@@ -1,6 +1,7 @@
 ///|
 pub enum Command {
   Prompt(PromptArgs)
+  PrintConfig
   Version
   Help
   UnknownCommand(String)
@@ -27,6 +28,7 @@ pub fn parse_args(args : Array[String]) -> Command {
 
   match args[0] {
     "prompt" => parse_prompt_args(args)
+    "print-config" => PrintConfig
     "version" | "--version" | "-V" => Version
     "help" | "--help" | "-h" => Help
     _ => UnknownCommand(args[0])

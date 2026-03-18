@@ -5,6 +5,10 @@ fn main {
 
   match cmd {
     Prompt(_pa) => println("❯")
+    PrintConfig => {
+      let config = load_config()
+      println(config.to_toml())
+    }
     Version => println("moonship 0.0.0")
     Help => run_help()
     UnknownCommand(name) => {
@@ -15,12 +19,30 @@ fn main {
 }
 
 ///|
+fn load_config() -> @config.Config {
+  let home = @sys.get_env_var("HOME").unwrap_or("")
+  if home.length() == 0 {
+    return @config.Config::default()
+  }
+
+  let path = "\{home}/.config/moonship/moonship.toml"
+  let content = @fs.read_file_to_string(path) catch {
+    _ => return @config.Config::default()
+  }
+
+  @config.Config::from_toml(content) catch {
+    _ => @config.Config::default()
+  }
+}
+
+///|
 fn run_help() -> Unit {
   let help =
     #|moonship - A fast async shell prompt
     #|
     #|Usage:
     #|  moonship prompt [options]    Generate prompt string
+    #|  moonship print-config        Print active configuration
     #|  moonship version             Print version
     #|  moonship help                Print this help
     #|
