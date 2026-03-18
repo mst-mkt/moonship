@@ -7,6 +7,7 @@ import {
   "mst-mkt/moonship/context" @context,
   "mst-mkt/moonship/module_system" @ms,
   "mst-mkt/moonship/modules/character" @mod_character,
+  "mst-mkt/moonship/modules/directory" @mod_directory,
 }
 
 options(

@@ -22,6 +22,8 @@ test "render: all disabled produces empty" {
     (
       #|[character]
       #|disabled = true
+      #|[directory]
+      #|disabled = true
       #|
     ),
   )

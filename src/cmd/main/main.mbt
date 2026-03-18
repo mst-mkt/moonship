@@ -42,6 +42,7 @@ fn run_prompt(pa : PromptArgs) -> Unit {
 fn build_modules() -> Map[String, &@ms.PromptModule] {
   let modules : Map[String, &@ms.PromptModule] = {}
   modules["character"] = @mod_character.CharacterModule::new()
+  modules["directory"] = @mod_directory.DirectoryModule::new()
   modules
 }
 

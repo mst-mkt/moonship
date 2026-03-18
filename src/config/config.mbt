@@ -81,6 +81,18 @@ pub fn ModuleConfig::get_prop(
 }
 
 ///|
+pub fn ModuleConfig::get_int_prop(
+  self : ModuleConfig,
+  key : String,
+  default? : Int = 0,
+) -> Int {
+  match self.props.get(key) {
+    Some(v) => @strconv.parse_int(v) catch { _ => default }
+    None => default
+  }
+}
+
+///|
 /// Parse a TOML string into a Config, merging with defaults.
 pub fn Config::from_toml(toml_str : String) -> Config raise {
   let value = @toml.parse(toml_str)
