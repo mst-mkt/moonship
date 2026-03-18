@@ -34,6 +34,17 @@ test "render: all disabled produces empty" {
 }
 
 ///|
+test "render: includes directory" {
+  let ctx = @context.Context::new(
+    cwd="/home/user/project",
+    home_dir="/home/user",
+  )
+  let output = render_prompt(ctx)
+
+  assert_true(output.contains("project"))
+}
+
+///|
 test "render: unknown module skipped" {
   let config = @config.Config::from_toml(
     (

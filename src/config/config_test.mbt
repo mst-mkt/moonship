@@ -77,3 +77,28 @@ test "numeric property" {
   let dir = config.get_module("directory")
   assert_eq(dir.get_prop("truncation_length"), "5")
 }
+
+///|
+test "get_int_prop: valid" {
+  let config = @config.Config::default()
+  let dir = config.get_module("directory")
+  assert_eq(dir.get_int_prop("truncation_length"), 3)
+}
+
+///|
+test "get_int_prop: missing key uses default" {
+  let config = @config.Config::default()
+  let dir = config.get_module("directory")
+  assert_eq(dir.get_int_prop("nonexistent", default=42), 42)
+}
+
+///|
+test "get_int_prop: invalid value uses default" {
+  let toml =
+    #|[directory]
+    #|truncation_length = "abc"
+    #|
+  let config = @config.Config::from_toml(toml)
+  let dir = config.get_module("directory")
+  assert_eq(dir.get_int_prop("truncation_length", default=3), 3)
+}

@@ -53,3 +53,13 @@ test "path with spaces" {
     "~/my project/src",
   )
 }
+
+///|
+test "exact truncation boundary" {
+  assert_eq(format_path("/a/b/c", "", 3), "/a/b/c")
+}
+
+///|
+test "one over truncation boundary" {
+  assert_eq(format_path("/a/b/c/d", "", 3), "…/b/c/d")
+}

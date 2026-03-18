@@ -17,9 +17,7 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleOutput? {
   let config = ctx.config.get_module("directory")
-  if config.disabled {
-    return None
-  }
+  guard not(config.disabled) else { return None }
 
   let truncation_length = config.get_int_prop("truncation_length", default=3)
   let path = format_path(ctx.cwd, ctx.home_dir, truncation_length)
