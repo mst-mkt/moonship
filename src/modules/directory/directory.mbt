@@ -30,7 +30,12 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
 
 ///|
 fn format_path(cwd : String, home : String, truncation_length : Int) -> String {
-  let display = if not(home.is_empty()) && cwd.has_prefix(home) {
+  let display = if not(home.is_empty()) &&
+    cwd.has_prefix(home) &&
+    (
+      cwd.length() == home.length() ||
+      cwd[home.length():].to_string().has_prefix("/")
+    ) {
     "~" + cwd[home.length():].to_string()
   } else {
     cwd

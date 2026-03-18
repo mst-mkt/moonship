@@ -63,3 +63,32 @@ test "exact truncation boundary" {
 test "one over truncation boundary" {
   assert_eq(format_path("/a/b/c/d", "", 3), "…/b/c/d")
 }
+
+///|
+test "home is prefix of longer dirname" {
+  assert_eq(
+    format_path("/home/user2/project", "/home/user", 3),
+    "/home/user2/project",
+  )
+}
+
+///|
+test "name" {
+  let m : &@ms.PromptModule = DirectoryModule::new()
+  assert_eq(m.name(), "directory")
+}
+
+///|
+test "disabled returns None" {
+  let config = @config.Config::from_toml(
+    (
+      #|[directory]
+      #|disabled = true
+      #|
+    ),
+  )
+  let ctx = @context.Context::new(cwd="/tmp", config~)
+  let m : &@ms.PromptModule = DirectoryModule::new()
+
+  assert_true(m.execute(ctx) is None)
+}

@@ -22,9 +22,7 @@ pub fn PromptArgs::default() -> PromptArgs {
 
 ///|
 pub fn parse_args(args : Array[String]) -> Command {
-  if args.is_empty() {
-    return Help
-  }
+  guard not(args.is_empty()) else { return Help }
 
   match args[0] {
     "prompt" => parse_prompt_args(args)
