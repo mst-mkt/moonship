@@ -1,0 +1,3 @@
+import {
+  "mst-mkt/moonship/config" @config,
+}
