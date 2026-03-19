@@ -1,5 +1,5 @@
 ///|
-fn main {
+async fn main {
   let args = get_argv()
   let cmd = parse_args(args)
 
@@ -19,19 +19,28 @@ fn main {
 }
 
 ///|
-fn run_prompt(pa : PromptArgs) -> Unit {
+async fn run_prompt(pa : PromptArgs) -> Unit {
   let config = load_config()
   let cwd = @env.current_dir().unwrap_or(".")
-  let home = @sys.get_env_var("HOME").unwrap_or("")
+  let home_dir = @sys.get_env_var("HOME").unwrap_or("")
+
+  let git_info = if @git.initialize() {
+    let info = @git.get_info(cwd)
+    @git.finalize()
+    info
+  } else {
+    None
+  }
 
   let ctx = @context.Context::new(
     cwd~,
-    home_dir=home,
+    home_dir~,
     status=pa.status,
     cmd_duration=pa.cmd_duration,
     jobs=pa.jobs,
     terminal_width=pa.terminal_width,
     config~,
+    git_info~,
   )
 
   let output = render_prompt(ctx)
@@ -43,6 +52,8 @@ fn build_modules() -> Map[String, &@ms.PromptModule] {
   let modules : Map[String, &@ms.PromptModule] = {}
   modules["character"] = @mod_character.CharacterModule::new()
   modules["directory"] = @mod_directory.DirectoryModule::new()
+  modules["git_branch"] = @mod_git_branch.GitBranchModule::new()
+  modules["git_status"] = @mod_git_status.GitStatusModule::new()
   modules
 }
 
@@ -97,10 +108,7 @@ fn run_help() -> Unit {
 ///|
 fn get_argv() -> Array[String] {
   let args = @sys.get_cli_args()
+  guard args.length() > 1 else { return [] }
 
-  if args.length() > 1 {
-    args[1:].to_array()
-  } else {
-    []
-  }
+  args[1:].to_array()
 }

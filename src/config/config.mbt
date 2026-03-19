@@ -33,7 +33,7 @@ pub fn Config::default() -> Config {
     disabled: false,
     format: "[$path]($style) ",
     style: "bold cyan",
-    props: { "truncation_length": "3", "truncate_to_repo": "true" },
+    props: { "truncation_length": "3" },
   }
   modules["git_branch"] = {
     disabled: false,
@@ -183,10 +183,10 @@ fn module_to_toml(name : String, mc : ModuleConfig) -> String {
   if mc.disabled {
     lines.push("disabled = true")
   }
-  if mc.format.length() > 0 {
+  if not(mc.format.is_empty()) {
     lines.push("format = \{quote(mc.format)}")
   }
-  if mc.style.length() > 0 {
+  if not(mc.style.is_empty()) {
     lines.push("style = \{quote(mc.style)}")
   }
 

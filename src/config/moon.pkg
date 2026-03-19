@@ -3,3 +3,7 @@ import {
   "moonbitlang/core/strconv" @strconv,
   "bobzhang/toml" @toml,
 }
+
+options(
+  "supported-targets": "native",
+)

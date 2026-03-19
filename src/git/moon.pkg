@@ -1,4 +1,6 @@
 import {
+  "mizchi/libgit2" @libgit2,
+  "moonbitlang/async/process" @process,
   "moonbitlang/core/strconv" @strconv,
 }
 

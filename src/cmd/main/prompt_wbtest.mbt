@@ -45,6 +45,20 @@ test "render: includes directory" {
 }
 
 ///|
+test "render: includes git branch and status" {
+  let git_info = @git.GitInfo::new(
+    repo_root="/repo",
+    branch="develop",
+    modified=1,
+  )
+  let ctx = @context.Context::new(cwd="/repo", git_info=Some(git_info))
+  let output = render_prompt(ctx)
+
+  assert_true(output.contains("develop"))
+  assert_true(output.contains("!"))
+}
+
+///|
 test "render: unknown module skipped" {
   let config = @config.Config::from_toml(
     (
