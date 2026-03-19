@@ -58,3 +58,31 @@ test "GitInfo::new defaults" {
   assert_eq(info.ahead, 0)
   assert_eq(info.behind, 0)
 }
+
+///|
+test "GitInfo JSON round-trip: all fields" {
+  let info = GitInfo::new(
+    repo_root="/home/user/project",
+    branch="feature/test",
+    is_detached=true,
+    commit_hash="abc1234",
+    staged=2,
+    modified=3,
+    untracked=1,
+    ahead=5,
+    behind=2,
+  )
+
+  let json = info.to_json()
+  let restored : GitInfo = @json.from_json(json)
+  assert_eq(restored, info)
+}
+
+///|
+test "GitInfo JSON round-trip: defaults" {
+  let info = GitInfo::new(repo_root="/repo", branch="main")
+
+  let json = info.to_json()
+  let restored : GitInfo = @json.from_json(json)
+  assert_eq(restored, info)
+}

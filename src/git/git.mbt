@@ -9,7 +9,7 @@ pub(all) struct GitInfo {
   untracked : Int
   ahead : Int
   behind : Int
-}
+} derive(Show, Eq, ToJson, FromJson)
 
 ///|
 pub fn GitInfo::new(
