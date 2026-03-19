@@ -374,6 +374,29 @@ test "compose_segments: preserves segment styles" {
   assert_true(output.segments[0].style.fg is Green)
 }
 
+// --- ModuleResult ---
+
+///|
+test "ModuleResult::output: Output variant" {
+  let out = @module_system.ModuleOutput::new([
+    @module_system.Segment::new("test"),
+  ])
+  let result : @module_system.ModuleResult = Output(out)
+  assert_true(result.output() is Some(_))
+}
+
+///|
+test "ModuleResult::output: Skipped variant" {
+  let result : @module_system.ModuleResult = Skipped("reason")
+  assert_true(result.output() is None)
+}
+
+///|
+test "ModuleResult::output: Disabled variant" {
+  let result : @module_system.ModuleResult = Disabled
+  assert_true(result.output() is None)
+}
+
 // --- collect_variable_names ---
 
 ///|

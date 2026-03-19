@@ -169,7 +169,7 @@ test "name" {
 }
 
 ///|
-test "disabled returns None" {
+test "disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[directory]
@@ -180,5 +180,5 @@ test "disabled returns None" {
   let ctx = @context.Context::new(cwd="/tmp", config~)
   let m : &@ms.PromptModule = DirectoryModule::new()
 
-  assert_true(m.execute(ctx) is None)
+  assert_true(m.execute(ctx) is Disabled)
 }

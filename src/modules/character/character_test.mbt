@@ -3,7 +3,7 @@ test "status 0: bold green symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=0)
   let m : &@ms.PromptModule = CharacterModule::new()
 
-  guard m.execute(ctx) is Some(out) else { fail("expected output") }
+  guard m.execute(ctx) is Output(out) else { fail("expected output") }
 
   let rendered = out.render()
   assert_true(rendered.contains("❯"))
@@ -15,7 +15,7 @@ test "non-zero status: bold red symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=1)
   let m : &@ms.PromptModule = CharacterModule::new()
 
-  guard m.execute(ctx) is Some(out) else { fail("expected output") }
+  guard m.execute(ctx) is Output(out) else { fail("expected output") }
 
   let rendered = out.render()
   assert_true(rendered.contains("❯"))
@@ -28,10 +28,12 @@ test "success and error differ" {
 
   let ok = m
     .execute(@context.Context::new(cwd="/tmp", status=0))
+    .output()
     .unwrap()
     .render()
   let err = m
     .execute(@context.Context::new(cwd="/tmp", status=1))
+    .output()
     .unwrap()
     .render()
 
@@ -39,7 +41,7 @@ test "success and error differ" {
 }
 
 ///|
-test "disabled returns None" {
+test "disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[character]
@@ -50,7 +52,7 @@ test "disabled returns None" {
   let ctx = @context.Context::new(cwd="/tmp", config~)
   let m : &@ms.PromptModule = CharacterModule::new()
 
-  assert_true(m.execute(ctx) is None)
+  assert_true(m.execute(ctx) is Disabled)
 }
 
 ///|
@@ -65,7 +67,7 @@ test "custom symbol via config" {
   let ctx = @context.Context::new(cwd="/tmp", status=0, config~)
   let m : &@ms.PromptModule = CharacterModule::new()
 
-  guard m.execute(ctx) is Some(out) else { fail("expected output") }
+  guard m.execute(ctx) is Output(out) else { fail("expected output") }
 
   let rendered = out.render()
   assert_true(rendered.contains("→"))

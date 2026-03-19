@@ -15,10 +15,12 @@ pub impl @ms.PromptModule for GitStatusModule with name(_self) -> String {
 pub impl @ms.PromptModule for GitStatusModule with execute(
   _self,
   ctx : @context.Context,
-) -> @ms.ModuleOutput? {
+) -> @ms.ModuleResult {
   let config = ctx.config.get_module("git_status")
-  guard not(config.disabled) else { return None }
-  guard ctx.get_repo() is Some(repo) else { return None }
+  guard not(config.disabled) else { return Disabled }
+  guard ctx.get_repo() is Some(repo) else {
+    return Skipped("not in git repository")
+  }
 
   let (staged, modified, untracked) = repo.get_status()
 
@@ -31,7 +33,7 @@ pub impl @ms.PromptModule for GitStatusModule with execute(
     (modified, modified_sym),
     (untracked, untracked_sym),
   ])
-  guard not(all_status.is_empty()) else { return None }
+  guard not(all_status.is_empty()) else { return Skipped("no changes") }
 
   let style = @terminal.parse_style(config.style)
   let vars : Map[String, String] = {
@@ -43,7 +45,7 @@ pub impl @ms.PromptModule for GitStatusModule with execute(
   }
   let segments = @ms.format_string(config.format, vars, style)
 
-  Some(@ms.ModuleOutput::new(segments))
+  Output(@ms.ModuleOutput::new(segments))
 }
 
 ///|

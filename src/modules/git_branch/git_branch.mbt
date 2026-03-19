@@ -15,15 +15,19 @@ pub impl @ms.PromptModule for GitBranchModule with name(_self) -> String {
 pub impl @ms.PromptModule for GitBranchModule with execute(
   _self,
   ctx : @context.Context,
-) -> @ms.ModuleOutput? {
+) -> @ms.ModuleResult {
   let config = ctx.config.get_module("git_branch")
-  guard not(config.disabled) else { return None }
-  guard ctx.get_repo() is Some(repo) else { return None }
+  guard not(config.disabled) else { return Disabled }
+  guard ctx.get_repo() is Some(repo) else {
+    return Skipped("not in git repository")
+  }
 
   let (raw_branch, is_detached, commit_hash) = repo.get_branch()
 
   let branch = if is_detached {
-    guard not(commit_hash.is_empty()) else { return None }
+    guard not(commit_hash.is_empty()) else {
+      return Skipped("detached HEAD with no commit")
+    }
     "(\{commit_hash})"
   } else {
     raw_branch
@@ -45,5 +49,5 @@ pub impl @ms.PromptModule for GitBranchModule with execute(
   }
   let segments = @ms.format_string(config.format, vars, style)
 
-  Some(@ms.ModuleOutput::new(segments))
+  Output(@ms.ModuleOutput::new(segments))
 }

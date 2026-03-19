@@ -15,9 +15,9 @@ pub impl @ms.PromptModule for CharacterModule with name(_self) -> String {
 pub impl @ms.PromptModule for CharacterModule with execute(
   _self,
   ctx : @context.Context,
-) -> @ms.ModuleOutput? {
+) -> @ms.ModuleResult {
   let config = ctx.config.get_module("character")
-  guard not(config.disabled) else { return None }
+  guard not(config.disabled) else { return Disabled }
 
   let symbol = if ctx.status == 0 {
     config.get_prop("success_symbol")
@@ -32,5 +32,5 @@ pub impl @ms.PromptModule for CharacterModule with execute(
     @terminal.Style::default(),
   )
 
-  Some(@ms.ModuleOutput::new(segments))
+  Output(@ms.ModuleOutput::new(segments))
 }

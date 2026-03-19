@@ -32,7 +32,22 @@ pub fn ModuleOutput::render(self : ModuleOutput) -> String {
 }
 
 ///|
+pub(all) enum ModuleResult {
+  Output(ModuleOutput)
+  Skipped(String)
+  Disabled
+}
+
+///|
+pub fn ModuleResult::output(self : ModuleResult) -> ModuleOutput? {
+  match self {
+    Output(o) => Some(o)
+    _ => None
+  }
+}
+
+///|
 pub(open) trait PromptModule {
   name(Self) -> String
-  execute(Self, @context.Context) -> ModuleOutput?
+  execute(Self, @context.Context) -> ModuleResult
 }

@@ -15,9 +15,9 @@ pub impl @ms.PromptModule for DirectoryModule with name(_self) -> String {
 pub impl @ms.PromptModule for DirectoryModule with execute(
   _self,
   ctx : @context.Context,
-) -> @ms.ModuleOutput? {
+) -> @ms.ModuleResult {
   let config = ctx.config.get_module("directory")
-  guard not(config.disabled) else { return None }
+  guard not(config.disabled) else { return Disabled }
 
   let truncation_length = config.get_int_prop("truncation_length", default=3)
   let truncate_to_repo = config.get_prop("truncate_to_repo") == "true"
@@ -45,7 +45,7 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
   }
   let segments = @ms.format_string(config.format, vars, style)
 
-  Some(@ms.ModuleOutput::new(segments))
+  Output(@ms.ModuleOutput::new(segments))
 }
 
 ///|

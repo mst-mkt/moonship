@@ -97,8 +97,8 @@ fn run_timings(pa : PromptArgs) -> Unit {
     let elapsed = @async.now() - start
 
     let output = match result {
-      Some(out) => out.render().replace(old="\n", new="\\n")
-      None => ""
+      Output(out) => out.render().replace(old="\n", new="\\n")
+      Skipped(_) | Disabled => ""
     }
 
     if elapsed > 0L || not(output.is_empty()) {
@@ -228,7 +228,7 @@ fn render_prompt(ctx : @context.Context) -> String {
 
   for name in @ms.extract_module_names(ctx.config.format) {
     guard modules.get(name) is Some(m) else { continue }
-    guard m.execute(ctx) is Some(output) else { continue }
+    guard m.execute(ctx) is Output(output) else { continue }
     segment_vars[name] = output.segments
   }
 
