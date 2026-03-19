@@ -57,7 +57,7 @@ fn run_prompt(pa : PromptArgs) -> Unit {
     if @cache.read_prompt(ctx.cwd, pa.status, ctx.config.cache_ttl) is Some(
       cached,
     ) {
-      println(cached)
+      println(wrap_for_shell(shell, cached))
       return
     }
   }
@@ -65,16 +65,11 @@ fn run_prompt(pa : PromptArgs) -> Unit {
   // Compute prompt
   let raw = render_prompt(ctx)
   ctx.close_repo()
-  let output = if shell == "zsh" {
-    wrap_ansi_for_zsh(raw)
-  } else {
-    raw
-  }
-  println(output)
+  println(wrap_for_shell(shell, raw))
 
-  // Write cache
+  // Write cache (store raw, without shell-specific wrapping)
   if use_cache {
-    @cache.write_prompt(ctx.cwd, pa.status, output)
+    @cache.write_prompt(ctx.cwd, pa.status, raw)
   }
 
   // Notify fish shell
@@ -183,6 +178,15 @@ fn build_modules() -> Map[String, &@ms.PromptModule] {
   modules["git_branch"] = @mod_git_branch.GitBranchModule::new()
   modules["git_status"] = @mod_git_status.GitStatusModule::new()
   modules
+}
+
+///|
+fn wrap_for_shell(shell : String, s : String) -> String {
+  if shell == "zsh" {
+    wrap_ansi_for_zsh(s)
+  } else {
+    s
+  }
 }
 
 ///|
