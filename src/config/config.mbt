@@ -44,7 +44,7 @@ pub fn Config::default() -> Config {
   }
   modules["git_status"] = {
     disabled: false,
-    format: "[$all_status]($style) ",
+    format: "[\\[$all_status\\]]($style) ",
     style: "bold red",
     props: {
       "staged": "+",
@@ -55,7 +55,7 @@ pub fn Config::default() -> Config {
     },
   }
   {
-    format: "$directory$git_branch$git_status$character",
+    format: "$directory$git_branch$git_status\n$character",
     scan_timeout: 1000,
     command_timeout: 500,
     cache_ttl: 5000,

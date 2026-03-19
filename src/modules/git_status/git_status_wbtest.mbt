@@ -13,7 +13,7 @@ test "build_status_string: all types" {
     (1, "!"),
     (3, "?"),
   ])
-  assert_eq(result, "⇡+2!?3")
+  assert_eq(result, "⇡+!?")
 }
 
 ///|
@@ -34,6 +34,6 @@ test "build_status_string: count=1 symbol only" {
 }
 
 ///|
-test "build_status_string: count>1 symbol+number" {
-  assert_eq(build_status_string([(5, "+")]), "+5")
+test "build_status_string: count>1 symbol only" {
+  assert_eq(build_status_string([(5, "+")]), "+")
 }

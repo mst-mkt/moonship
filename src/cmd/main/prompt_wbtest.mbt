@@ -30,7 +30,7 @@ test "render: all disabled produces empty" {
   let ctx = @context.Context::new(cwd="/tmp", config~)
   let output = render_prompt(ctx)
 
-  assert_eq(output, "")
+  assert_eq(output, "\n")
 }
 
 ///|

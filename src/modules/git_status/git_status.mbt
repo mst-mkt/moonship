@@ -48,10 +48,10 @@ pub impl @ms.PromptModule for GitStatusModule with execute(
 
 ///|
 fn format_count(count : Int, symbol : String) -> String {
-  match count {
-    0 => ""
-    1 => symbol
-    _ => "\{symbol}\{count}"
+  if count > 0 {
+    symbol
+  } else {
+    ""
   }
 }
 
