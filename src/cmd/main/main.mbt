@@ -224,15 +224,15 @@ fn wrap_ansi_for_zsh(s : String) -> String {
 ///|
 fn render_prompt(ctx : @context.Context) -> String {
   let modules = build_modules()
-  let vars : Map[String, String] = {}
+  let segment_vars : Map[String, Array[@ms.Segment]] = {}
 
   for name in @ms.extract_module_names(ctx.config.format) {
     guard modules.get(name) is Some(m) else { continue }
     guard m.execute(ctx) is Some(output) else { continue }
-    vars[name] = output.render()
+    segment_vars[name] = output.segments
   }
 
-  @ms.render_format(ctx.config.format, vars)
+  @ms.compose_segments(ctx.config.format, segment_vars).render()
 }
 
 ///|
