@@ -50,5 +50,6 @@ pub fn Context::close_repo(self : Context) -> Unit {
   if self.git_repo is Some(repo) {
     repo.close()
     self.git_repo = None
+    self.git_resolved = false
   }
 }

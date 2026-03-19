@@ -46,13 +46,7 @@ pub fn Config::default() -> Config {
     disabled: false,
     format: "[\\[$all_status\\]]($style) ",
     style: "bold red",
-    props: {
-      "staged": "+",
-      "modified": "!",
-      "untracked": "?",
-      "ahead": "⇡",
-      "behind": "⇣",
-    },
+    props: { "staged": "+", "modified": "!", "untracked": "?" },
   }
   {
     format: "$directory$git_branch$git_status\n$character",

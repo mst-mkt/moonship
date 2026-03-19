@@ -1,5 +1,5 @@
 ///|
-pub enum Command {
+enum Command {
   Prompt(PromptArgs)
   Timings(PromptArgs)
   Init(String)
@@ -13,7 +13,7 @@ pub enum Command {
 }
 
 ///|
-pub struct PromptArgs {
+struct PromptArgs {
   status : Int
   cmd_duration : Int
   jobs : Int
@@ -22,12 +22,12 @@ pub struct PromptArgs {
 }
 
 ///|
-pub fn PromptArgs::default() -> PromptArgs {
+fn PromptArgs::default() -> PromptArgs {
   { status: 0, cmd_duration: 0, jobs: 0, terminal_width: 80, is_async: false }
 }
 
 ///|
-pub fn parse_args(args : Array[String]) -> Command {
+fn parse_args(args : Array[String]) -> Command {
   guard not(args.is_empty()) else { return Help }
 
   match args[0] {
