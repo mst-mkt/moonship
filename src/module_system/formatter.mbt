@@ -73,6 +73,9 @@ fn parse_styled_segment(
   let style_spec = s[after_bracket + 1:style_end].to_string()
   let resolved_style = resolve_style(style_spec, vars)
   let resolved_text = substitute_vars(inner_text, vars)
+  if resolved_text.is_empty() {
+    return Some(([], style_end + 1))
+  }
 
   Some(([Segment::new(resolved_text, style=resolved_style)], style_end + 1))
 }
@@ -122,7 +125,7 @@ fn substitute_vars(text : String, vars : Map[String, String]) -> String {
     if char_at(text, i) == '$' {
       let (var_name, end) = scan_ident(text, i + 1)
       if not(var_name.is_empty()) {
-        buf.write_string(vars.get(var_name).unwrap_or(text[i:end].to_string()))
+        buf.write_string(vars.get(var_name).unwrap_or(""))
       }
       i = end
     } else {
