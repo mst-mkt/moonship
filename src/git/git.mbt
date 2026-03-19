@@ -49,17 +49,26 @@ pub fn finalize() -> Unit {
 ///|
 pub async fn get_info(cwd : String) -> GitInfo? {
   guard @libgit2.is_loaded() else { return None }
-  guard @libgit2.Repository::open(cwd) is Some(repo) else { return None }
 
-  let info = build_info(repo, cwd)
+  let repo_root = git_toplevel(cwd)
+  guard @libgit2.Repository::open(repo_root) is Some(repo) else { return None }
+
+  let info = build_info(repo, repo_root, cwd)
   repo.close()
   Some(info)
 }
 
 ///|
-async fn build_info(repo : @libgit2.Repository, cwd : String) -> GitInfo {
-  let repo_root = repo_root_from_path(repo.path())
+async fn git_toplevel(cwd : String) -> String {
+  git_cmd_output(cwd, ["rev-parse", "--show-toplevel"]).unwrap_or(cwd)
+}
 
+///|
+async fn build_info(
+  repo : @libgit2.Repository,
+  repo_root : String,
+  cwd : String,
+) -> GitInfo {
   let (branch, is_detached) = match repo.head_name() {
     Some(name) => (extract_branch_name(name), false)
     None => ("", true)
@@ -87,18 +96,24 @@ async fn build_info(repo : @libgit2.Repository, cwd : String) -> GitInfo {
 }
 
 ///|
-fn repo_root_from_path(git_path : String) -> String {
-  let path = if git_path.has_suffix("/") {
-    git_path[:git_path.length() - 1].to_string()
-  } else {
-    git_path
+async fn git_cmd_output(cwd : String, args : Array[String]) -> String? {
+  let full_args = ["-C", cwd] + args
+  let devnull = @process.redirect_to_file("/dev/null")
+  let (code, data) = @process.collect_stdout(
+    "git",
+    full_args[:],
+    stderr=devnull,
+  ) catch {
+    _ => return None
   }
 
-  if path.has_suffix("/.git") {
-    path[:path.length() - 5].to_string()
-  } else {
-    path
-  }
+  guard code == 0 else { return None }
+
+  let output = data.text() catch { _ => return None }
+  let trimmed = output.trim(chars=" \n\r\t").to_string()
+
+  guard not(trimmed.is_empty()) else { return None }
+  Some(trimmed)
 }
 
 ///|
@@ -128,19 +143,11 @@ fn count_status(flags : Array[@libgit2.StatusFlags]) -> (Int, Int, Int) {
 
 ///|
 async fn get_ahead_behind(cwd : String) -> (Int, Int) {
-  let devnull = @process.redirect_to_file("/dev/null")
-  let (code, data) = @process.collect_stdout(
-    "git",
-    ["-C", cwd, "rev-list", "--left-right", "--count", "HEAD...@{u}"][:],
-    stderr=devnull,
-  ) catch {
-    _ => return (0, 0)
+  match
+    git_cmd_output(cwd, ["rev-list", "--left-right", "--count", "HEAD...@{u}"]) {
+    Some(output) => parse_ahead_behind_output(output)
+    None => (0, 0)
   }
-
-  guard code == 0 else { return (0, 0) }
-
-  let output = data.text() catch { _ => return (0, 0) }
-  parse_ahead_behind_output(output.trim(chars=" \n\r\t").to_string())
 }
 
 ///|

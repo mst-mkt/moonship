@@ -1,26 +1,4 @@
 ///|
-test "repo_root_from_path: strips .git/" {
-  assert_eq(
-    repo_root_from_path("/home/user/project/.git/"),
-    "/home/user/project",
-  )
-  assert_eq(
-    repo_root_from_path("/home/user/project/.git"),
-    "/home/user/project",
-  )
-}
-
-///|
-test "repo_root_from_path: bare repo" {
-  assert_eq(repo_root_from_path("/srv/repo.git"), "/srv/repo.git")
-}
-
-///|
-test "repo_root_from_path: empty" {
-  assert_eq(repo_root_from_path(""), "")
-}
-
-///|
 test "extract_branch_name: strips refs/heads/" {
   assert_eq(extract_branch_name("refs/heads/main"), "main")
   assert_eq(extract_branch_name("refs/heads/feature/foo"), "feature/foo")
