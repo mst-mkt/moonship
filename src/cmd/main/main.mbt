@@ -233,10 +233,15 @@ fn self_exe() -> String {
 
 ///|
 fn load_config() -> @config.Config {
-  let home = @sys.get_env_var("HOME").unwrap_or("")
-  guard not(home.is_empty()) else { return @config.Config::default() }
+  let path = @sys.get_env_var("MOONSHIP_CONFIG").unwrap_or("")
+  let path = if not(path.is_empty()) {
+    path
+  } else {
+    let home = @sys.get_env_var("HOME").unwrap_or("")
+    guard not(home.is_empty()) else { return @config.Config::default() }
+    "\{home}/.config/moonship/moonship.toml"
+  }
 
-  let path = "\{home}/.config/moonship/moonship.toml"
   let content = @fs.read_file_to_string(path) catch {
     _ => return @config.Config::default()
   }
