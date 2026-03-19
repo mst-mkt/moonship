@@ -30,13 +30,22 @@ async fn build_context(pa : PromptArgs) -> @context.Context {
   let config = load_config()
   let cwd = @env.current_dir().unwrap_or(".")
   let home_dir = @sys.get_env_var("HOME").unwrap_or("")
+  let shell = @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("")
+  let use_cache = shell == "zsh" || shell == "fish"
 
-  let git_info = if @git.initialize() {
-    let info = @git.get_info(cwd)
-    @git.finalize()
-    info
+  let git_info = if use_cache {
+    match @cache.read_cache(cwd, config.cache_ttl) {
+      Some(_) as cached => cached
+      None => {
+        let info = compute_git_info(cwd)
+        if info is Some(i) {
+          @cache.write_cache(cwd, i)
+        }
+        info
+      }
+    }
   } else {
-    None
+    compute_git_info(cwd)
   }
 
   @context.Context::new(
@@ -49,6 +58,17 @@ async fn build_context(pa : PromptArgs) -> @context.Context {
     config~,
     git_info~,
   )
+}
+
+///|
+async fn compute_git_info(cwd : String) -> @git.GitInfo? {
+  if @git.initialize() {
+    let info = @git.get_info(cwd)
+    @git.finalize()
+    info
+  } else {
+    None
+  }
 }
 
 ///|

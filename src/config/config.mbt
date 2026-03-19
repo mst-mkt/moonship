@@ -3,6 +3,7 @@ pub struct Config {
   format : String
   scan_timeout : Int
   command_timeout : Int
+  cache_ttl : Int
   modules : Map[String, ModuleConfig]
 }
 
@@ -57,6 +58,7 @@ pub fn Config::default() -> Config {
     format: "$directory$git_branch$git_status$character",
     scan_timeout: 1000,
     command_timeout: 500,
+    cache_ttl: 5000,
     modules,
   }
 }
@@ -108,6 +110,7 @@ pub fn Config::from_toml(toml_str : String) -> Config raise {
   let command_timeout = get_int(table, "command_timeout").unwrap_or(
     default.command_timeout,
   )
+  let cache_ttl = get_int(table, "cache_ttl").unwrap_or(default.cache_ttl)
 
   let modules = default.modules
   table.each(fn(name, mod_value) {
@@ -116,7 +119,7 @@ pub fn Config::from_toml(toml_str : String) -> Config raise {
     modules[name] = parse_module_config(mod_table, base)
   })
 
-  { format, scan_timeout, command_timeout, modules }
+  { format, scan_timeout, command_timeout, cache_ttl, modules }
 }
 
 ///|
@@ -160,6 +163,7 @@ pub fn Config::to_toml(self : Config) -> String {
     "format = \{quote(self.format)}",
     "scan_timeout = \{self.scan_timeout}",
     "command_timeout = \{self.command_timeout}",
+    "cache_ttl = \{self.cache_ttl}",
   ].join("\n")
 
   let module_names = self.modules.keys().collect()

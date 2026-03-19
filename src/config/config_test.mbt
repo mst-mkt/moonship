@@ -6,6 +6,7 @@ test "default to_toml roundtrip" {
   assert_eq(parsed.format, config.format)
   assert_eq(parsed.scan_timeout, config.scan_timeout)
   assert_eq(parsed.command_timeout, config.command_timeout)
+  assert_eq(parsed.cache_ttl, config.cache_ttl)
 }
 
 ///|
