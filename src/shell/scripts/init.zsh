@@ -15,15 +15,14 @@ __moonship_preexec() {
   MOONSHIP_START_TIME=$MOONSHIP_CAPTURED_TIME
 }
 
-# Async prompt callback: read result from fd and redraw
+# Async prompt callback: update prompt when async computation completes
 __moonship_async_callback() {
   local fd=$1
   local result
-  if read -r -u "$fd" result 2>/dev/null; then
-    if [[ -n "$result" ]]; then
-      PROMPT="$result"
-      zle && zle reset-prompt
-    fi
+  result=$(cat <&$fd 2>/dev/null)
+  if [[ -n "$result" ]]; then
+    PROMPT=$'\n'"$result"
+    zle && zle reset-prompt
   fi
   zle -F "$fd"
   exec {fd}<&-
@@ -32,8 +31,15 @@ __moonship_async_callback() {
 # precmd: called before each prompt
 __moonship_precmd() {
   local exit_code=$?
-  local cmd_duration=0
 
+  # Clean up previous async fd immediately to prevent stale callbacks
+  if [[ -n "$MOONSHIP_ASYNC_FD" ]]; then
+    zle -F "$MOONSHIP_ASYNC_FD" 2>/dev/null
+    exec {MOONSHIP_ASYNC_FD}<&- 2>/dev/null
+    unset MOONSHIP_ASYNC_FD
+  fi
+
+  local cmd_duration=0
   if [[ -n "$MOONSHIP_START_TIME" ]]; then
     __moonship_get_time
     local end_time=$MOONSHIP_CAPTURED_TIME
@@ -51,14 +57,8 @@ __moonship_precmd() {
   )
 
   # Synchronous prompt (uses cache if available)
-  PROMPT=$("$MOONSHIP_BIN" prompt "${prompt_args[@]}")
-
-  # Clean up previous async fd if still open
-  if [[ -n "$MOONSHIP_ASYNC_FD" ]]; then
-    zle -F "$MOONSHIP_ASYNC_FD" 2>/dev/null
-    exec {MOONSHIP_ASYNC_FD}<&- 2>/dev/null
-    unset MOONSHIP_ASYNC_FD
-  fi
+  local raw=$("$MOONSHIP_BIN" prompt "${prompt_args[@]}")
+  PROMPT=$'\n'"$raw"
 
   # Async update: recompute in background, update cache, redraw
   exec {MOONSHIP_ASYNC_FD} < <("$MOONSHIP_BIN" prompt --async "${prompt_args[@]}")
