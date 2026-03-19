@@ -143,6 +143,27 @@ test "flag: invalid" {
 }
 
 ///|
+test "prompt: --async flag" {
+  let cmd = parse_args(["prompt", "--async", "--status=1"])
+  match cmd {
+    Prompt(pa) => {
+      assert_true(pa.is_async)
+      assert_eq(pa.status, 1)
+    }
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: default is_async is false" {
+  let cmd = parse_args(["prompt", "--status=0"])
+  match cmd {
+    Prompt(pa) => assert_true(not(pa.is_async))
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
 test "parse int" {
   assert_eq(parse_int_arg("42"), 42)
   assert_eq(parse_int_arg("-1"), -1)

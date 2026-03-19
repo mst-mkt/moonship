@@ -17,11 +17,12 @@ pub struct PromptArgs {
   cmd_duration : Int
   jobs : Int
   terminal_width : Int
+  is_async : Bool
 }
 
 ///|
 pub fn PromptArgs::default() -> PromptArgs {
-  { status: 0, cmd_duration: 0, jobs: 0, terminal_width: 80 }
+  { status: 0, cmd_duration: 0, jobs: 0, terminal_width: 80, is_async: false }
 }
 
 ///|
@@ -48,6 +49,10 @@ fn parse_prompt_args(
   let pa = args[1:]
     .iter()
     .fold(init=PromptArgs::default(), fn(pa, arg) {
+      if arg == "--async" {
+        return { ..pa, is_async: true }
+      }
+
       match extract_flag_value(arg) {
         Some(("status", v)) => { ..pa, status: parse_int_arg(v) }
         Some(("cmd-duration", v)) => { ..pa, cmd_duration: parse_int_arg(v) }

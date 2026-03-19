@@ -73,6 +73,14 @@ async fn compute_git_info(cwd : String) -> @git.GitInfo? {
 
 ///|
 async fn run_prompt(pa : PromptArgs) -> Unit {
+  if pa.is_async {
+    let cwd = @env.current_dir().unwrap_or(".")
+    let info = compute_git_info(cwd)
+    if info is Some(i) {
+      @cache.write_cache(cwd, i)
+    }
+  }
+
   let ctx = build_context(pa)
   let output = render_prompt(ctx)
   println(output)
@@ -285,6 +293,7 @@ fn run_help() -> Unit {
     #|  --cmd-duration=<ms>       Duration of last command
     #|  --jobs=<n>                Number of background jobs
     #|  --terminal-width=<cols>   Terminal width in columns
+    #|  --async                   Recompute and update cache
     #|
     #|Supported shells: zsh, bash, fish
     #|
