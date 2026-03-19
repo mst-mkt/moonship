@@ -3,6 +3,7 @@ pub enum Command {
   Prompt(PromptArgs)
   Timings(PromptArgs)
   Init(String)
+  CacheClear
   Time
   PrintConfig
   Version
@@ -33,6 +34,12 @@ pub fn parse_args(args : Array[String]) -> Command {
     "prompt" => parse_prompt_args(args, fn(pa) { Prompt(pa) })
     "timings" => parse_prompt_args(args, fn(pa) { Timings(pa) })
     "init" => if args.length() > 1 { Init(args[1]) } else { UnknownShell }
+    "cache" =>
+      if args.length() > 1 && args[1] == "clear" {
+        CacheClear
+      } else {
+        Help
+      }
     "time" => Time
     "print-config" => PrintConfig
     "version" | "--version" | "-V" => Version

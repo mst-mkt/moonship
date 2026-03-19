@@ -90,6 +90,16 @@ test "init: no shell" {
 }
 
 ///|
+test "cache clear" {
+  assert_true(parse_args(["cache", "clear"]) is CacheClear)
+}
+
+///|
+test "cache: no subcommand shows help" {
+  assert_true(parse_args(["cache"]) is Help)
+}
+
+///|
 test "time" {
   assert_true(parse_args(["time"]) is Time)
 }

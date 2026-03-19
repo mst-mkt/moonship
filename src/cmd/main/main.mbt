@@ -7,6 +7,10 @@ async fn main {
     Prompt(pa) => run_prompt(pa)
     Timings(pa) => run_timings(pa)
     Init(shell_name) => run_init(shell_name)
+    CacheClear => {
+      @cache.clear_cache()
+      println("Cache cleared.")
+    }
     Time => println(@async.now().to_string())
     PrintConfig => {
       let config = load_config()
@@ -283,6 +287,7 @@ fn run_help() -> Unit {
     #|  moonship prompt [options]    Generate prompt string
     #|  moonship timings [options]   Show module execution times
     #|  moonship init <shell>        Print shell init script
+    #|  moonship cache clear         Clear cached data
     #|  moonship time                Print current time in ms
     #|  moonship print-config        Print active configuration
     #|  moonship version             Print version
