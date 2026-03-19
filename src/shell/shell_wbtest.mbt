@@ -28,3 +28,37 @@ test "escape_fish_single_quote: with quote" {
 test "escape_fish_single_quote: with backslash" {
   assert_true(escape_fish_single_quote("/path\\here").contains("\\\\"))
 }
+
+///|
+test "wrap_ansi_for_zsh: wraps escape sequences" {
+  let input = "\u001b[1;31mhello\u001b[0m"
+  let result = wrap_ansi_for_zsh(input)
+  assert_true(result.contains("%{"))
+  assert_true(result.contains("%}"))
+  assert_true(result.contains("hello"))
+}
+
+///|
+test "wrap_ansi_for_zsh: plain text unchanged" {
+  assert_eq(wrap_ansi_for_zsh("hello"), "hello")
+}
+
+///|
+test "wrap_ansi_for_zsh: preserves newline" {
+  let input = "line1\n\u001b[1mline2\u001b[0m"
+  let result = wrap_ansi_for_zsh(input)
+  assert_true(result.contains("\n"))
+  assert_true(result.contains("%{"))
+}
+
+///|
+test "wrap_for_shell: zsh wraps" {
+  let input = "\u001b[1mtest\u001b[0m"
+  assert_true(wrap_for_shell("zsh", input).contains("%{"))
+}
+
+///|
+test "wrap_for_shell: fish passes through" {
+  let input = "\u001b[1mtest\u001b[0m"
+  assert_eq(wrap_for_shell("fish", input), input)
+}
