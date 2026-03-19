@@ -63,8 +63,13 @@ fn run_prompt(pa : PromptArgs) -> Unit {
   }
 
   // Compute prompt
-  let output = render_prompt(ctx)
+  let raw = render_prompt(ctx)
   ctx.close_repo()
+  let output = if shell == "zsh" {
+    wrap_ansi_for_zsh(raw)
+  } else {
+    raw
+  }
   println(output)
 
   // Write cache
@@ -181,16 +186,49 @@ fn build_modules() -> Map[String, &@ms.PromptModule] {
 }
 
 ///|
+fn wrap_ansi_for_zsh(s : String) -> String {
+  let buf = StringBuilder::new()
+  let len = s.length()
+  let mut i = 0
+
+  while i < len {
+    if i + 1 < len &&
+      s[i].unsafe_to_char() == '\u001b' &&
+      s[i + 1].unsafe_to_char() == '[' {
+      buf.write_string("%{\u001b[")
+      i += 2
+
+      while i < len {
+        let ch = s[i].unsafe_to_char()
+        buf.write_char(ch)
+        i += 1
+        if ch == 'm' {
+          break
+        }
+      }
+
+      buf.write_string("%}")
+    } else {
+      buf.write_char(s[i].unsafe_to_char())
+      i += 1
+    }
+  }
+
+  buf.to_string()
+}
+
+///|
 fn render_prompt(ctx : @context.Context) -> String {
   let modules = build_modules()
+  let vars : Map[String, String] = {}
 
-  @ms.extract_module_names(ctx.config.format)
-  .iter()
-  .filter_map(fn(name) { modules.get(name) })
-  .filter_map(fn(m) { m.execute(ctx) })
-  .map(fn(o) { o.render() })
-  .collect()
-  .join("")
+  for name in @ms.extract_module_names(ctx.config.format) {
+    guard modules.get(name) is Some(m) else { continue }
+    guard m.execute(ctx) is Some(output) else { continue }
+    vars[name] = output.render()
+  }
+
+  @ms.render_format(ctx.config.format, vars)
 }
 
 ///|

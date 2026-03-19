@@ -36,3 +36,12 @@ pub(open) trait PromptModule {
   name(Self) -> String
   execute(Self, @context.Context) -> ModuleOutput?
 }
+
+///|
+pub fn render_format(
+  template : String,
+  vars : Map[String, String],
+) -> String {
+  ModuleOutput::new(format_string(template, vars, @terminal.Style::default()))
+    .render()
+}
