@@ -1,9 +1,32 @@
 ///|
-pub struct GitBranchModule {}
+pub struct GitBranchModule {
+  disabled : Bool
+  format : String
+  style : String
+  truncation_length : Int
+  symbol : String
+}
 
 ///|
-pub fn GitBranchModule::new() -> GitBranchModule {
-  GitBranchModule::{  }
+pub fn GitBranchModule::new(
+  config? : @config.ModuleConfig = @config.Config::default().get_module(
+    "git_branch",
+  ),
+) -> GitBranchModule {
+  {
+    disabled: config.disabled,
+    format: config.format,
+    style: config.style,
+    truncation_length: config.get_int_prop("truncation_length", default=20),
+    symbol: config.get_prop("symbol", default=" "),
+  }
+}
+
+///|
+pub fn GitBranchModule::from_config(
+  config : @config.Config,
+) -> GitBranchModule {
+  GitBranchModule::new(config=config.get_module("git_branch"))
 }
 
 ///|
@@ -13,11 +36,10 @@ pub impl @ms.PromptModule for GitBranchModule with name(_self) -> String {
 
 ///|
 pub impl @ms.PromptModule for GitBranchModule with execute(
-  _self,
+  self,
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
-  let config = ctx.config.get_module("git_branch")
-  guard not(config.disabled) else { return Disabled }
+  guard not(self.disabled) else { return Disabled }
   guard ctx.get_repo() is Some(repo) else {
     return Skipped("not in git repository")
   }
@@ -33,21 +55,19 @@ pub impl @ms.PromptModule for GitBranchModule with execute(
     raw_branch
   }
 
-  let max_len = config.get_int_prop("truncation_length", default=20)
-  let display_branch = if branch.length() > max_len {
-    branch[:max_len].to_string() + "…"
+  let display_branch = if branch.length() > self.truncation_length {
+    branch[:self.truncation_length].to_string() + "…"
   } else {
     branch
   }
 
-  let symbol = config.get_prop("symbol", default=" ")
-  let style = @terminal.parse_style(config.style)
+  let style = @terminal.parse_style(self.style)
   let vars : Map[String, String] = {
     "branch": display_branch,
-    "symbol": symbol,
-    "style": config.style,
+    "symbol": self.symbol,
+    "style": self.style,
   }
-  let segments = @ms.format_string(config.format, vars, style)
+  let segments = @ms.format_string(self.format, vars, style)
 
   Output(@ms.ModuleOutput::new(segments))
 }

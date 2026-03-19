@@ -1,9 +1,28 @@
 ///|
-pub struct CharacterModule {}
+pub struct CharacterModule {
+  disabled : Bool
+  format : String
+  success_symbol : String
+  error_symbol : String
+}
 
 ///|
-pub fn CharacterModule::new() -> CharacterModule {
-  CharacterModule::{  }
+pub fn CharacterModule::new(
+  config? : @config.ModuleConfig = @config.Config::default().get_module(
+    "character",
+  ),
+) -> CharacterModule {
+  {
+    disabled: config.disabled,
+    format: config.format,
+    success_symbol: config.get_prop("success_symbol"),
+    error_symbol: config.get_prop("error_symbol"),
+  }
+}
+
+///|
+pub fn CharacterModule::from_config(config : @config.Config) -> CharacterModule {
+  CharacterModule::new(config=config.get_module("character"))
 }
 
 ///|
@@ -13,21 +32,20 @@ pub impl @ms.PromptModule for CharacterModule with name(_self) -> String {
 
 ///|
 pub impl @ms.PromptModule for CharacterModule with execute(
-  _self,
+  self,
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
-  let config = ctx.config.get_module("character")
-  guard not(config.disabled) else { return Disabled }
+  guard not(self.disabled) else { return Disabled }
 
   let symbol = if ctx.status == 0 {
-    config.get_prop("success_symbol")
+    self.success_symbol
   } else {
-    config.get_prop("error_symbol")
+    self.error_symbol
   }
 
   let vars : Map[String, String] = { "symbol": symbol }
   let segments = @ms.format_string(
-    config.format,
+    self.format,
     vars,
     @terminal.Style::default(),
   )

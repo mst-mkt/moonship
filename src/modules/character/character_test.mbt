@@ -50,7 +50,7 @@ test "disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m : &@ms.PromptModule = CharacterModule::new()
+  let m : &@ms.PromptModule = CharacterModule::from_config(config)
 
   assert_true(m.execute(ctx) is Disabled)
 }
@@ -65,7 +65,7 @@ test "custom symbol via config" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", status=0, config~)
-  let m : &@ms.PromptModule = CharacterModule::new()
+  let m : &@ms.PromptModule = CharacterModule::from_config(config)
 
   guard m.execute(ctx) is Output(out) else { fail("expected output") }
 

@@ -84,7 +84,7 @@ extern "C" fn notify_parent() -> Int = "moonship_notify_parent"
 ///|
 fn run_timings(pa : PromptArgs) -> Unit {
   let ctx = build_context(pa)
-  let modules = build_modules()
+  let modules = build_modules(ctx.config)
   let module_names = @ms.extract_module_names(ctx.config.format)
 
   let entries : Array[(String, Int64, String)] = []
@@ -171,12 +171,12 @@ fn pad_left(s : String, width : Int) -> String {
 }
 
 ///|
-fn build_modules() -> Map[String, &@ms.PromptModule] {
+fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   let modules : Map[String, &@ms.PromptModule] = {}
-  modules["character"] = @mod_character.CharacterModule::new()
-  modules["directory"] = @mod_directory.DirectoryModule::new()
-  modules["git_branch"] = @mod_git_branch.GitBranchModule::new()
-  modules["git_status"] = @mod_git_status.GitStatusModule::new()
+  modules["character"] = @mod_character.CharacterModule::from_config(config)
+  modules["directory"] = @mod_directory.DirectoryModule::from_config(config)
+  modules["git_branch"] = @mod_git_branch.GitBranchModule::from_config(config)
+  modules["git_status"] = @mod_git_status.GitStatusModule::from_config(config)
   modules
 }
 
@@ -223,7 +223,7 @@ fn wrap_ansi_for_zsh(s : String) -> String {
 
 ///|
 fn render_prompt(ctx : @context.Context) -> String {
-  let modules = build_modules()
+  let modules = build_modules(ctx.config)
   let segment_vars : Map[String, Array[@ms.Segment]] = {}
 
   for name in @ms.extract_module_names(ctx.config.format) {

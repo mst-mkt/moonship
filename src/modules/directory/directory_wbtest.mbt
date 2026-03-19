@@ -178,7 +178,7 @@ test "disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m : &@ms.PromptModule = DirectoryModule::new()
+  let m : &@ms.PromptModule = DirectoryModule::from_config(config)
 
   assert_true(m.execute(ctx) is Disabled)
 }
