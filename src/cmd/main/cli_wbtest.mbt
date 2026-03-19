@@ -77,6 +77,24 @@ test "print-config" {
 }
 
 ///|
+test "init: with shell" {
+  match parse_args(["init", "zsh"]) {
+    Init(shell) => assert_eq(shell, "zsh")
+    _ => fail("Expected Init")
+  }
+}
+
+///|
+test "init: no shell" {
+  assert_true(parse_args(["init"]) is UnknownShell)
+}
+
+///|
+test "time" {
+  assert_true(parse_args(["time"]) is Time)
+}
+
+///|
 test "no args is Help" {
   assert_true(parse_args([]) is Help)
 }

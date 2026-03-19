@@ -1,5 +1,6 @@
 import {
   "moonbitlang/async",
+  "moonbitlang/async/process" @process,
   "moonbitlang/core/env" @env,
   "moonbitlang/x/sys" @sys,
   "moonbitlang/x/fs" @fs,
@@ -12,6 +13,7 @@ import {
   "mst-mkt/moonship/modules/directory" @mod_directory,
   "mst-mkt/moonship/modules/git_branch" @mod_git_branch,
   "mst-mkt/moonship/modules/git_status" @mod_git_status,
+  "mst-mkt/moonship/shell" @shell,
 }
 
 options(

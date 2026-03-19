@@ -1,0 +1,20 @@
+options(
+  "pre-build": [
+    {
+      "command": ":embed -i $input -o $output --text --name init_zsh_script",
+      "input": "scripts/init.zsh",
+      "output": "init_zsh_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name init_bash_script",
+      "input": "scripts/init.bash",
+      "output": "init_bash_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name init_fish_script",
+      "input": "scripts/init.fish",
+      "output": "init_fish_embed.mbt",
+    },
+  ],
+  "supported-targets": "native",
+)

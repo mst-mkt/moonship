@@ -5,6 +5,8 @@ async fn main {
 
   match cmd {
     Prompt(pa) => run_prompt(pa)
+    Init(shell_name) => run_init(shell_name)
+    Time => println(@async.now().to_string())
     PrintConfig => {
       let config = load_config()
       println(config.to_toml())
@@ -14,6 +16,10 @@ async fn main {
     UnknownCommand(name) => {
       println("moonship: unknown command '\{name}'")
       run_help()
+    }
+    UnknownShell => {
+      println("moonship: 'init' requires a shell name")
+      println("Supported shells: zsh, bash, fish")
     }
   }
 }
@@ -71,6 +77,69 @@ fn render_prompt(ctx : @context.Context) -> String {
 }
 
 ///|
+async fn run_init(shell_name : String) -> Unit {
+  match @shell.Shell::from_string(shell_name) {
+    Some(shell) => {
+      let bin = self_exe()
+      println(@shell.generate_init(shell, bin))
+    }
+    None =>
+      println(
+        "moonship: unknown shell '\{shell_name}'. Supported: zsh, bash, fish",
+      )
+  }
+}
+
+///|
+async fn self_exe() -> String {
+  if @fs.path_exists("/proc/self/exe") {
+    let devnull = @process.redirect_to_file("/dev/null")
+    let (code, data) = @process.collect_stdout(
+      "readlink",
+      ["-f", "/proc/self/exe"][:],
+      stderr=devnull,
+    ) catch {
+      _ => return fallback_exe()
+    }
+
+    if code == 0 {
+      let path = (data.text() catch { _ => return fallback_exe() })
+        .trim(chars=" \n\r\t")
+        .to_string()
+      if not(path.is_empty()) {
+        return path
+      }
+    }
+  }
+
+  fallback_exe()
+}
+
+///|
+fn fallback_exe() -> String {
+  let args = @sys.get_cli_args()
+  guard args.length() > 0 else { return "moonship" }
+
+  let arg0 = args[0]
+
+  if arg0.has_prefix("/") {
+    return arg0
+  }
+  if arg0.contains("/") {
+    return @env.current_dir().unwrap_or(".") + "/" + arg0
+  }
+
+  let path_var = @sys.get_env_var("PATH").unwrap_or("")
+  path_var
+  .split(":")
+  .map(fn(dir) { dir.to_string() })
+  .filter(fn(dir) { not(dir.is_empty()) })
+  .map(fn(dir) { dir + "/" + arg0 })
+  .find_first(fn(candidate) { @fs.path_exists(candidate) })
+  .unwrap_or(arg0)
+}
+
+///|
 fn load_config() -> @config.Config {
   let home = @sys.get_env_var("HOME").unwrap_or("")
   guard not(home.is_empty()) else { return @config.Config::default() }
@@ -92,6 +161,8 @@ fn run_help() -> Unit {
     #|
     #|Usage:
     #|  moonship prompt [options]    Generate prompt string
+    #|  moonship init <shell>        Print shell init script
+    #|  moonship time                Print current time in ms
     #|  moonship print-config        Print active configuration
     #|  moonship version             Print version
     #|  moonship help                Print this help
@@ -101,6 +172,8 @@ fn run_help() -> Unit {
     #|  --cmd-duration=<ms>       Duration of last command
     #|  --jobs=<n>                Number of background jobs
     #|  --terminal-width=<cols>   Terminal width in columns
+    #|
+    #|Supported shells: zsh, bash, fish
     #|
   println(help)
 }

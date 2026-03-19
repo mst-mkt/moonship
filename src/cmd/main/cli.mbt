@@ -1,10 +1,13 @@
 ///|
 pub enum Command {
   Prompt(PromptArgs)
+  Init(String)
+  Time
   PrintConfig
   Version
   Help
   UnknownCommand(String)
+  UnknownShell
 }
 
 ///|
@@ -26,6 +29,8 @@ pub fn parse_args(args : Array[String]) -> Command {
 
   match args[0] {
     "prompt" => parse_prompt_args(args)
+    "init" => if args.length() > 1 { Init(args[1]) } else { UnknownShell }
+    "time" => Time
     "print-config" => PrintConfig
     "version" | "--version" | "-V" => Version
     "help" | "--help" | "-h" => Help
