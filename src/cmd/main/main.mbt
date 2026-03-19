@@ -30,27 +30,10 @@ async fn main {
 }
 
 ///|
-async fn build_context(pa : PromptArgs) -> @context.Context {
+fn build_context(pa : PromptArgs) -> @context.Context {
   let config = load_config()
   let cwd = @env.current_dir().unwrap_or(".")
   let home_dir = @sys.get_env_var("HOME").unwrap_or("")
-  let shell = @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("")
-  let use_cache = shell == "zsh" || shell == "fish"
-
-  let git_info = if use_cache {
-    match @cache.read_cache(cwd, config.cache_ttl) {
-      Some(_) as cached => cached
-      None => {
-        let info = compute_git_info(cwd)
-        if info is Some(i) {
-          @cache.write_cache(cwd, i)
-        }
-        info
-      }
-    }
-  } else {
-    compute_git_info(cwd)
-  }
 
   @context.Context::new(
     cwd~,
@@ -60,37 +43,37 @@ async fn build_context(pa : PromptArgs) -> @context.Context {
     jobs=pa.jobs,
     terminal_width=pa.terminal_width,
     config~,
-    git_info~,
   )
 }
 
 ///|
-async fn compute_git_info(cwd : String) -> @git.GitInfo? {
-  if @git.initialize() {
-    let info = @git.get_info(cwd)
-    @git.finalize()
-    info
-  } else {
-    None
-  }
-}
+fn run_prompt(pa : PromptArgs) -> Unit {
+  let shell = @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("")
+  let use_cache = shell == "zsh" || shell == "fish"
+  let ctx = build_context(pa)
 
-///|
-async fn run_prompt(pa : PromptArgs) -> Unit {
-  if pa.is_async {
-    let cwd = @env.current_dir().unwrap_or(".")
-    let info = compute_git_info(cwd)
-    if info is Some(i) {
-      @cache.write_cache(cwd, i)
+  // Cache hit: return immediately (sync path only)
+  if use_cache && not(pa.is_async) {
+    if @cache.read_prompt(ctx.cwd, pa.status, ctx.config.cache_ttl) is Some(
+      cached,
+    ) {
+      println(cached)
+      return
     }
   }
 
-  let ctx = build_context(pa)
+  // Compute prompt
   let output = render_prompt(ctx)
+  ctx.close_repo()
   println(output)
 
-  if pa.is_async &&
-    @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("") == "fish" {
+  // Write cache
+  if use_cache {
+    @cache.write_prompt(ctx.cwd, pa.status, output)
+  }
+
+  // Notify fish shell
+  if pa.is_async && shell == "fish" {
     notify_parent() |> ignore
   }
 }
@@ -99,7 +82,7 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
 extern "C" fn notify_parent() -> Int = "moonship_notify_parent"
 
 ///|
-async fn run_timings(pa : PromptArgs) -> Unit {
+fn run_timings(pa : PromptArgs) -> Unit {
   let ctx = build_context(pa)
   let modules = build_modules()
   let module_names = @ms.extract_module_names(ctx.config.format)
@@ -122,6 +105,8 @@ async fn run_timings(pa : PromptArgs) -> Unit {
       entries.push((name, elapsed, output))
     }
   }
+
+  ctx.close_repo()
 
   entries.sort_by(fn(a, b) { b.1.compare(a.1) })
 

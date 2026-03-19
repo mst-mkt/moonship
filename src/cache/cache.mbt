@@ -2,11 +2,12 @@
 struct CacheEntry {
   v : Int
   ts : Int64
-  info : @git.GitInfo
+  status : Int
+  prompt : String
 } derive(ToJson, FromJson)
 
 ///|
-let cache_version : Int = 1
+let cache_version : Int = 2
 
 ///|
 pub fn cache_dir() -> String {
@@ -27,28 +28,34 @@ pub fn cache_dir() -> String {
 }
 
 ///|
-pub fn read_cache(repo_root : String, ttl_ms : Int) -> @git.GitInfo? {
-  let path = cache_file_path(cache_dir(), repo_root)
+pub fn read_prompt(cwd : String, status : Int, ttl_ms : Int) -> String? {
+  let path = cache_file_path(cache_dir(), cwd)
 
   let content = @fs.read_file_to_string(path) catch { _ => return None }
   let json : Json = @json.parse(content) catch { _ => return None }
   let entry : CacheEntry = @json.from_json(json) catch { _ => return None }
 
   guard entry.v == cache_version else { return None }
+  guard entry.status == status else { return None }
 
   let now = @async.now()
   guard now - entry.ts < ttl_ms.to_int64() else { return None }
 
-  Some(entry.info)
+  Some(entry.prompt)
 }
 
 ///|
-pub fn write_cache(repo_root : String, info : @git.GitInfo) -> Unit {
+pub fn write_prompt(cwd : String, status : Int, prompt : String) -> Unit {
   let dir = cache_dir()
   ensure_dir(dir)
 
-  let entry : CacheEntry = { v: cache_version, ts: @async.now(), info }
-  let path = cache_file_path(dir, repo_root)
+  let entry : CacheEntry = {
+    v: cache_version,
+    ts: @async.now(),
+    status,
+    prompt,
+  }
+  let path = cache_file_path(dir, cwd)
   @fs.write_string_to_file(path, entry.to_json().stringify()) catch { _ => () }
 }
 
@@ -63,8 +70,8 @@ pub fn clear_cache() -> Unit {
 }
 
 ///|
-fn cache_file_path(dir : String, repo_root : String) -> String {
-  dir + "/" + hash_path(repo_root) + ".json"
+fn cache_file_path(dir : String, cwd : String) -> String {
+  dir + "/" + hash_path(cwd) + ".json"
 }
 
 ///|

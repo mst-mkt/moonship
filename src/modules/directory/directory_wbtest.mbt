@@ -157,23 +157,6 @@ test "truncate_to_repo: cwd outside repo" {
 }
 
 ///|
-test "execute with git_info truncates to repo" {
-  let git_info = @git.GitInfo::new(repo_root="/home/user/repo", branch="main")
-  let ctx = @context.Context::new(
-    cwd="/home/user/repo/src",
-    home_dir="/home/user",
-    git_info=Some(git_info),
-  )
-  let m : &@ms.PromptModule = DirectoryModule::new()
-
-  guard m.execute(ctx) is Some(out) else { fail("expected output") }
-
-  let rendered = out.render()
-  assert_true(rendered.contains("repo/src"))
-  assert_false(rendered.contains("~"))
-}
-
-///|
 test "last_path_component" {
   assert_eq(last_path_component("/home/user/project"), "project")
   assert_eq(last_path_component("/"), "/")

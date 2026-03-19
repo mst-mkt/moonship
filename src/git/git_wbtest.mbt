@@ -15,23 +15,6 @@ test "extract_branch_name: empty" {
 }
 
 ///|
-test "parse_ahead_behind_output: valid" {
-  assert_eq(parse_ahead_behind_output("3\t1"), (3, 1))
-  assert_eq(parse_ahead_behind_output("0\t0"), (0, 0))
-}
-
-///|
-test "parse_ahead_behind_output: invalid" {
-  assert_eq(parse_ahead_behind_output(""), (0, 0))
-  assert_eq(parse_ahead_behind_output("abc"), (0, 0))
-}
-
-///|
-test "parse_ahead_behind_output: large numbers" {
-  assert_eq(parse_ahead_behind_output("100\t200"), (100, 200))
-}
-
-///|
 test "count_status: empty" {
   assert_eq(count_status([]), (0, 0, 0))
 }
@@ -48,41 +31,13 @@ test "count_status: mixed" {
 }
 
 ///|
-test "GitInfo::new defaults" {
-  let info = GitInfo::new(repo_root="/repo", branch="main")
-  assert_eq(info.is_detached, false)
-  assert_eq(info.commit_hash, "")
-  assert_eq(info.staged, 0)
-  assert_eq(info.modified, 0)
-  assert_eq(info.untracked, 0)
-  assert_eq(info.ahead, 0)
-  assert_eq(info.behind, 0)
+test "last_slash: basic" {
+  assert_eq(last_slash("/home/user"), Some(5))
+  assert_eq(last_slash("/"), Some(0))
+  assert_eq(last_slash("noslash"), None)
 }
 
 ///|
-test "GitInfo JSON round-trip: all fields" {
-  let info = GitInfo::new(
-    repo_root="/home/user/project",
-    branch="feature/test",
-    is_detached=true,
-    commit_hash="abc1234",
-    staged=2,
-    modified=3,
-    untracked=1,
-    ahead=5,
-    behind=2,
-  )
-
-  let json = info.to_json()
-  let restored : GitInfo = @json.from_json(json)
-  assert_eq(restored, info)
-}
-
-///|
-test "GitInfo JSON round-trip: defaults" {
-  let info = GitInfo::new(repo_root="/repo", branch="main")
-
-  let json = info.to_json()
-  let restored : GitInfo = @json.from_json(json)
-  assert_eq(restored, info)
+test "find_repo_root: not found returns None" {
+  assert_eq(find_repo_root("/nonexistent/path"), None)
 }

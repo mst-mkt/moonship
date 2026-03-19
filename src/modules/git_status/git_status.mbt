@@ -18,14 +18,14 @@ pub impl @ms.PromptModule for GitStatusModule with execute(
 ) -> @ms.ModuleOutput? {
   let config = ctx.config.get_module("git_status")
   guard not(config.disabled) else { return None }
-  guard ctx.git_info is Some(info) else { return None }
+  guard ctx.get_repo() is Some(repo) else { return None }
+
+  let (staged, modified, untracked) = repo.get_status()
 
   let status = build_status_string([
-    (info.ahead, config.get_prop("ahead")),
-    (info.behind, config.get_prop("behind")),
-    (info.staged, config.get_prop("staged")),
-    (info.modified, config.get_prop("modified")),
-    (info.untracked, config.get_prop("untracked")),
+    (staged, config.get_prop("staged")),
+    (modified, config.get_prop("modified")),
+    (untracked, config.get_prop("untracked")),
   ])
   guard not(status.is_empty()) else { return None }
 

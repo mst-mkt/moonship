@@ -21,7 +21,12 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
 
   let truncation_length = config.get_int_prop("truncation_length", default=3)
   let truncate_to_repo = config.get_prop("truncate_to_repo") == "true"
-  let repo_root = ctx.git_info.map(fn(info) { info.repo_root })
+  let repo_root = if truncate_to_repo {
+    ctx.get_repo().map(fn(repo) { repo.repo_root() })
+  } else {
+    None
+  }
+
   let path = format_path(
     ctx.cwd,
     ctx.home_dir,

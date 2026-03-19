@@ -26,24 +26,25 @@ test "cache_dir: ends with /cache" {
 }
 
 ///|
-test "write_cache and read_cache: round-trip" {
-  let info = @git.GitInfo::new(
-    repo_root="/tmp/test-repo",
-    branch="main",
-    staged=1,
-    modified=2,
-  )
+test "write_prompt and read_prompt: round-trip" {
+  write_prompt("/tmp/test-cwd", 0, "test-prompt-output")
+  let restored = read_prompt("/tmp/test-cwd", 0, 60000)
+  assert_eq(restored, Some("test-prompt-output"))
 
-  write_cache("/tmp/test-repo", info)
-  let restored = read_cache("/tmp/test-repo", 60000)
-  assert_eq(restored, Some(info))
-
-  // cleanup
   clear_cache()
 }
 
 ///|
-test "read_cache: returns None for missing cache" {
-  let result = read_cache("/nonexistent/repo", 5000)
+test "read_prompt: status mismatch returns None" {
+  write_prompt("/tmp/test-cwd", 0, "prompt-for-status-0")
+  let result = read_prompt("/tmp/test-cwd", 1, 60000)
+  assert_eq(result, None)
+
+  clear_cache()
+}
+
+///|
+test "read_prompt: returns None for missing cache" {
+  let result = read_prompt("/nonexistent/cwd", 0, 5000)
   assert_eq(result, None)
 }

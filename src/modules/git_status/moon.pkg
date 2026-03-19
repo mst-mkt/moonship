@@ -4,11 +4,6 @@ import {
   "mst-mkt/moonship/terminal" @terminal,
 }
 
-import {
-  "mst-mkt/moonship/config" @config,
-  "mst-mkt/moonship/git" @git,
-} for "wbtest"
-
 options(
   "supported-targets": "native",
 )

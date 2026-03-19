@@ -18,13 +18,15 @@ pub impl @ms.PromptModule for GitBranchModule with execute(
 ) -> @ms.ModuleOutput? {
   let config = ctx.config.get_module("git_branch")
   guard not(config.disabled) else { return None }
-  guard ctx.git_info is Some(info) else { return None }
+  guard ctx.get_repo() is Some(repo) else { return None }
 
-  let branch = if info.is_detached {
-    guard not(info.commit_hash.is_empty()) else { return None }
-    "(\{info.commit_hash})"
+  let (raw_branch, is_detached, commit_hash) = repo.get_branch()
+
+  let branch = if is_detached {
+    guard not(commit_hash.is_empty()) else { return None }
+    "(\{commit_hash})"
   } else {
-    info.branch
+    raw_branch
   }
 
   let max_len = config.get_int_prop("truncation_length", default=20)

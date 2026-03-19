@@ -7,7 +7,8 @@ pub struct Context {
   jobs : Int
   terminal_width : Int
   config : @config.Config
-  git_info : @git.GitInfo?
+  mut git_repo : @git.RepoHandle?
+  mut git_resolved : Bool
 }
 
 ///|
@@ -19,7 +20,6 @@ pub fn Context::new(
   jobs? : Int = 0,
   terminal_width? : Int = 80,
   config? : @config.Config = @config.Config::default(),
-  git_info? : @git.GitInfo? = None,
 ) -> Context {
   {
     cwd,
@@ -29,6 +29,26 @@ pub fn Context::new(
     jobs,
     terminal_width,
     config,
-    git_info,
+    git_repo: None,
+    git_resolved: false,
+  }
+}
+
+///|
+pub fn Context::get_repo(self : Context) -> @git.RepoHandle? {
+  if self.git_resolved {
+    return self.git_repo
+  }
+
+  self.git_resolved = true
+  self.git_repo = @git.open_repo(self.cwd)
+  self.git_repo
+}
+
+///|
+pub fn Context::close_repo(self : Context) -> Unit {
+  if self.git_repo is Some(repo) {
+    repo.close()
+    self.git_repo = None
   }
 }

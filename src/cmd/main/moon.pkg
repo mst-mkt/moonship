@@ -9,7 +9,6 @@ import {
   "mst-mkt/moonship/config" @config,
   "mst-mkt/moonship/context" @context,
   "mst-mkt/moonship/module_system" @ms,
-  "mst-mkt/moonship/git" @git,
   "mst-mkt/moonship/modules/character" @mod_character,
   "mst-mkt/moonship/modules/directory" @mod_directory,
   "mst-mkt/moonship/modules/git_branch" @mod_git_branch,

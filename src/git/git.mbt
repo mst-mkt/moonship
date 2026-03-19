@@ -1,119 +1,89 @@
 ///|
-pub(all) struct GitInfo {
-  repo_root : String
-  branch : String
-  is_detached : Bool
-  commit_hash : String
-  staged : Int
-  modified : Int
-  untracked : Int
-  ahead : Int
-  behind : Int
-} derive(Show, Eq, ToJson, FromJson)
+pub struct RepoHandle {
+  repo : @libgit2.Repository
+  root : String
+}
 
 ///|
-pub fn GitInfo::new(
-  repo_root~ : String,
-  branch~ : String,
-  is_detached? : Bool = false,
-  commit_hash? : String = "",
-  staged? : Int = 0,
-  modified? : Int = 0,
-  untracked? : Int = 0,
-  ahead? : Int = 0,
-  behind? : Int = 0,
-) -> GitInfo {
-  {
-    repo_root,
-    branch,
-    is_detached,
-    commit_hash,
-    staged,
-    modified,
-    untracked,
-    ahead,
-    behind,
+pub fn open_repo(cwd : String) -> RepoHandle? {
+  guard @libgit2.git_init() else { return None }
+
+  let repo_root = find_repo_root(cwd).unwrap_or(cwd)
+  guard @libgit2.Repository::open(repo_root) is Some(repo) else {
+    @libgit2.git_shutdown()
+    return None
   }
+
+  Some({ repo, root: repo_root })
 }
 
 ///|
-pub fn initialize() -> Bool {
-  @libgit2.git_init()
-}
-
-///|
-pub fn finalize() -> Unit {
+pub fn RepoHandle::close(self : RepoHandle) -> Unit {
+  self.repo.close()
   @libgit2.git_shutdown()
 }
 
 ///|
-pub async fn get_info(cwd : String) -> GitInfo? {
-  guard @libgit2.is_loaded() else { return None }
-
-  let repo_root = git_toplevel(cwd)
-  guard @libgit2.Repository::open(repo_root) is Some(repo) else { return None }
-
-  let info = build_info(repo, repo_root, cwd)
-  repo.close()
-  Some(info)
+pub fn RepoHandle::repo_root(self : RepoHandle) -> String {
+  self.root
 }
 
 ///|
-async fn git_toplevel(cwd : String) -> String {
-  git_cmd_output(cwd, ["rev-parse", "--show-toplevel"]).unwrap_or(cwd)
-}
-
-///|
-async fn build_info(
-  repo : @libgit2.Repository,
-  repo_root : String,
-  cwd : String,
-) -> GitInfo {
-  let (branch, is_detached) = match repo.head_name() {
+pub fn RepoHandle::get_branch(self : RepoHandle) -> (String, Bool, String) {
+  let (branch, is_detached) = match self.repo.head_name() {
     Some(name) => (extract_branch_name(name), false)
     None => ("", true)
   }
 
-  let commit_hash = match repo.head_id() {
+  let commit_hash = match self.repo.head_id() {
     Some(id) => if id.length() >= 7 { id[:7].to_string() } else { id }
     None => ""
   }
 
-  let (staged, modified, untracked) = count_status(repo.status_flags())
-  let (ahead, behind) = get_ahead_behind(cwd)
-
-  {
-    repo_root,
-    branch,
-    is_detached,
-    commit_hash,
-    staged,
-    modified,
-    untracked,
-    ahead,
-    behind,
-  }
+  (branch, is_detached, commit_hash)
 }
 
 ///|
-async fn git_cmd_output(cwd : String, args : Array[String]) -> String? {
-  let full_args = ["-C", cwd] + args
-  let devnull = @process.redirect_to_file("/dev/null")
-  let (code, data) = @process.collect_stdout(
-    "git",
-    full_args[:],
-    stderr=devnull,
-  ) catch {
-    _ => return None
+pub fn RepoHandle::get_status(self : RepoHandle) -> (Int, Int, Int) {
+  count_status(self.repo.status_flags())
+}
+
+///|
+fn find_repo_root(cwd : String) -> String? {
+  let mut dir = cwd
+
+  for i = 0; i < 50; i = i + 1 {
+    if @fs.path_exists(dir + "/.git") {
+      return Some(dir)
+    }
+
+    match last_slash(dir) {
+      Some(idx) =>
+        if idx == 0 {
+          return None
+        } else {
+          dir = dir[:idx].to_string()
+        }
+      None => return None
+    }
   }
 
-  guard code == 0 else { return None }
+  None
+}
 
-  let output = data.text() catch { _ => return None }
-  let trimmed = output.trim(chars=" \n\r\t").to_string()
+///|
+fn last_slash(s : String) -> Int? {
+  let mut result : Int? = None
+  let mut i = 0
 
-  guard not(trimmed.is_empty()) else { return None }
-  Some(trimmed)
+  for ch in s {
+    if ch == '/' {
+      result = Some(i)
+    }
+    i = i + 1
+  }
+
+  result
 }
 
 ///|
@@ -139,32 +109,4 @@ fn count_status(flags : Array[@libgit2.StatusFlags]) -> (Int, Int, Int) {
       u + Bool::to_int(f.is_new()),
     )
   })
-}
-
-///|
-async fn get_ahead_behind(cwd : String) -> (Int, Int) {
-  match
-    git_cmd_output(cwd, ["rev-list", "--left-right", "--count", "HEAD...@{u}"]) {
-    Some(output) => parse_ahead_behind_output(output)
-    None => (0, 0)
-  }
-}
-
-///|
-fn parse_ahead_behind_output(s : String) -> (Int, Int) {
-  match s.split_once("\t") {
-    Some((ahead_str, behind_str)) =>
-      (
-        parse_int_default(ahead_str.to_string()),
-        parse_int_default(behind_str.to_string()),
-      )
-    None => (0, 0)
-  }
-}
-
-///|
-fn parse_int_default(s : String) -> Int {
-  @strconv.parse_int(s) catch {
-    _ => 0
-  }
 }
