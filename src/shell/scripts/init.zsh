@@ -62,7 +62,7 @@ __moonship_precmd() {
 
   # Async update: recompute in background, update cache, redraw
   exec {MOONSHIP_ASYNC_FD} < <("$MOONSHIP_BIN" prompt --async "${prompt_args[@]}")
-  zle -F "$MOONSHIP_ASYNC_FD" __moonship_async_callback
+  zle -F "$MOONSHIP_ASYNC_FD" __moonship_async_callback 2>/dev/null
 }
 
 # Install hooks

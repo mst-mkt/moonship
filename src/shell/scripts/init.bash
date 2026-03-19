@@ -1,6 +1,7 @@
 # moonship init script for bash
 # Usage: eval "$(moonship init bash)"
 
+export MOONSHIP_SHELL="bash"
 MOONSHIP_BIN='::BIN::'
 
 # Capture start time
