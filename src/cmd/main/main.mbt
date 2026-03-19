@@ -1,5 +1,5 @@
 ///|
-async fn main {
+fn main {
   let args = get_argv()
   let cmd = parse_args(args)
 
@@ -194,7 +194,7 @@ fn render_prompt(ctx : @context.Context) -> String {
 }
 
 ///|
-async fn run_init(shell_name : String) -> Unit {
+fn run_init(shell_name : String) -> Unit {
   match @shell.Shell::from_string(shell_name) {
     Some(shell) => {
       let bin = self_exe()
@@ -208,32 +208,7 @@ async fn run_init(shell_name : String) -> Unit {
 }
 
 ///|
-async fn self_exe() -> String {
-  if @fs.path_exists("/proc/self/exe") {
-    let devnull = @process.redirect_to_file("/dev/null")
-    let (code, data) = @process.collect_stdout(
-      "readlink",
-      ["-f", "/proc/self/exe"][:],
-      stderr=devnull,
-    ) catch {
-      _ => return fallback_exe()
-    }
-
-    if code == 0 {
-      let path = (data.text() catch { _ => return fallback_exe() })
-        .trim(chars=" \n\r\t")
-        .to_string()
-      if not(path.is_empty()) {
-        return path
-      }
-    }
-  }
-
-  fallback_exe()
-}
-
-///|
-fn fallback_exe() -> String {
+fn self_exe() -> String {
   let args = @sys.get_cli_args()
   guard args.length() > 0 else { return "moonship" }
 
