@@ -177,3 +177,34 @@ test "render: empty" {
   let output = @module_system.ModuleOutput::new([])
   assert_eq(output.render(), "")
 }
+
+///|
+test "format: escaped brackets" {
+  let vars : Map[String, String] = { "x": "hello" }
+  let segs = @module_system.format_string(
+    "[\\[$x\\]](bold)",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs[0].text, "[hello]")
+}
+
+///|
+test "format: escaped newline" {
+  let segs = @module_system.format_string(
+    "a\\nb",
+    {},
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "a\nb")
+}
+
+///|
+test "format: escaped backslash" {
+  let segs = @module_system.format_string(
+    "a\\\\b",
+    {},
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "a\\b")
+}

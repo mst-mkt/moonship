@@ -16,6 +16,10 @@ pub fn format_string(
 
   while i < len {
     match char_at(template, i) {
+      '\\' if i + 1 < len => {
+        segments.push(Segment::new(unescape(char_at(template, i + 1)), style~))
+        i += 2
+      }
       '$' => {
         let (var_name, end) = scan_ident(template, i + 1)
         if not(var_name.is_empty()) {
@@ -41,7 +45,9 @@ pub fn format_string(
           }
         }
       _ => {
-        let end = scan_while(template, i, fn(c) { c != '$' && c != '[' })
+        let end = scan_while(template, i, fn(c) {
+          c != '$' && c != '[' && c != '\\'
+        })
         segments.push(Segment::new(template[i:end].to_string(), style~))
         i = end
       }
@@ -122,7 +128,10 @@ fn substitute_vars(text : String, vars : Map[String, String]) -> String {
   let mut i = 0
 
   while i < len {
-    if char_at(text, i) == '$' {
+    if char_at(text, i) == '\\' && i + 1 < len {
+      buf.write_string(unescape(char_at(text, i + 1)))
+      i += 2
+    } else if char_at(text, i) == '$' {
       let (var_name, end) = scan_ident(text, i + 1)
       if not(var_name.is_empty()) {
         buf.write_string(vars.get(var_name).unwrap_or(""))
@@ -174,6 +183,15 @@ fn is_ident_char(c : Char) -> Bool {
   match c {
     'a'..='z' | 'A'..='Z' | '_' | '0'..='9' => true
     _ => false
+  }
+}
+
+///|
+fn unescape(ch : Char) -> String {
+  match ch {
+    'n' => "\n"
+    't' => "\t"
+    _ => ch.to_string()
   }
 }
 
