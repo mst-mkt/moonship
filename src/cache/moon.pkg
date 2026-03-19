@@ -1,0 +1,11 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/core/json" @json,
+  "moonbitlang/x/fs" @fs,
+  "moonbitlang/x/sys" @sys,
+  "mst-mkt/moonship/git" @git,
+}
+
+options(
+  "supported-targets": "native",
+)
