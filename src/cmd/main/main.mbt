@@ -88,7 +88,15 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
   let ctx = build_context(pa)
   let output = render_prompt(ctx)
   println(output)
+
+  if pa.is_async &&
+    @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("") == "fish" {
+    notify_parent() |> ignore
+  }
 }
+
+///|
+extern "C" fn notify_parent() -> Int = "moonship_notify_parent"
 
 ///|
 async fn run_timings(pa : PromptArgs) -> Unit {
