@@ -34,8 +34,15 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
     truncate_to_repo,
     repo_root,
   )
+  // TODO: detect read-only directories (needs access() syscall)
+  let read_only = ""
   let style = @terminal.parse_style(config.style)
-  let vars : Map[String, String] = { "path": path }
+  let vars : Map[String, String] = {
+    "path": path,
+    "read_only": read_only,
+    "style": config.style,
+    "read_only_style": config.get_prop("read_only_style", default="red"),
+  }
   let segments = @ms.format_string(config.format, vars, style)
 
   Some(@ms.ModuleOutput::new(segments))

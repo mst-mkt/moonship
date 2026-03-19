@@ -42,7 +42,7 @@ test "module disabled" {
   let config = @config.Config::from_toml(toml)
   let gb = config.get_module("git_branch")
   assert_true(gb.disabled)
-  assert_eq(gb.format, "[$branch]($style) ")
+  assert_eq(gb.format, "[$symbol$branch]($style) ")
 }
 
 ///|

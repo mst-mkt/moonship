@@ -38,9 +38,9 @@ pub fn Config::default() -> Config {
   }
   modules["git_branch"] = {
     disabled: false,
-    format: "[$branch]($style) ",
+    format: "[$symbol$branch]($style) ",
     style: "bold purple",
-    props: { "truncation_length": "20" },
+    props: { "truncation_length": "20", "symbol": " " },
   }
   modules["git_status"] = {
     disabled: false,

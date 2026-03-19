@@ -36,8 +36,13 @@ pub impl @ms.PromptModule for GitBranchModule with execute(
     branch
   }
 
+  let symbol = config.get_prop("symbol", default=" ")
   let style = @terminal.parse_style(config.style)
-  let vars : Map[String, String] = { "branch": display_branch }
+  let vars : Map[String, String] = {
+    "branch": display_branch,
+    "symbol": symbol,
+    "style": config.style,
+  }
   let segments = @ms.format_string(config.format, vars, style)
 
   Some(@ms.ModuleOutput::new(segments))
