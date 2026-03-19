@@ -33,7 +33,7 @@ pub fn Config::default() -> Config {
     disabled: false,
     format: "[$path]($style) ",
     style: "bold cyan",
-    props: { "truncation_length": "3" },
+    props: { "truncation_length": "3", "truncate_to_repo": "true" },
   }
   modules["git_branch"] = {
     disabled: false,
