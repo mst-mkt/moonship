@@ -1,6 +1,7 @@
 ///|
 pub enum Command {
   Prompt(PromptArgs)
+  Timings(PromptArgs)
   Init(String)
   Time
   PrintConfig
@@ -28,7 +29,8 @@ pub fn parse_args(args : Array[String]) -> Command {
   guard not(args.is_empty()) else { return Help }
 
   match args[0] {
-    "prompt" => parse_prompt_args(args)
+    "prompt" => parse_prompt_args(args, fn(pa) { Prompt(pa) })
+    "timings" => parse_prompt_args(args, fn(pa) { Timings(pa) })
     "init" => if args.length() > 1 { Init(args[1]) } else { UnknownShell }
     "time" => Time
     "print-config" => PrintConfig
@@ -39,7 +41,10 @@ pub fn parse_args(args : Array[String]) -> Command {
 }
 
 ///|
-fn parse_prompt_args(args : Array[String]) -> Command {
+fn parse_prompt_args(
+  args : Array[String],
+  ctor : (PromptArgs) -> Command,
+) -> Command {
   let pa = args[1:]
     .iter()
     .fold(init=PromptArgs::default(), fn(pa, arg) {
@@ -52,7 +57,7 @@ fn parse_prompt_args(args : Array[String]) -> Command {
         _ => pa
       }
     })
-  Prompt(pa)
+  ctor(pa)
 }
 
 ///|

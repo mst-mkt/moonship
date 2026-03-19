@@ -5,6 +5,7 @@ async fn main {
 
   match cmd {
     Prompt(pa) => run_prompt(pa)
+    Timings(pa) => run_timings(pa)
     Init(shell_name) => run_init(shell_name)
     Time => println(@async.now().to_string())
     PrintConfig => {
@@ -25,7 +26,7 @@ async fn main {
 }
 
 ///|
-async fn run_prompt(pa : PromptArgs) -> Unit {
+async fn build_context(pa : PromptArgs) -> @context.Context {
   let config = load_config()
   let cwd = @env.current_dir().unwrap_or(".")
   let home_dir = @sys.get_env_var("HOME").unwrap_or("")
@@ -38,7 +39,7 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
     None
   }
 
-  let ctx = @context.Context::new(
+  @context.Context::new(
     cwd~,
     home_dir~,
     status=pa.status,
@@ -48,9 +49,100 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
     config~,
     git_info~,
   )
+}
 
+///|
+async fn run_prompt(pa : PromptArgs) -> Unit {
+  let ctx = build_context(pa)
   let output = render_prompt(ctx)
   println(output)
+}
+
+///|
+async fn run_timings(pa : PromptArgs) -> Unit {
+  let ctx = build_context(pa)
+  let modules = build_modules()
+  let module_names = @ms.extract_module_names(ctx.config.format)
+
+  let entries : Array[(String, Int64, String)] = []
+
+  for name in module_names {
+    guard modules.get(name) is Some(m) else { continue }
+
+    let start = @async.now()
+    let result = m.execute(ctx)
+    let elapsed = @async.now() - start
+
+    let output = match result {
+      Some(out) => out.render().replace(old="\n", new="\\n")
+      None => ""
+    }
+
+    if elapsed > 0L || not(output.is_empty()) {
+      entries.push((name, elapsed, output))
+    }
+  }
+
+  entries.sort_by(fn(a, b) { b.1.compare(a.1) })
+
+  let max_name = max_length(entries.iter().map(fn(e) { e.0 }))
+  let max_dur = max_length(entries.iter().map(fn(e) { format_duration(e.1) }))
+
+  println("")
+  println(" Here are the timings of modules in your prompt (>=1ms or output):")
+  for entry in entries {
+    let (name, ms, output) = entry
+    let dur = format_duration(ms)
+
+    println(
+      " \{pad_right(name, max_name)}  -  \{pad_left(dur, max_dur)}  -   \"\{output}\"",
+    )
+  }
+}
+
+///|
+fn max_length(iter : Iter[String]) -> Int {
+  iter.fold(init=0, fn(max, s) {
+    let len = s.length()
+    if len > max {
+      len
+    } else {
+      max
+    }
+  })
+}
+
+///|
+fn format_duration(ms : Int64) -> String {
+  if ms == 0L {
+    "<1ms"
+  } else {
+    "\{ms}ms"
+  }
+}
+
+///|
+fn pad_right(s : String, width : Int) -> String {
+  guard s.length() < width else { return s }
+
+  let buf = StringBuilder::new()
+  buf.write_string(s)
+  for _ in 0..<(width - s.length()) {
+    buf.write_char(' ')
+  }
+  buf.to_string()
+}
+
+///|
+fn pad_left(s : String, width : Int) -> String {
+  guard s.length() < width else { return s }
+
+  let buf = StringBuilder::new()
+  for _ in 0..<(width - s.length()) {
+    buf.write_char(' ')
+  }
+  buf.write_string(s)
+  buf.to_string()
 }
 
 ///|
@@ -161,6 +253,7 @@ fn run_help() -> Unit {
     #|
     #|Usage:
     #|  moonship prompt [options]    Generate prompt string
+    #|  moonship timings [options]   Show module execution times
     #|  moonship init <shell>        Print shell init script
     #|  moonship time                Print current time in ms
     #|  moonship print-config        Print active configuration

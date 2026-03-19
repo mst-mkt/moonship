@@ -95,6 +95,22 @@ test "time" {
 }
 
 ///|
+test "timings: default" {
+  match parse_args(["timings"]) {
+    Timings(pa) => assert_eq(pa.status, 0)
+    _ => fail("Expected Timings")
+  }
+}
+
+///|
+test "timings: with options" {
+  match parse_args(["timings", "--status=1"]) {
+    Timings(pa) => assert_eq(pa.status, 1)
+    _ => fail("Expected Timings")
+  }
+}
+
+///|
 test "no args is Help" {
   assert_true(parse_args([]) is Help)
 }

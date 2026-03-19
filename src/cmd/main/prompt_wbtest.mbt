@@ -59,6 +59,47 @@ test "render: includes git branch and status" {
 }
 
 ///|
+test "pad_right: shorter than width" {
+  assert_eq(pad_right("abc", 6), "abc   ")
+}
+
+///|
+test "pad_right: equal to width" {
+  assert_eq(pad_right("abc", 3), "abc")
+}
+
+///|
+test "pad_right: longer than width" {
+  assert_eq(pad_right("abcdef", 3), "abcdef")
+}
+
+///|
+test "pad_left: shorter than width" {
+  assert_eq(pad_left("abc", 6), "   abc")
+}
+
+///|
+test "pad_left: equal to width" {
+  assert_eq(pad_left("abc", 3), "abc")
+}
+
+///|
+test "pad_left: longer than width" {
+  assert_eq(pad_left("abcdef", 3), "abcdef")
+}
+
+///|
+test "format_duration: zero" {
+  assert_eq(format_duration(0L), "<1ms")
+}
+
+///|
+test "format_duration: nonzero" {
+  assert_eq(format_duration(5L), "5ms")
+  assert_eq(format_duration(123L), "123ms")
+}
+
+///|
 test "render: unknown module skipped" {
   let config = @config.Config::from_toml(
     (
