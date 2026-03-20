@@ -1,5 +1,5 @@
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = GitBranchModule::new()
   assert_eq(m.name(), "git_branch")
 }
@@ -7,7 +7,7 @@ test "name" {
 // --- render_branch unit tests ---
 
 ///|
-test "render_branch: normal branch" {
+async test "render_branch: normal branch" {
   let m = GitBranchModule::new()
   guard m.render_branch("main", false, "abc1234") is Output(out) else {
     fail("expected Output")
@@ -19,7 +19,7 @@ test "render_branch: normal branch" {
 }
 
 ///|
-test "render_branch: detached HEAD shows commit hash" {
+async test "render_branch: detached HEAD shows commit hash" {
   let m = GitBranchModule::new()
   guard m.render_branch("", true, "abc1234") is Output(out) else {
     fail("expected Output")
@@ -29,13 +29,13 @@ test "render_branch: detached HEAD shows commit hash" {
 }
 
 ///|
-test "render_branch: detached HEAD with empty hash returns Skipped" {
+async test "render_branch: detached HEAD with empty hash returns Skipped" {
   let m = GitBranchModule::new()
   assert_true(m.render_branch("", true, "") is Skipped(_))
 }
 
 ///|
-test "render_branch: truncation" {
+async test "render_branch: truncation" {
   let config = @config.Config::from_toml(
     (
       #|[git_branch]
@@ -54,7 +54,7 @@ test "render_branch: truncation" {
 }
 
 ///|
-test "render_branch: custom symbol" {
+async test "render_branch: custom symbol" {
   let config = @config.Config::from_toml(
     (
       #|[git_branch]
@@ -70,7 +70,7 @@ test "render_branch: custom symbol" {
 }
 
 ///|
-test "render_branch: custom truncation_symbol" {
+async test "render_branch: custom truncation_symbol" {
   let config = @config.Config::from_toml(
     (
       #|[git_branch]
@@ -89,7 +89,7 @@ test "render_branch: custom truncation_symbol" {
 }
 
 ///|
-test "render_branch: only_attached skips detached" {
+async test "render_branch: only_attached skips detached" {
   let config = @config.Config::from_toml(
     (
       #|[git_branch]
@@ -101,7 +101,7 @@ test "render_branch: only_attached skips detached" {
 }
 
 ///|
-test "render_branch: only_attached allows normal branch" {
+async test "render_branch: only_attached allows normal branch" {
   let config = @config.Config::from_toml(
     (
       #|[git_branch]
@@ -113,7 +113,7 @@ test "render_branch: only_attached allows normal branch" {
 }
 
 ///|
-test "render_branch: ignore_branches hides matching" {
+async test "render_branch: ignore_branches hides matching" {
   let config = @config.Config::from_toml(
     (
       #|[git_branch]
@@ -125,7 +125,7 @@ test "render_branch: ignore_branches hides matching" {
 }
 
 ///|
-test "render_branch: ignore_branches allows non-matching" {
+async test "render_branch: ignore_branches allows non-matching" {
   let config = @config.Config::from_toml(
     (
       #|[git_branch]
@@ -137,19 +137,19 @@ test "render_branch: ignore_branches allows non-matching" {
 }
 
 ///|
-test "parse_string_list: basic" {
+async test "parse_string_list: basic" {
   assert_eq(parse_string_list("a,b,c"), ["a", "b", "c"])
 }
 
 ///|
-test "parse_string_list: empty" {
+async test "parse_string_list: empty" {
   assert_eq(parse_string_list(""), [])
 }
 
 // --- execute integration tests ---
 
 ///|
-test "execute: disabled returns Disabled" {
+async test "execute: disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[git_branch]
@@ -162,14 +162,14 @@ test "execute: disabled returns Disabled" {
 }
 
 ///|
-test "execute: not in git repo returns Skipped" {
+async test "execute: not in git repo returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
   let m = GitBranchModule::new()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
 ///|
-test "execute: real repo returns Output with branch" {
+async test "execute: real repo returns Output with branch" {
   let path = "/tmp/moonship-test-git-branch"
   let repo = create_test_repo(path)
 

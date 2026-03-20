@@ -1,5 +1,5 @@
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = GitCommitModule::new()
   assert_eq(m.name(), "git_commit")
 }
@@ -7,7 +7,7 @@ test "name" {
 // --- execute ---
 
 ///|
-test "execute: disabled returns Disabled" {
+async test "execute: disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[git_commit]
@@ -20,14 +20,14 @@ test "execute: disabled returns Disabled" {
 }
 
 ///|
-test "execute: not in git repo returns Skipped" {
+async test "execute: not in git repo returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
   let m = GitCommitModule::new()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
 ///|
-test "execute: only_detached skips attached branch" {
+async test "execute: only_detached skips attached branch" {
   let path = "/tmp/moonship-test-git-commit-attached"
   let repo = create_test_repo(path)
 
@@ -40,7 +40,7 @@ test "execute: only_detached skips attached branch" {
 }
 
 ///|
-test "execute: only_detached=false shows hash for attached" {
+async test "execute: only_detached=false shows hash for attached" {
   let path = "/tmp/moonship-test-git-commit-show-all"
   let repo = create_test_repo(path)
 

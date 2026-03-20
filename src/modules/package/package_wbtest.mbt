@@ -1,11 +1,11 @@
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = PackageModule::new()
   assert_eq(m.name(), "package")
 }
 
 ///|
-test "execute: disabled returns Disabled" {
+async test "execute: disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[package]
@@ -18,14 +18,14 @@ test "execute: disabled returns Disabled" {
 }
 
 ///|
-test "execute: no package file returns Skipped" {
+async test "execute: no package file returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
   let m = PackageModule::new()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
 ///|
-test "detect_version: package.json" {
+async test "detect_version: package.json" {
   let path = "/tmp/moonship-test-package-json"
   setup_dir(path)
   @fs.write_string_to_file(path + "/package.json", "{\"version\": \"3.0.0\"}")
@@ -36,7 +36,7 @@ test "detect_version: package.json" {
 }
 
 ///|
-test "detect_version: Cargo.toml" {
+async test "detect_version: Cargo.toml" {
   let path = "/tmp/moonship-test-package-cargo"
   setup_dir(path)
   @fs.write_string_to_file(
@@ -50,7 +50,7 @@ test "detect_version: Cargo.toml" {
 }
 
 ///|
-test "detect_version: pubspec.yaml" {
+async test "detect_version: pubspec.yaml" {
   let path = "/tmp/moonship-test-package-pubspec"
   setup_dir(path)
   @fs.write_string_to_file(
@@ -64,7 +64,7 @@ test "detect_version: pubspec.yaml" {
 }
 
 ///|
-test "detect_version: pom.xml" {
+async test "detect_version: pom.xml" {
   let path = "/tmp/moonship-test-package-pom"
   setup_dir(path)
   @fs.write_string_to_file(
@@ -78,7 +78,7 @@ test "detect_version: pom.xml" {
 }
 
 ///|
-test "detect_version: jsr.json" {
+async test "detect_version: jsr.json" {
   let path = "/tmp/moonship-test-package-jsr"
   setup_dir(path)
   @fs.write_string_to_file(path + "/jsr.json", "{\"version\": \"0.9.0\"}")
@@ -89,7 +89,7 @@ test "detect_version: jsr.json" {
 }
 
 ///|
-test "detect_version: daml.yaml" {
+async test "detect_version: daml.yaml" {
   let path = "/tmp/moonship-test-package-daml"
   setup_dir(path)
   @fs.write_string_to_file(path + "/daml.yaml", "version: 1.5.0\n")
@@ -100,7 +100,7 @@ test "detect_version: daml.yaml" {
 }
 
 ///|
-test "detect_version: DESCRIPTION (R)" {
+async test "detect_version: DESCRIPTION (R)" {
   let path = "/tmp/moonship-test-package-r"
   setup_dir(path)
   @fs.write_string_to_file(
@@ -114,7 +114,7 @@ test "detect_version: DESCRIPTION (R)" {
 }
 
 ///|
-test "detect_version: nimble" {
+async test "detect_version: nimble" {
   let path = "/tmp/moonship-test-package-nimble"
   setup_dir(path)
   @fs.write_string_to_file(path + "/myproject.nimble", "version = \"0.2.0\"\n")
@@ -125,7 +125,7 @@ test "detect_version: nimble" {
 }
 
 ///|
-test "detect_version: no package file" {
+async test "detect_version: no package file" {
   let path = "/tmp/moonship-test-package-empty"
   setup_dir(path)
 
@@ -135,7 +135,7 @@ test "detect_version: no package file" {
 }
 
 ///|
-test "detect_version: priority order" {
+async test "detect_version: priority order" {
   let path = "/tmp/moonship-test-package-priority"
   setup_dir(path)
   @fs.write_string_to_file(path + "/package.json", "{\"version\": \"1.0.0\"}")

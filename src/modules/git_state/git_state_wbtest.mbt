@@ -1,5 +1,5 @@
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = GitStateModule::new()
   assert_eq(m.name(), "git_state")
 }
@@ -7,7 +7,7 @@ test "name" {
 // --- detect_state ---
 
 ///|
-test "detect_state: no state files returns empty" {
+async test "detect_state: no state files returns empty" {
   let path = "/tmp/moonship-test-git-state-clean"
   setup_git_dir(path)
 
@@ -17,7 +17,7 @@ test "detect_state: no state files returns empty" {
 }
 
 ///|
-test "detect_state: rebase-merge" {
+async test "detect_state: rebase-merge" {
   let path = "/tmp/moonship-test-git-state-rebase"
   setup_git_dir(path)
   @fs.create_dir(path + "/.git/rebase-merge") |> ignore
@@ -28,7 +28,7 @@ test "detect_state: rebase-merge" {
 }
 
 ///|
-test "detect_state: rebase-apply" {
+async test "detect_state: rebase-apply" {
   let path = "/tmp/moonship-test-git-state-rebase-apply"
   setup_git_dir(path)
   @fs.create_dir(path + "/.git/rebase-apply") |> ignore
@@ -39,7 +39,7 @@ test "detect_state: rebase-apply" {
 }
 
 ///|
-test "detect_state: MERGE_HEAD" {
+async test "detect_state: MERGE_HEAD" {
   let path = "/tmp/moonship-test-git-state-merge"
   setup_git_dir(path)
   @fs.write_string_to_file(path + "/.git/MERGE_HEAD", "")
@@ -50,7 +50,7 @@ test "detect_state: MERGE_HEAD" {
 }
 
 ///|
-test "detect_state: CHERRY_PICK_HEAD" {
+async test "detect_state: CHERRY_PICK_HEAD" {
   let path = "/tmp/moonship-test-git-state-cherry"
   setup_git_dir(path)
   @fs.write_string_to_file(path + "/.git/CHERRY_PICK_HEAD", "")
@@ -64,7 +64,7 @@ test "detect_state: CHERRY_PICK_HEAD" {
 }
 
 ///|
-test "detect_state: REVERT_HEAD" {
+async test "detect_state: REVERT_HEAD" {
   let path = "/tmp/moonship-test-git-state-revert"
   setup_git_dir(path)
   @fs.write_string_to_file(path + "/.git/REVERT_HEAD", "")
@@ -75,7 +75,7 @@ test "detect_state: REVERT_HEAD" {
 }
 
 ///|
-test "detect_state: BISECT_LOG" {
+async test "detect_state: BISECT_LOG" {
   let path = "/tmp/moonship-test-git-state-bisect"
   setup_git_dir(path)
   @fs.write_string_to_file(path + "/.git/BISECT_LOG", "")
@@ -86,7 +86,7 @@ test "detect_state: BISECT_LOG" {
 }
 
 ///|
-test "detect_state: custom labels" {
+async test "detect_state: custom labels" {
   let path = "/tmp/moonship-test-git-state-custom"
   setup_git_dir(path)
   @fs.write_string_to_file(path + "/.git/MERGE_HEAD", "")
@@ -107,7 +107,7 @@ test "detect_state: custom labels" {
 // --- execute ---
 
 ///|
-test "execute: disabled returns Disabled" {
+async test "execute: disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[git_state]
@@ -120,7 +120,7 @@ test "execute: disabled returns Disabled" {
 }
 
 ///|
-test "execute: not in git repo returns Skipped" {
+async test "execute: not in git repo returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
   let m = GitStateModule::new()
   assert_true(m.execute(ctx) is Skipped(_))

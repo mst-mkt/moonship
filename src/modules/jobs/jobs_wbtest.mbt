@@ -1,5 +1,5 @@
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = JobsModule::new()
   assert_eq(m.name(), "jobs")
 }
@@ -7,14 +7,14 @@ test "name" {
 // --- execute ---
 
 ///|
-test "execute: no jobs returns Skipped" {
+async test "execute: no jobs returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp", jobs=0)
   let m = JobsModule::new()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
 ///|
-test "execute: one job shows symbol without number" {
+async test "execute: one job shows symbol without number" {
   let ctx = @context.Context::new(cwd="/tmp", jobs=1)
   let m = JobsModule::new()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
@@ -25,7 +25,7 @@ test "execute: one job shows symbol without number" {
 }
 
 ///|
-test "execute: jobs at threshold shows number" {
+async test "execute: jobs at threshold shows number" {
   let ctx = @context.Context::new(cwd="/tmp", jobs=2)
   let m = JobsModule::new()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
@@ -36,7 +36,7 @@ test "execute: jobs at threshold shows number" {
 }
 
 ///|
-test "execute: custom number_threshold=1" {
+async test "execute: custom number_threshold=1" {
   let config = @config.Config::from_toml(
     (
       #|[jobs]
@@ -51,7 +51,7 @@ test "execute: custom number_threshold=1" {
 }
 
 ///|
-test "execute: disabled returns Disabled" {
+async test "execute: disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[jobs]

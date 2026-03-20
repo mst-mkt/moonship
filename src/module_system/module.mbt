@@ -49,5 +49,5 @@ pub fn ModuleResult::output(self : ModuleResult) -> ModuleOutput? {
 ///|
 pub(open) trait PromptModule {
   name(Self) -> String
-  execute(Self, @context.Context) -> ModuleResult
+  async execute(Self, @context.Context) -> ModuleResult
 }

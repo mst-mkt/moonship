@@ -1,5 +1,5 @@
 ///|
-test "status 0: bold green symbol" {
+async test "status 0: bold green symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=0)
   let m : &@ms.PromptModule = CharacterModule::new()
 
@@ -11,7 +11,7 @@ test "status 0: bold green symbol" {
 }
 
 ///|
-test "non-zero status: bold red symbol" {
+async test "non-zero status: bold red symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=1)
   let m : &@ms.PromptModule = CharacterModule::new()
 
@@ -23,7 +23,7 @@ test "non-zero status: bold red symbol" {
 }
 
 ///|
-test "success and error differ" {
+async test "success and error differ" {
   let m : &@ms.PromptModule = CharacterModule::new()
 
   let ok = m
@@ -41,7 +41,7 @@ test "success and error differ" {
 }
 
 ///|
-test "disabled returns Disabled" {
+async test "disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[character]
@@ -56,7 +56,7 @@ test "disabled returns Disabled" {
 }
 
 ///|
-test "custom symbol via config" {
+async test "custom symbol via config" {
   let config = @config.Config::from_toml(
     (
       #|[character]
@@ -75,13 +75,13 @@ test "custom symbol via config" {
 }
 
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = CharacterModule::new()
   assert_eq(m.name(), "character")
 }
 
 ///|
-test "vicmd keymap: shows vimcmd symbol" {
+async test "vicmd keymap: shows vimcmd symbol" {
   let ctx = @context.Context::new(cwd="/tmp", keymap="vicmd")
   let m : &@ms.PromptModule = CharacterModule::new()
 
@@ -91,7 +91,7 @@ test "vicmd keymap: shows vimcmd symbol" {
 }
 
 ///|
-test "visual keymap: shows visual symbol" {
+async test "visual keymap: shows visual symbol" {
   let ctx = @context.Context::new(cwd="/tmp", keymap="visual")
   let m : &@ms.PromptModule = CharacterModule::new()
 
@@ -103,7 +103,7 @@ test "visual keymap: shows visual symbol" {
 }
 
 ///|
-test "unknown keymap: falls back to success symbol" {
+async test "unknown keymap: falls back to success symbol" {
   let ctx = @context.Context::new(cwd="/tmp", keymap="viins", status=0)
   let m : &@ms.PromptModule = CharacterModule::new()
 

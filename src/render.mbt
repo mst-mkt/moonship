@@ -5,7 +5,7 @@ let module_order : Array[String] = [
 ]
 
 ///|
-fn render_prompt(ctx : @context.Context) -> String {
+async fn render_prompt(ctx : @context.Context) -> String {
   let modules = build_modules(ctx.config)
   let format = expand_all(ctx.config.format, modules)
   let segment_vars : Map[String, Array[@ms.Segment]] = {}

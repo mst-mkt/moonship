@@ -1,5 +1,5 @@
 ///|
-fn main {
+async fn main {
   let args = get_argv()
   let cmd = parse_args(args)
 

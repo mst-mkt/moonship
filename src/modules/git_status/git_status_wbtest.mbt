@@ -1,5 +1,5 @@
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = GitStatusModule::new()
   assert_eq(m.name(), "git_status")
 }
@@ -7,7 +7,7 @@ test "name" {
 // --- build_status_string unit tests ---
 
 ///|
-test "build_status_string: all types" {
+async test "build_status_string: all types" {
   let result = build_status_string([
     (1, "⇡"),
     (0, "⇣"),
@@ -19,7 +19,7 @@ test "build_status_string: all types" {
 }
 
 ///|
-test "build_status_string: all zero" {
+async test "build_status_string: all zero" {
   let result = build_status_string([
     (0, "⇡"),
     (0, "⇣"),
@@ -31,19 +31,19 @@ test "build_status_string: all zero" {
 }
 
 ///|
-test "build_status_string: count=1 symbol only" {
+async test "build_status_string: count=1 symbol only" {
   assert_eq(build_status_string([(1, "+")]), "+")
 }
 
 ///|
-test "build_status_string: count>1 symbol only" {
+async test "build_status_string: count>1 symbol only" {
   assert_eq(build_status_string([(5, "+")]), "+")
 }
 
 // --- render_status unit tests ---
 
 ///|
-test "render_status: staged only" {
+async test "render_status: staged only" {
   let m = GitStatusModule::new()
   guard m.render_status(1, 0, 0, 0) is Output(out) else {
     fail("expected Output")
@@ -56,7 +56,7 @@ test "render_status: staged only" {
 }
 
 ///|
-test "render_status: modified only" {
+async test "render_status: modified only" {
   let m = GitStatusModule::new()
   guard m.render_status(0, 1, 0, 0) is Output(out) else {
     fail("expected Output")
@@ -68,7 +68,7 @@ test "render_status: modified only" {
 }
 
 ///|
-test "render_status: all types present" {
+async test "render_status: all types present" {
   let m = GitStatusModule::new()
   guard m.render_status(2, 3, 1, 0) is Output(out) else {
     fail("expected Output")
@@ -81,7 +81,7 @@ test "render_status: all types present" {
 }
 
 ///|
-test "render_status: deleted only" {
+async test "render_status: deleted only" {
   let m = GitStatusModule::new()
   guard m.render_status(0, 0, 0, 1) is Output(out) else {
     fail("expected Output")
@@ -93,13 +93,13 @@ test "render_status: deleted only" {
 }
 
 ///|
-test "render_status: all zero returns Skipped" {
+async test "render_status: all zero returns Skipped" {
   let m = GitStatusModule::new()
   assert_true(m.render_status(0, 0, 0, 0) is Skipped("no changes"))
 }
 
 ///|
-test "render_status: custom symbols" {
+async test "render_status: custom symbols" {
   let config = @config.Config::from_toml(
     (
       #|[git_status]
@@ -124,7 +124,7 @@ test "render_status: custom symbols" {
 // --- execute integration tests ---
 
 ///|
-test "execute: disabled returns Disabled" {
+async test "execute: disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[git_status]
@@ -137,14 +137,14 @@ test "execute: disabled returns Disabled" {
 }
 
 ///|
-test "execute: not in git repo returns Skipped" {
+async test "execute: not in git repo returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
   let m = GitStatusModule::new()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
 ///|
-test "execute: clean repo returns Skipped no changes" {
+async test "execute: clean repo returns Skipped no changes" {
   let path = "/tmp/moonship-test-git-status-clean"
   let repo = create_test_repo(path)
 
@@ -157,7 +157,7 @@ test "execute: clean repo returns Skipped no changes" {
 }
 
 ///|
-test "execute: modified file returns Output with modified symbol" {
+async test "execute: modified file returns Output with modified symbol" {
   let path = "/tmp/moonship-test-git-status-dirty"
   let repo = create_test_repo(path)
 
@@ -173,7 +173,7 @@ test "execute: modified file returns Output with modified symbol" {
 }
 
 ///|
-test "execute: untracked file returns Output with untracked symbol" {
+async test "execute: untracked file returns Output with untracked symbol" {
   let path = "/tmp/moonship-test-git-status-untracked"
   let repo = create_test_repo(path)
 

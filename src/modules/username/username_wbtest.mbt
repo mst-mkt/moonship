@@ -1,5 +1,5 @@
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = UsernameModule::new()
   assert_eq(m.name(), "username")
 }
@@ -7,7 +7,7 @@ test "name" {
 // --- execute ---
 
 ///|
-test "execute: disabled returns Disabled" {
+async test "execute: disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[username]
@@ -20,7 +20,7 @@ test "execute: disabled returns Disabled" {
 }
 
 ///|
-test "execute: show_always shows username" {
+async test "execute: show_always shows username" {
   let config = @config.Config::from_toml(
     (
       #|[username]
@@ -38,7 +38,7 @@ test "execute: show_always shows username" {
 }
 
 ///|
-test "execute: default hides for normal user" {
+async test "execute: default hides for normal user" {
   let ctx = @context.Context::new(cwd="/tmp")
   let m = UsernameModule::new()
 

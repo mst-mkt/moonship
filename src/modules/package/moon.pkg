@@ -7,6 +7,10 @@ import {
   "mst-mkt/moonship/terminal" @terminal,
 }
 
+import {
+  "moonbitlang/async",
+} for "wbtest"
+
 options(
   "supported-targets": "native",
 )

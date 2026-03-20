@@ -1,11 +1,11 @@
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = LineBreakModule::new()
   assert_eq(m.name(), "line_break")
 }
 
 ///|
-test "execute: outputs newline" {
+async test "execute: outputs newline" {
   let ctx = @context.Context::new(cwd="/tmp")
   let m = LineBreakModule::new()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
@@ -14,7 +14,7 @@ test "execute: outputs newline" {
 }
 
 ///|
-test "execute: disabled returns Disabled" {
+async test "execute: disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[line_break]

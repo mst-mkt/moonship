@@ -1,5 +1,5 @@
 ///|
-test "replace home with ~" {
+async test "replace home with ~" {
   assert_eq(
     format_path("/home/user/project", "/home/user", 3, false, None),
     "~/project",
@@ -7,32 +7,32 @@ test "replace home with ~" {
 }
 
 ///|
-test "root path" {
+async test "root path" {
   assert_eq(format_path("/", "", 3, false, None), "/")
 }
 
 ///|
-test "home exact match" {
+async test "home exact match" {
   assert_eq(format_path("/home/user", "/home/user", 3, false, None), "~")
 }
 
 ///|
-test "deep path truncation" {
+async test "deep path truncation" {
   assert_eq(format_path("/a/b/c/d/e", "", 3, false, None), "…/c/d/e")
 }
 
 ///|
-test "truncation_length=1" {
+async test "truncation_length=1" {
   assert_eq(format_path("/a/b/c/d/e", "", 1, false, None), "…/e")
 }
 
 ///|
-test "empty path" {
+async test "empty path" {
   assert_eq(format_path("", "", 3, false, None), "")
 }
 
 ///|
-test "no home replacement when home is empty" {
+async test "no home replacement when home is empty" {
   assert_eq(
     format_path("/home/user/project", "", 3, false, None),
     "/home/user/project",
@@ -40,12 +40,12 @@ test "no home replacement when home is empty" {
 }
 
 ///|
-test "split_path: removes empty segments" {
+async test "split_path: removes empty segments" {
   assert_eq(split_path("/a//b/"), ["a", "b"])
 }
 
 ///|
-test "unicode path" {
+async test "unicode path" {
   assert_eq(
     format_path(
       "/home/user/プロジェクト/src",
@@ -59,7 +59,7 @@ test "unicode path" {
 }
 
 ///|
-test "path with spaces" {
+async test "path with spaces" {
   assert_eq(
     format_path("/home/user/my project/src", "/home/user", 3, false, None),
     "~/my project/src",
@@ -67,17 +67,17 @@ test "path with spaces" {
 }
 
 ///|
-test "exact truncation boundary" {
+async test "exact truncation boundary" {
   assert_eq(format_path("/a/b/c", "", 3, false, None), "/a/b/c")
 }
 
 ///|
-test "one over truncation boundary" {
+async test "one over truncation boundary" {
   assert_eq(format_path("/a/b/c/d", "", 3, false, None), "…/b/c/d")
 }
 
 ///|
-test "home is prefix of longer dirname" {
+async test "home is prefix of longer dirname" {
   assert_eq(
     format_path("/home/user2/project", "/home/user", 3, false, None),
     "/home/user2/project",
@@ -85,7 +85,7 @@ test "home is prefix of longer dirname" {
 }
 
 ///|
-test "truncate_to_repo: relative path" {
+async test "truncate_to_repo: relative path" {
   assert_eq(
     format_path(
       "/home/user/repo/src/lib",
@@ -99,7 +99,7 @@ test "truncate_to_repo: relative path" {
 }
 
 ///|
-test "truncate_to_repo: repo root" {
+async test "truncate_to_repo: repo root" {
   assert_eq(
     format_path(
       "/home/user/repo",
@@ -113,7 +113,7 @@ test "truncate_to_repo: repo root" {
 }
 
 ///|
-test "truncate_to_repo: deep path truncated" {
+async test "truncate_to_repo: deep path truncated" {
   assert_eq(
     format_path(
       "/home/user/repo/a/b/c/d",
@@ -127,7 +127,7 @@ test "truncate_to_repo: deep path truncated" {
 }
 
 ///|
-test "truncate_to_repo: false falls back to home" {
+async test "truncate_to_repo: false falls back to home" {
   assert_eq(
     format_path(
       "/home/user/repo/src",
@@ -141,7 +141,7 @@ test "truncate_to_repo: false falls back to home" {
 }
 
 ///|
-test "truncate_to_repo: no repo_root" {
+async test "truncate_to_repo: no repo_root" {
   assert_eq(
     format_path("/home/user/project", "/home/user", 3, true, None),
     "~/project",
@@ -149,7 +149,7 @@ test "truncate_to_repo: no repo_root" {
 }
 
 ///|
-test "truncate_to_repo: cwd outside repo" {
+async test "truncate_to_repo: cwd outside repo" {
   assert_eq(
     format_path("/other/path", "/home/user", 3, true, Some("/home/user/repo")),
     "/other/path",
@@ -157,7 +157,7 @@ test "truncate_to_repo: cwd outside repo" {
 }
 
 ///|
-test "custom truncation_symbol" {
+async test "custom truncation_symbol" {
   assert_eq(
     format_path("/a/b/c/d/e", "", 3, false, None, truncation_symbol="../"),
     "../c/d/e",
@@ -165,7 +165,7 @@ test "custom truncation_symbol" {
 }
 
 ///|
-test "custom home_symbol" {
+async test "custom home_symbol" {
   assert_eq(
     format_path(
       "/home/user/project",
@@ -180,7 +180,7 @@ test "custom home_symbol" {
 }
 
 ///|
-test "execute: custom truncation_symbol" {
+async test "execute: custom truncation_symbol" {
   let config = @config.Config::from_toml(
     (
       #|[directory]
@@ -196,19 +196,19 @@ test "execute: custom truncation_symbol" {
 }
 
 ///|
-test "last_path_component" {
+async test "last_path_component" {
   assert_eq(last_path_component("/home/user/project"), "project")
   assert_eq(last_path_component("/"), "/")
 }
 
 ///|
-test "name" {
+async test "name" {
   let m : &@ms.PromptModule = DirectoryModule::new()
   assert_eq(m.name(), "directory")
 }
 
 ///|
-test "disabled returns Disabled" {
+async test "disabled returns Disabled" {
   let config = @config.Config::from_toml(
     (
       #|[directory]
@@ -225,7 +225,7 @@ test "disabled returns Disabled" {
 // --- execute tests ---
 
 ///|
-test "execute: returns Output with path" {
+async test "execute: returns Output with path" {
   let ctx = @context.Context::new(
     cwd="/home/user/project",
     home_dir="/home/user",
@@ -238,7 +238,7 @@ test "execute: returns Output with path" {
 }
 
 ///|
-test "execute: custom format" {
+async test "execute: custom format" {
   let config = @config.Config::from_toml(
     (
       #|[directory]
@@ -257,7 +257,7 @@ test "execute: custom format" {
 }
 
 ///|
-test "execute: truncation applied" {
+async test "execute: truncation applied" {
   let config = @config.Config::from_toml(
     (
       #|[directory]
