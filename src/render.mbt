@@ -1,11 +1,12 @@
 ///|
 let module_order : Array[String] = [
   "username", "hostname", "directory", "git_branch", "git_commit", "git_state", "git_status",
-  "package", "bun", "c", "cmake", "cpp", "crystal", "dart", "deno", "dotnet", "elixir",
-  "elm", "erlang", "fortran", "gleam", "golang", "gradle", "haskell", "haxe", "java",
-  "julia", "kotlin", "lua", "maven", "moonbit", "nim", "nodejs", "ocaml", "perl",
-  "php", "purescript", "python", "ruby", "rust", "scala", "swift", "terraform", "zig",
-  "cmd_duration", "line_break", "jobs", "character",
+  "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal", "dart", "deno",
+  "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang", "gradle",
+  "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven", "mojo", "moonbit",
+  "nim", "nodejs", "ocaml", "odin", "opa", "perl", "php", "purescript", "python",
+  "quarto", "red", "ruby", "rust", "scala", "swift", "terraform", "zig", "cmd_duration",
+  "line_break", "jobs", "character",
 ]
 
 ///|
@@ -131,6 +132,15 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["haxe"] = @mod_haxe.HaxeModule::from_config(config)
   modules["fortran"] = @mod_fortran.FortranModule::from_config(config)
   modules["purescript"] = @mod_purescript.PureScriptModule::from_config(config)
+  modules["buf"] = @mod_buf.BufModule::from_config(config)
+  modules["cobol"] = @mod_cobol.CobolModule::from_config(config)
+  modules["fennel"] = @mod_fennel.FennelModule::from_config(config)
+  modules["helm"] = @mod_helm.HelmModule::from_config(config)
+  modules["mojo"] = @mod_mojo.MojoModule::from_config(config)
+  modules["odin"] = @mod_odin.OdinModule::from_config(config)
+  modules["opa"] = @mod_opa.OpaModule::from_config(config)
+  modules["quarto"] = @mod_quarto.QuartoModule::from_config(config)
+  modules["red"] = @mod_red.RedModule::from_config(config)
   modules["hostname"] = @mod_hostname.HostnameModule::from_config(config)
   modules["username"] = @mod_username.UsernameModule::from_config(config)
   modules

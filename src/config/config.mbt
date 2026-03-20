@@ -315,6 +315,60 @@ pub fn Config::default() -> Config {
     style: "bold white",
     props: { "symbol": "<=> " },
   }
+  modules["buf"] = {
+    disabled: false,
+    format: "with [$symbol($version )]($style)",
+    style: "bold blue",
+    props: { "symbol": "🐃 " },
+  }
+  modules["cobol"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold blue",
+    props: { "symbol": "⚙️ " },
+  }
+  modules["fennel"] = {
+    disabled: true,
+    format: "via [$symbol($version )]($style)",
+    style: "bold green",
+    props: { "symbol": "🧅 " },
+  }
+  modules["helm"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold white",
+    props: { "symbol": "⎈ " },
+  }
+  modules["mojo"] = {
+    disabled: false,
+    format: "with [$symbol($version )]($style)",
+    style: "bold 208",
+    props: { "symbol": "🔥 " },
+  }
+  modules["odin"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold bright-blue",
+    props: { "symbol": "Ø " },
+  }
+  modules["opa"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold blue",
+    props: { "symbol": "🪖 " },
+  }
+  modules["quarto"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold #75AADB",
+    props: { "symbol": "⨁ " },
+  }
+  modules["red"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "red bold",
+    props: { "symbol": "🔺 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
