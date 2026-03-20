@@ -16,7 +16,7 @@ test "extract_branch_name: empty" {
 
 ///|
 test "count_status: empty" {
-  assert_eq(count_status([]), (0, 0, 0))
+  assert_eq(count_status([]), (0, 0, 0, 0))
 }
 
 ///|
@@ -27,7 +27,16 @@ test "count_status: mixed" {
     @libgit2.StatusFlags::new(@libgit2.GIT_STATUS_WT_NEW),
     @libgit2.StatusFlags::new(@libgit2.GIT_STATUS_INDEX_MODIFIED),
   ]
-  assert_eq(count_status(flags), (2, 1, 1))
+  assert_eq(count_status(flags), (2, 1, 1, 0))
+}
+
+///|
+test "count_status: with deleted" {
+  let flags = [
+    @libgit2.StatusFlags::new(@libgit2.GIT_STATUS_WT_DELETED),
+    @libgit2.StatusFlags::new(@libgit2.GIT_STATUS_INDEX_NEW),
+  ]
+  assert_eq(count_status(flags), (1, 0, 0, 1))
 }
 
 ///|

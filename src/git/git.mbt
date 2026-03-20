@@ -44,7 +44,7 @@ pub fn RepoHandle::get_branch(self : RepoHandle) -> (String, Bool, String) {
 }
 
 ///|
-pub fn RepoHandle::get_status(self : RepoHandle) -> (Int, Int, Int) {
+pub fn RepoHandle::get_status(self : RepoHandle) -> (Int, Int, Int, Int) {
   count_status(self.repo.status_flags())
 }
 
@@ -98,15 +98,16 @@ fn extract_branch_name(head_ref : String) -> String {
 }
 
 ///|
-fn count_status(flags : Array[@libgit2.StatusFlags]) -> (Int, Int, Int) {
+fn count_status(flags : Array[@libgit2.StatusFlags]) -> (Int, Int, Int, Int) {
   flags
   .iter()
-  .fold(init=(0, 0, 0), fn(acc, f) {
-    let (s, m, u) = acc
+  .fold(init=(0, 0, 0, 0), fn(acc, f) {
+    let (s, m, u, d) = acc
     (
       s + Bool::to_int(f.is_staged()),
       m + Bool::to_int(f.is_modified()),
       u + Bool::to_int(f.is_new()),
+      d + Bool::to_int(f.is_deleted()),
     )
   })
 }

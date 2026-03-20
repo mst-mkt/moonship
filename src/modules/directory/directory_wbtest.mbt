@@ -157,6 +157,45 @@ test "truncate_to_repo: cwd outside repo" {
 }
 
 ///|
+test "custom truncation_symbol" {
+  assert_eq(
+    format_path("/a/b/c/d/e", "", 3, false, None, truncation_symbol="../"),
+    "../c/d/e",
+  )
+}
+
+///|
+test "custom home_symbol" {
+  assert_eq(
+    format_path(
+      "/home/user/project",
+      "/home/user",
+      3,
+      false,
+      None,
+      home_symbol="🏠",
+    ),
+    "🏠/project",
+  )
+}
+
+///|
+test "execute: custom truncation_symbol" {
+  let config = @config.Config::from_toml(
+    (
+      #|[directory]
+      #|truncation_symbol = "../"
+      #|truncation_length = 1
+    ),
+  )
+  let ctx = @context.Context::new(cwd="/a/b/c/d/e")
+  let m = DirectoryModule::from_config(config)
+  guard m.execute(ctx) is Output(out) else { fail("expected Output") }
+
+  assert_true(out.render().contains("../"))
+}
+
+///|
 test "last_path_component" {
   assert_eq(last_path_component("/home/user/project"), "project")
   assert_eq(last_path_component("/"), "/")
@@ -206,7 +245,10 @@ test "execute: custom format" {
       #|format = "dir:[$path]($style)"
     ),
   )
-  let ctx = @context.Context::new(cwd="/home/user/project", home_dir="/home/user")
+  let ctx = @context.Context::new(
+    cwd="/home/user/project",
+    home_dir="/home/user",
+  )
   let m = DirectoryModule::from_config(config)
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
 

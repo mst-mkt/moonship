@@ -5,6 +5,8 @@ pub struct DirectoryModule {
   style : String
   truncation_length : Int
   truncate_to_repo : Bool
+  truncation_symbol : String
+  home_symbol : String
 }
 
 ///|
@@ -19,13 +21,13 @@ pub fn DirectoryModule::new(
     style: config.style,
     truncation_length: config.get_int_prop("truncation_length", default=3),
     truncate_to_repo: config.get_prop("truncate_to_repo") == "true",
+    truncation_symbol: config.get_prop("truncation_symbol", default="…/"),
+    home_symbol: config.get_prop("home_symbol", default="~"),
   }
 }
 
 ///|
-pub fn DirectoryModule::from_config(
-  config : @config.Config,
-) -> DirectoryModule {
+pub fn DirectoryModule::from_config(config : @config.Config) -> DirectoryModule {
   DirectoryModule::new(config=config.get_module("directory"))
 }
 
@@ -53,6 +55,8 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
     self.truncation_length,
     self.truncate_to_repo,
     repo_root,
+    truncation_symbol=self.truncation_symbol,
+    home_symbol=self.home_symbol,
   )
   let style = @terminal.parse_style(self.style)
   let vars : Map[String, String] = { "path": path, "style": self.style }
@@ -68,6 +72,8 @@ fn format_path(
   truncation_length : Int,
   truncate_to_repo : Bool,
   repo_root : String?,
+  truncation_symbol? : String = "…/",
+  home_symbol? : String = "~",
 ) -> String {
   let display = match (truncate_to_repo, repo_root) {
     (true, Some(root)) if cwd.has_prefix(root) => {
@@ -78,14 +84,14 @@ fn format_path(
       }
       last_path_component(root) + relative
     }
-    _ => replace_home(cwd, home)
+    _ => replace_home(cwd, home, home_symbol)
   }
 
-  truncate_path(display, truncation_length)
+  truncate_path(display, truncation_length, truncation_symbol)
 }
 
 ///|
-fn replace_home(cwd : String, home : String) -> String {
+fn replace_home(cwd : String, home : String, home_symbol : String) -> String {
   let is_home = not(home.is_empty()) &&
     cwd.has_prefix(home) &&
     (
@@ -94,19 +100,23 @@ fn replace_home(cwd : String, home : String) -> String {
     )
 
   if is_home {
-    "~" + cwd[home.length():].to_string()
+    home_symbol + cwd[home.length():].to_string()
   } else {
     cwd
   }
 }
 
 ///|
-fn truncate_path(display : String, truncation_length : Int) -> String {
+fn truncate_path(
+  display : String,
+  truncation_length : Int,
+  truncation_symbol : String,
+) -> String {
   let parts = split_path(display)
 
   if parts.length() > truncation_length {
     let start = parts.length() - truncation_length
-    "…/" + parts[start:].to_array().join("/")
+    truncation_symbol + parts[start:].to_array().join("/")
   } else {
     display
   }

@@ -69,6 +69,83 @@ test "render_branch: custom symbol" {
   assert_true(out.render().contains("BR"))
 }
 
+///|
+test "render_branch: custom truncation_symbol" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|truncation_length = 4
+      #|truncation_symbol = "..."
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  guard m.render_branch("feature/long", false, "") is Output(out) else {
+    fail("expected Output")
+  }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("feat"))
+  assert_true(rendered.contains("..."))
+}
+
+///|
+test "render_branch: only_attached skips detached" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|only_attached = true
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  assert_true(m.render_branch("", true, "abc1234") is Skipped(_))
+}
+
+///|
+test "render_branch: only_attached allows normal branch" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|only_attached = true
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  assert_true(m.render_branch("main", false, "") is Output(_))
+}
+
+///|
+test "render_branch: ignore_branches hides matching" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|ignore_branches = "main,master"
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  assert_true(m.render_branch("main", false, "") is Skipped(_))
+}
+
+///|
+test "render_branch: ignore_branches allows non-matching" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|ignore_branches = "main,master"
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  assert_true(m.render_branch("feature/test", false, "") is Output(_))
+}
+
+///|
+test "parse_string_list: basic" {
+  assert_eq(parse_string_list("a,b,c"), ["a", "b", "c"])
+}
+
+///|
+test "parse_string_list: empty" {
+  assert_eq(parse_string_list(""), [])
+}
+
 // --- execute integration tests ---
 
 ///|
@@ -147,18 +224,22 @@ fn remove_dir_recursive(path : String) -> Unit {
     return
   }
 
-  let entries = try { @fs.read_dir(path) } catch { _ => return }
+  let entries = @fs.read_dir(path) catch { _ => return }
 
   for entry in entries {
     let full = path + "/" + entry
-    let is_dir = try { @fs.is_dir(full) } catch { _ => false }
+    let is_dir = @fs.is_dir(full) catch { _ => false }
 
     if is_dir {
       remove_dir_recursive(full)
     } else {
-      try { @fs.remove_file(full) } catch { _ => () }
+      @fs.remove_file(full) catch {
+        _ => ()
+      }
     }
   }
 
-  try { @fs.remove_dir(path) } catch { _ => () }
+  @fs.remove_dir(path) catch {
+    _ => ()
+  }
 }

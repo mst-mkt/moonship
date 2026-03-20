@@ -45,7 +45,7 @@ test "build_status_string: count>1 symbol only" {
 ///|
 test "render_status: staged only" {
   let m = GitStatusModule::new()
-  guard m.render_status(1, 0, 0) is Output(out) else {
+  guard m.render_status(1, 0, 0, 0) is Output(out) else {
     fail("expected Output")
   }
 
@@ -58,7 +58,7 @@ test "render_status: staged only" {
 ///|
 test "render_status: modified only" {
   let m = GitStatusModule::new()
-  guard m.render_status(0, 1, 0) is Output(out) else {
+  guard m.render_status(0, 1, 0, 0) is Output(out) else {
     fail("expected Output")
   }
 
@@ -70,7 +70,7 @@ test "render_status: modified only" {
 ///|
 test "render_status: all types present" {
   let m = GitStatusModule::new()
-  guard m.render_status(2, 3, 1) is Output(out) else {
+  guard m.render_status(2, 3, 1, 0) is Output(out) else {
     fail("expected Output")
   }
 
@@ -81,9 +81,21 @@ test "render_status: all types present" {
 }
 
 ///|
+test "render_status: deleted only" {
+  let m = GitStatusModule::new()
+  guard m.render_status(0, 0, 0, 1) is Output(out) else {
+    fail("expected Output")
+  }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("✘"))
+  assert_false(rendered.contains("+"))
+}
+
+///|
 test "render_status: all zero returns Skipped" {
   let m = GitStatusModule::new()
-  assert_true(m.render_status(0, 0, 0) is Skipped("no changes"))
+  assert_true(m.render_status(0, 0, 0, 0) is Skipped("no changes"))
 }
 
 ///|
@@ -94,10 +106,11 @@ test "render_status: custom symbols" {
       #|staged = "S"
       #|modified = "M"
       #|untracked = "U"
+      #|deleted = "D"
     ),
   )
   let m = GitStatusModule::from_config(config)
-  guard m.render_status(1, 1, 1) is Output(out) else {
+  guard m.render_status(1, 1, 1, 1) is Output(out) else {
     fail("expected Output")
   }
 
@@ -105,6 +118,7 @@ test "render_status: custom symbols" {
   assert_true(rendered.contains("S"))
   assert_true(rendered.contains("M"))
   assert_true(rendered.contains("U"))
+  assert_true(rendered.contains("D"))
 }
 
 // --- execute integration tests ---
@@ -212,18 +226,22 @@ fn remove_dir_recursive(path : String) -> Unit {
     return
   }
 
-  let entries = try { @fs.read_dir(path) } catch { _ => return }
+  let entries = @fs.read_dir(path) catch { _ => return }
 
   for entry in entries {
     let full = path + "/" + entry
-    let is_dir = try { @fs.is_dir(full) } catch { _ => false }
+    let is_dir = @fs.is_dir(full) catch { _ => false }
 
     if is_dir {
       remove_dir_recursive(full)
     } else {
-      try { @fs.remove_file(full) } catch { _ => () }
+      @fs.remove_file(full) catch {
+        _ => ()
+      }
     }
   }
 
-  try { @fs.remove_dir(path) } catch { _ => () }
+  @fs.remove_dir(path) catch {
+    _ => ()
+  }
 }

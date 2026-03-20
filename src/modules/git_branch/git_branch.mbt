@@ -4,7 +4,10 @@ pub struct GitBranchModule {
   format : String
   style : String
   truncation_length : Int
+  truncation_symbol : String
   symbol : String
+  only_attached : Bool
+  ignore_branches : Array[String]
 }
 
 ///|
@@ -18,14 +21,15 @@ pub fn GitBranchModule::new(
     format: config.format,
     style: config.style,
     truncation_length: config.get_int_prop("truncation_length", default=20),
+    truncation_symbol: config.get_prop("truncation_symbol", default="…"),
     symbol: config.get_prop("symbol", default=" "),
+    only_attached: config.get_prop("only_attached") == "true",
+    ignore_branches: parse_string_list(config.get_prop("ignore_branches")),
   }
 }
 
 ///|
-pub fn GitBranchModule::from_config(
-  config : @config.Config,
-) -> GitBranchModule {
+pub fn GitBranchModule::from_config(config : @config.Config) -> GitBranchModule {
   GitBranchModule::new(config=config.get_module("git_branch"))
 }
 
@@ -56,6 +60,7 @@ fn GitBranchModule::render_branch(
   commit_hash : String,
 ) -> @ms.ModuleResult {
   let branch = if is_detached {
+    guard not(self.only_attached) else { return Skipped("detached HEAD") }
     guard not(commit_hash.is_empty()) else {
       return Skipped("detached HEAD with no commit")
     }
@@ -64,8 +69,12 @@ fn GitBranchModule::render_branch(
     raw_branch
   }
 
+  guard not(self.ignore_branches.contains(branch)) else {
+    return Skipped("branch in ignore list")
+  }
+
   let display_branch = if branch.length() > self.truncation_length {
-    branch[:self.truncation_length].to_string() + "…"
+    branch[:self.truncation_length].to_string() + self.truncation_symbol
   } else {
     branch
   }
@@ -79,4 +88,17 @@ fn GitBranchModule::render_branch(
   let segments = @ms.format_string(self.format, vars, style)
 
   Output(@ms.ModuleOutput::new(segments))
+}
+
+///|
+fn parse_string_list(s : String) -> Array[String] {
+  if s.is_empty() {
+    return []
+  }
+
+  s
+  .split(",")
+  .map(fn(sv) { sv.to_string() })
+  .filter(fn(s) { not(s.is_empty()) })
+  .collect()
 }
