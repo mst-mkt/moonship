@@ -51,6 +51,87 @@ pub fn strip_v_prefix(s : String) -> String {
 }
 
 ///|
+pub async fn try_commands(commands : Array[(String, String)]) -> String {
+  for pair in commands {
+    let (cmd, arg) = pair
+    let output = exec_cmd(cmd, [arg])
+    if not(output.is_empty()) {
+      return output
+    }
+  }
+
+  ""
+}
+
+///|
+pub fn find_semver(output : String) -> String {
+  let parts = output.split(" ").collect()
+
+  for i = 0; i < parts.length(); i = i + 1 {
+    let s = parts[i].to_string()
+    let ver = extract_semver(s)
+    if not(ver.is_empty()) {
+      return ver
+    }
+  }
+
+  ""
+}
+
+///|
+fn extract_semver(s : String) -> String {
+  if s.is_empty() {
+    return ""
+  }
+
+  let first = s[0].unsafe_to_char()
+  if not(first >= '0' && first <= '9') {
+    return ""
+  }
+
+  let buf = StringBuilder::new()
+  let mut dots = 0
+
+  for i = 0; i < s.length(); i = i + 1 {
+    let c = s[i].unsafe_to_char()
+    if c >= '0' && c <= '9' {
+      buf.write_char(c)
+    } else if c == '.' {
+      dots += 1
+      buf.write_char(c)
+    } else {
+      break
+    }
+  }
+
+  if dots >= 2 {
+    let result = buf.to_string()
+    if result.has_suffix(".") {
+      result[:result.length() - 1].to_string()
+    } else {
+      result
+    }
+  } else {
+    ""
+  }
+}
+
+///|
+pub fn detect_compiler_name(
+  output : String,
+  compilers : Array[(String, String)],
+) -> String {
+  for pair in compilers {
+    let (name, hint) = pair
+    if output.contains(hint) {
+      return name
+    }
+  }
+
+  ""
+}
+
+///|
 pub fn detect_project(
   cwd : String,
   files : Array[String],

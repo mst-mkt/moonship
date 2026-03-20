@@ -66,6 +66,69 @@ test "detect_project: no match" {
 }
 
 ///|
+test "find_semver: gcc output" {
+  assert_eq(find_semver("gcc (GCC) 13.2.1 20230801"), "13.2.1")
+}
+
+///|
+test "find_semver: clang output" {
+  assert_eq(find_semver("clang version 16.0.6"), "16.0.6")
+}
+
+///|
+test "find_semver: with hyphen suffix" {
+  assert_eq(find_semver("clang version 16.0.6-1"), "16.0.6")
+}
+
+///|
+test "find_semver: empty" {
+  assert_eq(find_semver(""), "")
+}
+
+///|
+test "find_semver: trailing dot" {
+  assert_eq(find_semver("version 1.2.3."), "1.2.3")
+}
+
+///|
+test "find_semver: no semver" {
+  assert_eq(find_semver("no version here"), "")
+}
+
+///|
+test "detect_compiler_name: clang" {
+  assert_eq(
+    detect_compiler_name("clang version 16.0.6", [
+      ("clang", "clang"),
+      ("gcc", "Free Software Foundation"),
+    ]),
+    "clang",
+  )
+}
+
+///|
+test "detect_compiler_name: gcc" {
+  assert_eq(
+    detect_compiler_name(
+      "gcc (GCC) 13.2.1 Copyright (C) Free Software Foundation",
+      [("clang", "clang"), ("gcc", "Free Software Foundation")],
+    ),
+    "gcc",
+  )
+}
+
+///|
+test "detect_compiler_name: unknown" {
+  assert_eq(
+    detect_compiler_name("some unknown compiler", [
+      ("clang", "clang"),
+      ("gcc", "Free Software Foundation"),
+    ]),
+    "",
+  )
+}
+
+///|
 fn setup_dir(path : String) -> Unit {
   remove_dir_recursive(path)
   @fs.create_dir(path) catch {

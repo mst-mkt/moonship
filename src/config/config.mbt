@@ -255,6 +255,18 @@ pub fn Config::default() -> Config {
     style: "bold red",
     props: { "symbol": "🔮 " },
   }
+  modules["c"] = {
+    disabled: false,
+    format: "via [$symbol($version(-$name) )]($style)",
+    style: "149 bold",
+    props: { "symbol": "C " },
+  }
+  modules["cpp"] = {
+    disabled: true,
+    format: "via [$symbol($version(-$name) )]($style)",
+    style: "149 bold",
+    props: { "symbol": "C++ " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
