@@ -159,6 +159,12 @@ pub fn Config::default() -> Config {
     style: "bold purple",
     props: { "symbol": "💧 " },
   }
+  modules["lua"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold blue",
+    props: { "symbol": "🌙 ", "lua_binary": "lua" },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
