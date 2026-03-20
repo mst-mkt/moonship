@@ -135,6 +135,12 @@ pub fn Config::default() -> Config {
     style: "bold red",
     props: { "symbol": "💎 " },
   }
+  modules["deno"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "green bold",
+    props: { "symbol": "🦕 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
