@@ -291,6 +291,30 @@ pub fn Config::default() -> Config {
     style: "bold bright-cyan",
     props: { "symbol": "🅼 " },
   }
+  modules["ocaml"] = {
+    disabled: false,
+    format: "via [$symbol($version )(\\($switch_indicator$switch_name\\) )]($style)",
+    style: "bold yellow",
+    props: { "symbol": "🐫 " },
+  }
+  modules["haxe"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold fg:202",
+    props: { "symbol": "⌘ " },
+  }
+  modules["fortran"] = {
+    disabled: false,
+    format: "via [$symbol($version(-$name) )]($style)",
+    style: "bold purple",
+    props: { "symbol": "🅵  " },
+  }
+  modules["purescript"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold white",
+    props: { "symbol": "<=> " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",

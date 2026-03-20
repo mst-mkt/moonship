@@ -2,9 +2,10 @@
 let module_order : Array[String] = [
   "username", "hostname", "directory", "git_branch", "git_commit", "git_state", "git_status",
   "package", "bun", "c", "cmake", "cpp", "crystal", "dart", "deno", "dotnet", "elixir",
-  "elm", "erlang", "gleam", "golang", "gradle", "haskell", "java", "julia", "kotlin",
-  "lua", "maven", "moonbit", "nim", "nodejs", "perl", "php", "python", "ruby", "rust",
-  "scala", "swift", "terraform", "zig", "cmd_duration", "line_break", "jobs", "character",
+  "elm", "erlang", "fortran", "gleam", "golang", "gradle", "haskell", "haxe", "java",
+  "julia", "kotlin", "lua", "maven", "moonbit", "nim", "nodejs", "ocaml", "perl",
+  "php", "purescript", "python", "ruby", "rust", "scala", "swift", "terraform", "zig",
+  "cmd_duration", "line_break", "jobs", "character",
 ]
 
 ///|
@@ -126,6 +127,10 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["terraform"] = @mod_terraform.TerraformModule::from_config(config)
   modules["gradle"] = @mod_gradle.GradleModule::from_config(config)
   modules["maven"] = @mod_maven.MavenModule::from_config(config)
+  modules["ocaml"] = @mod_ocaml.OCamlModule::from_config(config)
+  modules["haxe"] = @mod_haxe.HaxeModule::from_config(config)
+  modules["fortran"] = @mod_fortran.FortranModule::from_config(config)
+  modules["purescript"] = @mod_purescript.PureScriptModule::from_config(config)
   modules["hostname"] = @mod_hostname.HostnameModule::from_config(config)
   modules["username"] = @mod_username.UsernameModule::from_config(config)
   modules
