@@ -1,10 +1,10 @@
 ///|
 let module_order : Array[String] = [
   "username", "hostname", "directory", "git_branch", "git_commit", "git_state", "git_status",
-  "package", "bun", "dart", "deno", "dotnet", "elixir", "erlang", "gleam", "golang",
-  "java", "julia", "kotlin", "lua", "moonbit", "nim", "nodejs", "perl", "php", "python",
-  "ruby", "rust", "scala", "swift", "zig", "cmd_duration", "line_break", "jobs",
-  "character",
+  "package", "bun", "crystal", "dart", "deno", "dotnet", "elixir", "elm", "erlang",
+  "gleam", "golang", "haskell", "java", "julia", "kotlin", "lua", "moonbit", "nim",
+  "nodejs", "perl", "php", "python", "ruby", "rust", "scala", "swift", "zig", "cmd_duration",
+  "line_break", "jobs", "character",
 ]
 
 ///|
@@ -117,6 +117,9 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["nim"] = @mod_nim.NimModule::from_config(config)
   modules["gleam"] = @mod_gleam.GleamModule::from_config(config)
   modules["erlang"] = @mod_erlang.ErlangModule::from_config(config)
+  modules["elm"] = @mod_elm.ElmModule::from_config(config)
+  modules["haskell"] = @mod_haskell.HaskellModule::from_config(config)
+  modules["crystal"] = @mod_crystal.CrystalModule::from_config(config)
   modules["hostname"] = @mod_hostname.HostnameModule::from_config(config)
   modules["username"] = @mod_username.UsernameModule::from_config(config)
   modules

@@ -237,6 +237,24 @@ pub fn Config::default() -> Config {
     style: "bold red",
     props: { "symbol": " " },
   }
+  modules["elm"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "cyan bold",
+    props: { "symbol": "🌳 " },
+  }
+  modules["haskell"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold purple",
+    props: { "symbol": "λ " },
+  }
+  modules["crystal"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold red",
+    props: { "symbol": "🔮 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
