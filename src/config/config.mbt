@@ -117,6 +117,12 @@ pub fn Config::default() -> Config {
     style: "bold red",
     props: { "symbol": "🦀 " },
   }
+  modules["golang"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold cyan",
+    props: { "symbol": "🐹 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
