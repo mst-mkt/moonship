@@ -95,6 +95,12 @@ pub fn Config::default() -> Config {
     style: "208 bold",
     props: { "symbol": "📦 " },
   }
+  modules["bun"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold red",
+    props: { "symbol": "🥟 " },
+  }
   modules["nodejs"] = {
     disabled: false,
     format: "via [$symbol($version )]($style)",
