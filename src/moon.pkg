@@ -14,6 +14,7 @@ import {
   "mst-mkt/moonship/modules/git_branch" @mod_git_branch,
   "mst-mkt/moonship/modules/git_commit" @mod_git_commit,
   "mst-mkt/moonship/modules/git_status" @mod_git_status,
+  "mst-mkt/moonship/modules/hostname" @mod_hostname,
   "mst-mkt/moonship/modules/jobs" @mod_jobs,
   "mst-mkt/moonship/modules/line_break" @mod_line_break,
   "mst-mkt/moonship/modules/username" @mod_username,

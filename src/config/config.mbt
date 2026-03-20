@@ -77,6 +77,12 @@ pub fn Config::default() -> Config {
     style: "green bold",
     props: { "only_detached": "true" },
   }
+  modules["hostname"] = {
+    disabled: false,
+    format: "[$hostname]($style) ",
+    style: "bold dimmed green",
+    props: { "ssh_only": "true", "trim_at": "." },
+  }
   modules["username"] = {
     disabled: false,
     format: "[$user]($style) ",
