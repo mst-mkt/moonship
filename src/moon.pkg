@@ -31,6 +31,7 @@ import {
   "mst-mkt/moonship/modules/deno" @mod_deno,
   "mst-mkt/moonship/modules/elixir" @mod_elixir,
   "mst-mkt/moonship/modules/lua" @mod_lua,
+  "mst-mkt/moonship/modules/moonbit" @mod_moonbit,
   "mst-mkt/moonship/modules/perl" @mod_perl,
   "mst-mkt/moonship/modules/php" @mod_php,
   "mst-mkt/moonship/modules/kotlin" @mod_kotlin,

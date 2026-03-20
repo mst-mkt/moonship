@@ -207,6 +207,12 @@ pub fn Config::default() -> Config {
     style: "blue bold",
     props: { "symbol": ".NET " },
   }
+  modules["moonbit"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold 125",
+    props: { "symbol": "🐰 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
