@@ -99,6 +99,8 @@ fn run_help() -> Unit {
     #|Usage:
     #|  moonship prompt [options]    Generate prompt string
     #|  moonship timings [options]   Show module execution times
+    #|  moonship module <name>       Run a single module
+    #|  moonship module --list       List available modules
     #|  moonship init <shell>        Print shell init script
     #|  moonship cache clear         Clear cached data
     #|  moonship time                Print current time in ms
@@ -111,6 +113,9 @@ fn run_help() -> Unit {
     #|  --cmd-duration=<ms>       Duration of last command
     #|  --jobs=<n>                Number of background jobs
     #|  --terminal-width=<cols>   Terminal width in columns
+    #|  --keymap=<mode>           Vim keymap mode (vicmd, visual, replace)
+    #|  --path=<path>             Override current directory
+    #|  --shlvl=<n>               Shell nesting level
     #|  --async                   Recompute and update cache
     #|
     #|Supported shells: zsh, bash, fish

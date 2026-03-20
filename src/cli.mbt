@@ -2,6 +2,8 @@
 enum Command {
   Prompt(PromptArgs)
   Timings(PromptArgs)
+  Module(String, PromptArgs)
+  ModuleList
   Init(String)
   CacheClear
   Time
@@ -33,6 +35,7 @@ fn parse_args(args : Array[String]) -> Command {
   match args[0] {
     "prompt" => parse_prompt_args(args, fn(pa) { Prompt(pa) })
     "timings" => parse_prompt_args(args, fn(pa) { Timings(pa) })
+    "module" => parse_module_command(args)
     "init" => if args.length() > 1 { Init(args[1]) } else { UnknownShell }
     "cache" =>
       if args.length() > 1 && args[1] == "clear" {
@@ -80,6 +83,23 @@ fn extract_flag_value(arg : String) -> (String, String)? {
   .to_string()
   .split_once("=")
   .map(fn(pair) { (pair.0.to_string(), pair.1.to_string()) })
+}
+
+///|
+fn parse_module_command(args : Array[String]) -> Command {
+  guard args.length() > 1 else { return Help }
+
+  if args[1] == "--list" || args[1] == "-l" {
+    return ModuleList
+  }
+
+  let name = args[1]
+  let rest = Array::new()
+  rest.push("module")
+  for i = 2; i < args.length(); i = i + 1 {
+    rest.push(args[i])
+  }
+  parse_prompt_args(rest, fn(pa) { Module(name, pa) })
 }
 
 ///|

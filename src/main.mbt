@@ -6,6 +6,8 @@ fn main {
   match cmd {
     Prompt(pa) => run_prompt(pa)
     Timings(pa) => run_timings(pa)
+    Module(name, pa) => run_module(name, pa)
+    ModuleList => run_module_list()
     Init(shell_name) => run_init(shell_name)
     CacheClear => {
       @cache.clear_cache()
