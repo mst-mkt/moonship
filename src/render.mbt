@@ -1,11 +1,12 @@
 ///|
 let module_order : Array[String] = [
   "username", "hostname", "directory", "git_branch", "git_commit", "git_state", "git_status",
-  "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal", "dart", "deno",
-  "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang", "gradle",
-  "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven", "mojo", "moonbit",
-  "nim", "nodejs", "ocaml", "odin", "opa", "perl", "php", "purescript", "python",
-  "quarto", "red", "ruby", "rust", "scala", "swift", "terraform", "zig", "cmd_duration",
+  "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal", "daml", "dart",
+  "deno", "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang",
+  "gradle", "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven",
+  "mojo", "moonbit", "nim", "nodejs", "ocaml", "odin", "opa", "perl", "php", "purescript",
+  "python", "quarto", "raku", "red", "rlang", "ruby", "rust", "scala", "solidity",
+  "swift", "terraform", "typst", "vagrant", "vlang", "xmake", "zig", "cmd_duration",
   "line_break", "jobs", "character",
 ]
 
@@ -141,6 +142,14 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["opa"] = @mod_opa.OpaModule::from_config(config)
   modules["quarto"] = @mod_quarto.QuartoModule::from_config(config)
   modules["red"] = @mod_red.RedModule::from_config(config)
+  modules["daml"] = @mod_daml.DamlModule::from_config(config)
+  modules["raku"] = @mod_raku.RakuModule::from_config(config)
+  modules["rlang"] = @mod_rlang.RlangModule::from_config(config)
+  modules["solidity"] = @mod_solidity.SolidityModule::from_config(config)
+  modules["typst"] = @mod_typst.TypstModule::from_config(config)
+  modules["vlang"] = @mod_vlang.VlangModule::from_config(config)
+  modules["vagrant"] = @mod_vagrant.VagrantModule::from_config(config)
+  modules["xmake"] = @mod_xmake.XmakeModule::from_config(config)
   modules["hostname"] = @mod_hostname.HostnameModule::from_config(config)
   modules["username"] = @mod_username.UsernameModule::from_config(config)
   modules

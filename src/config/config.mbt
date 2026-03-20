@@ -369,6 +369,54 @@ pub fn Config::default() -> Config {
     style: "red bold",
     props: { "symbol": "🔺 " },
   }
+  modules["daml"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold cyan",
+    props: { "symbol": "Λ " },
+  }
+  modules["raku"] = {
+    disabled: false,
+    format: "via [$symbol($version-$vm_version )]($style)",
+    style: "149 bold",
+    props: { "symbol": "🦋 " },
+  }
+  modules["rlang"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "blue bold",
+    props: { "symbol": "📐 " },
+  }
+  modules["solidity"] = {
+    disabled: false,
+    format: "via [$symbol($version)]($style)",
+    style: "bold blue",
+    props: { "symbol": "S " },
+  }
+  modules["typst"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold #0093A7",
+    props: { "symbol": "t " },
+  }
+  modules["vlang"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "blue bold",
+    props: { "symbol": "V " },
+  }
+  modules["vagrant"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "cyan bold",
+    props: { "symbol": "⍱ " },
+  }
+  modules["xmake"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold green",
+    props: { "symbol": "△ " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
