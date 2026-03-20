@@ -129,6 +129,12 @@ pub fn Config::default() -> Config {
     style: "red dimmed",
     props: { "symbol": "☕ " },
   }
+  modules["ruby"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold red",
+    props: { "symbol": "💎 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
