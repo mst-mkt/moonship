@@ -27,6 +27,7 @@ import {
   "mst-mkt/moonship/modules/java" @mod_java,
   "mst-mkt/moonship/modules/ruby" @mod_ruby,
   "mst-mkt/moonship/modules/bun" @mod_bun,
+  "mst-mkt/moonship/modules/dart" @mod_dart,
   "mst-mkt/moonship/modules/deno" @mod_deno,
   "mst-mkt/moonship/modules/username" @mod_username,
   "mst-mkt/moonship/shell" @shell,
