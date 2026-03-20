@@ -14,7 +14,8 @@ fn run_prompt(pa : PromptArgs) -> Unit {
   }
 
   // Compute prompt
-  let raw = render_prompt(ctx)
+  let prefix = if ctx.config.add_newline { "\n" } else { "" }
+  let raw = prefix + render_prompt(ctx)
   ctx.close_repo()
   println(@shell.wrap_for_shell(shell, raw))
 

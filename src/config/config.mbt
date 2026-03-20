@@ -4,6 +4,7 @@ pub struct Config {
   scan_timeout : Int
   command_timeout : Int
   cache_ttl : Int
+  add_newline : Bool
   modules : Map[String, ModuleConfig]
 }
 
@@ -77,6 +78,7 @@ pub fn Config::default() -> Config {
     scan_timeout: 1000,
     command_timeout: 500,
     cache_ttl: 5000,
+    add_newline: true,
     modules,
   }
 }
@@ -129,6 +131,9 @@ pub fn Config::from_toml(toml_str : String) -> Config raise {
     default.command_timeout,
   )
   let cache_ttl = get_int(table, "cache_ttl").unwrap_or(default.cache_ttl)
+  let add_newline = get_bool(table, "add_newline").unwrap_or(
+    default.add_newline,
+  )
 
   let modules = default.modules
   table.each(fn(name, mod_value) {
@@ -137,7 +142,7 @@ pub fn Config::from_toml(toml_str : String) -> Config raise {
     modules[name] = parse_module_config(mod_table, base)
   })
 
-  { format, scan_timeout, command_timeout, cache_ttl, modules }
+  { format, scan_timeout, command_timeout, cache_ttl, add_newline, modules }
 }
 
 ///|
@@ -182,6 +187,7 @@ pub fn Config::to_toml(self : Config) -> String {
     "scan_timeout = \{self.scan_timeout}",
     "command_timeout = \{self.command_timeout}",
     "cache_ttl = \{self.cache_ttl}",
+    "add_newline = \{self.add_newline}",
   ].join("\n")
 
   let module_names = self.modules.keys().collect()
