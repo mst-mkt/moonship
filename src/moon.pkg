@@ -18,6 +18,7 @@ import {
   "mst-mkt/moonship/modules/hostname" @mod_hostname,
   "mst-mkt/moonship/modules/jobs" @mod_jobs,
   "mst-mkt/moonship/modules/line_break" @mod_line_break,
+  "mst-mkt/moonship/modules/nodejs" @mod_nodejs,
   "mst-mkt/moonship/modules/package" @mod_package,
   "mst-mkt/moonship/modules/username" @mod_username,
   "mst-mkt/moonship/shell" @shell,

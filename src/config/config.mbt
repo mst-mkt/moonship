@@ -95,6 +95,12 @@ pub fn Config::default() -> Config {
     style: "208 bold",
     props: { "symbol": "📦 " },
   }
+  modules["nodejs"] = {
+    disabled: false,
+    format: "[$symbol($version)]($style) ",
+    style: "bold green",
+    props: { "symbol": " " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$hostname]($style) ",
