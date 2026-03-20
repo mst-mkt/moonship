@@ -79,6 +79,26 @@ test "parse_color: named" {
 }
 
 ///|
+test "parse_style: none resets" {
+  let style = @terminal.parse_style("none")
+  assert_true(style.fg is Default)
+  assert_false(style.bold)
+}
+
+///|
+test "parse_style: bold none resets" {
+  let style = @terminal.parse_style("bold none")
+  assert_false(style.bold)
+}
+
+///|
+test "parse_style: none bold applies bold only" {
+  let style = @terminal.parse_style("none bold")
+  assert_true(style.bold)
+  assert_true(style.fg is Default)
+}
+
+///|
 test "parse_color: bright" {
   assert_true(@terminal.parse_color("bright-red") is BrightRed)
   assert_true(@terminal.parse_color("brightred") is BrightRed)

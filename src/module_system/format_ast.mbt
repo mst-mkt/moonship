@@ -4,6 +4,7 @@ pub enum FormatNode {
   Escape(Char)
   Variable(String)
   Styled(Array[FormatNode], String) // (content_nodes, style_spec)
+  Conditional(Array[FormatNode]) // (content_nodes)
 }
 
 ///|
@@ -37,9 +38,22 @@ pub fn parse_format(template : String) -> Array[FormatNode] {
             i += 1
           }
         }
+      '(' =>
+        match find_matching(template, i, '(', ')') {
+          Some(cp) => {
+            let inner = template[i + 1:cp].to_string()
+            let content_nodes = parse_format(inner)
+            nodes.push(Conditional(content_nodes))
+            i = cp + 1
+          }
+          None => {
+            nodes.push(Text("("))
+            i += 1
+          }
+        }
       _ => {
         let end = scan_while(template, i, fn(c) {
-          c != '$' && c != '[' && c != '\\'
+          c != '$' && c != '[' && c != '\\' && c != '('
         })
         nodes.push(Text(template[i:end].to_string()))
         i = end
@@ -52,7 +66,7 @@ pub fn parse_format(template : String) -> Array[FormatNode] {
 
 ///|
 fn parse_styled_node(s : String, start : Int) -> (FormatNode, Int)? {
-  guard find_matching_bracket(s, start) is Some(cb) else { return None }
+  guard find_matching(s, start, '[', ']') is Some(cb) else { return None }
 
   let inner = s[start + 1:cb].to_string()
   let after_bracket = cb + 1
@@ -79,6 +93,8 @@ pub fn collect_variable_names(nodes : Array[FormatNode]) -> Array[String] {
     match node {
       Variable(name) => names.push(name)
       Styled(content, _) =>
+        collect_variable_names(content).each(fn(n) { names.push(n) })
+      Conditional(content) =>
         collect_variable_names(content).each(fn(n) { names.push(n) })
       _ => ()
     }

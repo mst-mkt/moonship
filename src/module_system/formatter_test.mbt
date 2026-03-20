@@ -413,3 +413,182 @@ test "collect_variable_names: no variables" {
   let names = @module_system.collect_variable_names(nodes)
   assert_eq(names.length(), 0)
 }
+
+// --- conditional format ---
+
+///|
+test "parse_format: conditional" {
+  let nodes = @module_system.parse_format("($var)")
+  assert_eq(nodes.length(), 1)
+  guard nodes[0] is Conditional(content) else { fail("expected Conditional") }
+  assert_eq(content.length(), 1)
+  assert_true(content[0] is Variable("var"))
+}
+
+///|
+test "parse_format: conditional with styled content" {
+  let nodes = @module_system.parse_format("([$status]($style))")
+  assert_eq(nodes.length(), 1)
+  guard nodes[0] is Conditional(content) else { fail("expected Conditional") }
+  assert_eq(content.length(), 1)
+  assert_true(content[0] is Styled(_))
+}
+
+///|
+test "parse_format: unclosed paren is text" {
+  let nodes = @module_system.parse_format("(unclosed")
+  assert_eq(nodes.length(), 2)
+  assert_true(nodes[0] is Text("("))
+}
+
+///|
+test "format: conditional shown when var non-empty" {
+  let vars : Map[String, String] = { "x": "hello" }
+  let segs = @module_system.format_string(
+    "($x)",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "hello")
+}
+
+///|
+test "format: conditional hidden when var empty" {
+  let vars : Map[String, String] = { "x": "" }
+  let segs = @module_system.format_string(
+    "($x)",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "format: conditional hidden when var missing" {
+  let segs = @module_system.format_string(
+    "($x)",
+    {},
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "format: conditional with literal and var" {
+  let vars : Map[String, String] = { "branch": "main" }
+  let segs = @module_system.format_string(
+    "( on $branch)",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), " on main")
+}
+
+///|
+test "format: conditional hides literal when var empty" {
+  let vars : Map[String, String] = { "branch": "" }
+  let segs = @module_system.format_string(
+    "( on $branch)",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "format: conditional with styled content" {
+  let vars : Map[String, String] = { "status": "+!", "style": "bold red" }
+  let segs = @module_system.format_string(
+    "([$status]($style))",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs[0].text, "+!")
+  assert_true(segs[0].style.bold)
+}
+
+///|
+test "format: conditional shown if any var non-empty" {
+  let vars : Map[String, String] = { "a": "", "b": "yes" }
+  let segs = @module_system.format_string(
+    "($a$b)",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "yes")
+}
+
+///|
+test "format: conditional hidden when all vars empty" {
+  let vars : Map[String, String] = { "a": "", "b": "" }
+  let segs = @module_system.format_string(
+    "($a$b)",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "format: conditional no variables always hidden" {
+  let segs = @module_system.format_string(
+    "(literal only)",
+    {},
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "format: conditional surrounded by text" {
+  let vars : Map[String, String] = { "x": "val" }
+  let segs = @module_system.format_string(
+    "before($x)after",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "beforevalafter")
+}
+
+///|
+test "format: conditional hidden keeps surrounding text" {
+  let segs = @module_system.format_string(
+    "before($x)after",
+    {},
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "beforeafter")
+}
+
+///|
+test "evaluate_segments: conditional shown" {
+  let segment_vars : Map[String, Array[@module_system.Segment]] = {
+    "mod": [@module_system.Segment::new("output")],
+  }
+  let ast = @module_system.parse_format("($mod)")
+  let segs = @module_system.evaluate_segments(
+    ast,
+    segment_vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs[0].text, "output")
+}
+
+///|
+test "evaluate_segments: conditional hidden when empty" {
+  let segment_vars : Map[String, Array[@module_system.Segment]] = {}
+  let ast = @module_system.parse_format("($mod)")
+  let segs = @module_system.evaluate_segments(
+    ast,
+    segment_vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "collect_variable_names: inside conditional" {
+  let nodes = @module_system.parse_format("([$status]($style))")
+  let names = @module_system.collect_variable_names(nodes)
+  assert_eq(names, ["status"])
+}

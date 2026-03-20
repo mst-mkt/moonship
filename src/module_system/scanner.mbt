@@ -44,16 +44,26 @@ fn scan_ident(s : String, start : Int) -> (String, Int) {
 }
 
 ///|
-fn find_matching_bracket(s : String, start : Int) -> Int? {
+fn find_matching(
+  s : String,
+  start : Int,
+  open : Char,
+  close : Char,
+) -> Int? {
   let len = s.length()
   let mut depth = 1
   let mut i = start + 1
 
   while i < len && depth > 0 {
-    match char_at(s, i) {
-      '[' => depth += 1
-      ']' => depth -= 1
-      _ => ()
+    let ch = char_at(s, i)
+    if ch == '\\' && i + 1 < len {
+      i += 2
+      continue
+    }
+    if ch == open {
+      depth += 1
+    } else if ch == close {
+      depth -= 1
     }
     if depth > 0 {
       i += 1

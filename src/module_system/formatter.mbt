@@ -45,6 +45,13 @@ fn evaluate(
           segments.push(Segment::new(text, style=resolved_style))
         }
       }
+
+      Conditional(content_nodes) =>
+        if has_any_string_var(content_nodes, vars) {
+          evaluate(content_nodes, vars, default_style).each(fn(seg) {
+            segments.push(seg)
+          })
+        }
     }
   }
 
@@ -65,6 +72,10 @@ fn nodes_to_text(
       Escape(ch) => buf.write_string(unescape(ch))
       Variable(name) => buf.write_string(vars.get(name).unwrap_or(""))
       Styled(inner, _) => buf.write_string(nodes_to_text(inner, vars))
+      Conditional(content) =>
+        if has_any_string_var(content, vars) {
+          buf.write_string(nodes_to_text(content, vars))
+        }
     }
   }
 
@@ -114,6 +125,13 @@ pub fn evaluate_segments(
         let inner = evaluate_segments(content_nodes, segment_vars, style)
         inner.each(fn(seg) { segments.push(seg) })
       }
+
+      Conditional(content_nodes) =>
+        if has_any_segment_var(content_nodes, segment_vars) {
+          evaluate_segments(content_nodes, segment_vars, default_style).each(
+            fn(seg) { segments.push(seg) },
+          )
+        }
     }
   }
 
@@ -139,4 +157,32 @@ pub fn compose_segments(
 /// Extract module names from a format string like "$directory$git_branch"
 pub fn extract_module_names(format : String) -> Array[String] {
   collect_variable_names(parse_format(format))
+}
+
+///|
+/// Check if any variable in the nodes has a non-empty string value.
+fn has_any_string_var(
+  nodes : Array[FormatNode],
+  vars : Map[String, String],
+) -> Bool {
+  collect_variable_names(nodes).iter().any(fn(name) {
+    match vars.get(name) {
+      Some(val) => not(val.is_empty())
+      None => false
+    }
+  })
+}
+
+///|
+/// Check if any variable in the nodes has non-empty segments.
+fn has_any_segment_var(
+  nodes : Array[FormatNode],
+  vars : Map[String, Array[Segment]],
+) -> Bool {
+  collect_variable_names(nodes).iter().any(fn(name) {
+    match vars.get(name) {
+      Some(segs) => not(segs.is_empty())
+      None => false
+    }
+  })
 }

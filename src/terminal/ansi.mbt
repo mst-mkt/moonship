@@ -150,6 +150,7 @@ pub fn parse_style(spec : String) -> Style {
 ///|
 fn apply_style_part(style : Style, part : String) -> Style {
   match part {
+    "none" => Style::default()
     "bold" => style.with_bold()
     "italic" => style.with_italic()
     "underline" => style.with_underline()
