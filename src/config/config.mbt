@@ -195,6 +195,18 @@ pub fn Config::default() -> Config {
     style: "red bold",
     props: { "symbol": "🆂 " },
   }
+  modules["zig"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold yellow",
+    props: { "symbol": "↯ " },
+  }
+  modules["dotnet"] = {
+    disabled: false,
+    format: "via [$symbol($version )(🎯 $tfm )]($style)",
+    style: "blue bold",
+    props: { "symbol": ".NET " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",

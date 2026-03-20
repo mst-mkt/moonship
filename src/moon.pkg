@@ -35,7 +35,9 @@ import {
   "mst-mkt/moonship/modules/php" @mod_php,
   "mst-mkt/moonship/modules/kotlin" @mod_kotlin,
   "mst-mkt/moonship/modules/swift" @mod_swift,
+  "mst-mkt/moonship/modules/dotnet" @mod_dotnet,
   "mst-mkt/moonship/modules/scala" @mod_scala,
+  "mst-mkt/moonship/modules/zig" @mod_zig,
   "mst-mkt/moonship/modules/username" @mod_username,
   "mst-mkt/moonship/shell" @shell,
 }
