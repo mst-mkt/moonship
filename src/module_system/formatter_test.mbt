@@ -343,10 +343,7 @@ test "compose_segments: basic" {
     "char": [@module_system.Segment::new("❯")],
   }
 
-  let output = @module_system.compose_segments(
-    "$dir\\n$char",
-    segment_vars,
-  )
+  let output = @module_system.compose_segments("$dir\\n$char", segment_vars)
   let rendered = output.render()
   assert_true(rendered.contains("~/project"))
   assert_true(rendered.contains("❯"))

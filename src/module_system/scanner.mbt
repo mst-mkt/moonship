@@ -44,12 +44,7 @@ fn scan_ident(s : String, start : Int) -> (String, Int) {
 }
 
 ///|
-fn find_matching(
-  s : String,
-  start : Int,
-  open : Char,
-  close : Char,
-) -> Int? {
+fn find_matching(s : String, start : Int, open : Char, close : Char) -> Int? {
   let len = s.length()
   let mut depth = 1
   let mut i = start + 1

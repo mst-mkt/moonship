@@ -6,9 +6,8 @@ fn run_prompt(pa : PromptArgs) -> Unit {
 
   // Cache hit: return immediately (sync path only)
   if use_cache && not(pa.is_async) {
-    if @cache.read_prompt(ctx.cwd, pa.status, ctx.config.cache_ttl) is Some(
-      cached,
-    ) {
+    if @cache.read_prompt(ctx.cwd, pa.status, ctx.config.cache_ttl)
+      is Some(cached) {
       println(@shell.wrap_for_shell(shell, cached))
       return
     }

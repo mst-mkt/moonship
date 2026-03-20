@@ -56,7 +56,9 @@ pub fn write_prompt(cwd : String, status : Int, prompt : String) -> Unit {
     prompt,
   }
   let path = cache_file_path(dir, cwd)
-  @fs.write_string_to_file(path, entry.to_json().stringify()) catch { _ => () }
+  @fs.write_string_to_file(path, entry.to_json().stringify()) catch {
+    _ => ()
+  }
 }
 
 ///|
@@ -65,7 +67,9 @@ pub fn clear_cache() -> Unit {
   let files = @fs.read_dir(dir) catch { _ => return }
 
   for file in files {
-    @fs.remove_file(dir + "/" + file) catch { _ => () }
+    @fs.remove_file(dir + "/" + file) catch {
+      _ => ()
+    }
   }
 }
 
@@ -102,7 +106,9 @@ fn ensure_dir(path : String) -> Unit {
     let current = buf.to_string()
 
     if not(@fs.path_exists(current)) {
-      @fs.create_dir(current) catch { _ => () }
+      @fs.create_dir(current) catch {
+        _ => ()
+      }
     }
 
     buf.write_char('/')

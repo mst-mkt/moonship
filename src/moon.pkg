@@ -17,6 +17,6 @@ import {
 
 options(
   "is-main": true,
+  "native-stub": [ "signal.c" ],
   "supported-targets": "native",
-  "native-stub": ["signal.c"],
 )

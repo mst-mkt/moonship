@@ -21,12 +21,9 @@ fn evaluate(
 
   for node in nodes {
     match node {
-      Text(t) =>
-        segments.push(Segment::new(t, style=default_style))
-
+      Text(t) => segments.push(Segment::new(t, style=default_style))
       Escape(ch) =>
         segments.push(Segment::new(unescape(ch), style=default_style))
-
       Variable(name) =>
         match vars.get(name) {
           Some(val) =>
@@ -36,7 +33,6 @@ fn evaluate(
             })
           None => ()
         }
-
       Styled(content_nodes, style_spec) => {
         let resolved_style = resolve_style(style_spec, vars)
         let text = nodes_to_text(content_nodes, vars)
@@ -45,7 +41,6 @@ fn evaluate(
           segments.push(Segment::new(text, style=resolved_style))
         }
       }
-
       Conditional(content_nodes) =>
         if has_any_string_var(content_nodes, vars) {
           evaluate(content_nodes, vars, default_style).each(fn(seg) {
@@ -83,10 +78,7 @@ fn nodes_to_text(
 }
 
 ///|
-fn resolve_style(
-  spec : String,
-  vars : Map[String, String],
-) -> @terminal.Style {
+fn resolve_style(spec : String, vars : Map[String, String]) -> @terminal.Style {
   let resolved = if spec.has_prefix("$") {
     vars.get(spec[1:].to_string()).unwrap_or(spec)
   } else {
@@ -108,29 +100,26 @@ pub fn evaluate_segments(
 
   for node in nodes {
     match node {
-      Text(t) =>
-        segments.push(Segment::new(t, style=default_style))
-
+      Text(t) => segments.push(Segment::new(t, style=default_style))
       Escape(ch) =>
         segments.push(Segment::new(unescape(ch), style=default_style))
-
       Variable(name) =>
         match segment_vars.get(name) {
           Some(segs) => segs.each(fn(seg) { segments.push(seg) })
           None => ()
         }
-
       Styled(content_nodes, style_spec) => {
         let style = @terminal.parse_style(style_spec)
         let inner = evaluate_segments(content_nodes, segment_vars, style)
         inner.each(fn(seg) { segments.push(seg) })
       }
-
       Conditional(content_nodes) =>
         if has_any_segment_var(content_nodes, segment_vars) {
-          evaluate_segments(content_nodes, segment_vars, default_style).each(
-            fn(seg) { segments.push(seg) },
-          )
+          evaluate_segments(content_nodes, segment_vars, default_style).each(fn(
+            seg,
+          ) {
+            segments.push(seg)
+          })
         }
     }
   }
@@ -145,11 +134,7 @@ pub fn compose_segments(
   segment_vars : Map[String, Array[Segment]],
 ) -> ModuleOutput {
   let ast = parse_format(template)
-  let segs = evaluate_segments(
-    ast,
-    segment_vars,
-    @terminal.Style::default(),
-  )
+  let segs = evaluate_segments(ast, segment_vars, @terminal.Style::default())
   ModuleOutput::new(segs)
 }
 
@@ -165,7 +150,9 @@ fn has_any_string_var(
   nodes : Array[FormatNode],
   vars : Map[String, String],
 ) -> Bool {
-  collect_variable_names(nodes).iter().any(fn(name) {
+  collect_variable_names(nodes)
+  .iter()
+  .any(fn(name) {
     match vars.get(name) {
       Some(val) => not(val.is_empty())
       None => false
@@ -179,7 +166,9 @@ fn has_any_segment_var(
   nodes : Array[FormatNode],
   vars : Map[String, Array[Segment]],
 ) -> Bool {
-  collect_variable_names(nodes).iter().any(fn(name) {
+  collect_variable_names(nodes)
+  .iter()
+  .any(fn(name) {
     match vars.get(name) {
       Some(segs) => not(segs.is_empty())
       None => false
