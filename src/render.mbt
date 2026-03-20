@@ -1,7 +1,7 @@
 ///|
 let module_order : Array[String] = [
   "username", "hostname", "directory", "git_branch", "git_commit", "git_state", "git_status",
-  "cmd_duration", "line_break", "jobs", "character",
+  "package", "cmd_duration", "line_break", "jobs", "character",
 ]
 
 ///|
@@ -90,6 +90,7 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["line_break"] = @mod_line_break.LineBreakModule::from_config(config)
   modules["git_commit"] = @mod_git_commit.GitCommitModule::from_config(config)
   modules["git_state"] = @mod_git_state.GitStateModule::from_config(config)
+  modules["package"] = @mod_package.PackageModule::from_config(config)
   modules["hostname"] = @mod_hostname.HostnameModule::from_config(config)
   modules["username"] = @mod_username.UsernameModule::from_config(config)
   modules

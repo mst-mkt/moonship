@@ -89,6 +89,12 @@ pub fn Config::default() -> Config {
       "bisect": "BISECTING",
     },
   }
+  modules["package"] = {
+    disabled: false,
+    format: "[$symbol$version]($style) ",
+    style: "208 bold",
+    props: { "symbol": "📦 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$hostname]($style) ",
