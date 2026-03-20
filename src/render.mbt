@@ -89,5 +89,6 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["jobs"] = @mod_jobs.JobsModule::from_config(config)
   modules["line_break"] = @mod_line_break.LineBreakModule::from_config(config)
   modules["git_commit"] = @mod_git_commit.GitCommitModule::from_config(config)
+  modules["username"] = @mod_username.UsernameModule::from_config(config)
   modules
 }

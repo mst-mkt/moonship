@@ -16,6 +16,7 @@ import {
   "mst-mkt/moonship/modules/git_status" @mod_git_status,
   "mst-mkt/moonship/modules/jobs" @mod_jobs,
   "mst-mkt/moonship/modules/line_break" @mod_line_break,
+  "mst-mkt/moonship/modules/username" @mod_username,
   "mst-mkt/moonship/shell" @shell,
 }
 

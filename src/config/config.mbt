@@ -77,6 +77,12 @@ pub fn Config::default() -> Config {
     style: "green bold",
     props: { "only_detached": "true" },
   }
+  modules["username"] = {
+    disabled: false,
+    format: "[$user]($style) ",
+    style: "",
+    props: { "style_root": "bold red", "style_user": "bold yellow" },
+  }
   {
     format: "$directory$git_branch$git_status\n$character",
     scan_timeout: 1000,

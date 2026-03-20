@@ -1,0 +1,11 @@
+import {
+  "moonbitlang/x/sys" @sys,
+  "mst-mkt/moonship/config" @config,
+  "mst-mkt/moonship/context" @context,
+  "mst-mkt/moonship/module_system" @ms,
+  "mst-mkt/moonship/terminal" @terminal,
+}
+
+options(
+  "supported-targets": "native",
+)
