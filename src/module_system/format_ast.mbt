@@ -3,6 +3,7 @@ pub enum FormatNode {
   Text(String)
   Escape(Char)
   Variable(String)
+  EnvVar(String) // ${env:VAR_NAME}
   Styled(Array[FormatNode], String) // (content_nodes, style_spec)
   Conditional(Array[FormatNode]) // (content_nodes)
 }
@@ -20,13 +21,14 @@ pub fn parse_format(template : String) -> Array[FormatNode] {
         nodes.push(Escape(char_at(template, i + 1)))
         i += 2
       }
-      '$' => {
-        let (name, end) = scan_ident(template, i + 1)
-        if not(name.is_empty()) {
-          nodes.push(Variable(name))
+      '$' =>
+        match parse_dollar(template, i) {
+          Some((node, end)) => {
+            nodes.push(node)
+            i = end
+          }
+          None => i += 1
         }
-        i = end
-      }
       '[' =>
         match parse_styled_node(template, i) {
           Some((node, next_i)) => {
@@ -62,6 +64,32 @@ pub fn parse_format(template : String) -> Array[FormatNode] {
   }
 
   nodes
+}
+
+///|
+fn parse_dollar(s : String, start : Int) -> (FormatNode, Int)? {
+  let after = start + 1
+  guard after < s.length() else { return None }
+
+  // ${env:VAR_NAME}
+  if char_at(s, after) == '{' {
+    let env_prefix = "env:"
+    let content_start = after + 1
+    let close = scan_while(s, content_start, fn(c) { c != '}' })
+    guard close < s.length() else { return None }
+
+    let content = s[content_start:close].to_string()
+    guard content.has_prefix(env_prefix) else { return None }
+
+    let var_name = content[env_prefix.length():].to_string()
+    return Some((EnvVar(var_name), close + 1))
+  }
+
+  // $variable
+  let (name, end) = scan_ident(s, after)
+  guard not(name.is_empty()) else { return None }
+
+  Some((Variable(name), end))
 }
 
 ///|

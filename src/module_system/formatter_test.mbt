@@ -589,3 +589,78 @@ test "collect_variable_names: inside conditional" {
   let names = @module_system.collect_variable_names(nodes)
   assert_eq(names, ["status"])
 }
+
+// --- ${env:VAR} ---
+
+///|
+test "parse_format: env var" {
+  let nodes = @module_system.parse_format("${env:HOME}")
+  assert_eq(nodes.length(), 1)
+  assert_true(nodes[0] is EnvVar("HOME"))
+}
+
+///|
+test "parse_format: env var with surrounding text" {
+  let nodes = @module_system.parse_format("dir=${env:HOME}!")
+  assert_eq(nodes.length(), 3)
+  assert_true(nodes[0] is Text("dir="))
+  assert_true(nodes[1] is EnvVar("HOME"))
+  assert_true(nodes[2] is Text("!"))
+}
+
+///|
+test "parse_format: invalid env syntax falls through" {
+  let nodes = @module_system.parse_format("${invalid}")
+  // ${invalid} doesn't have "env:" prefix, so $ is skipped, rest is text
+  assert_true(nodes.length() > 0)
+}
+
+///|
+test "format: env var resolves" {
+  // HOME is almost always set
+  let segs = @module_system.format_string(
+    "${env:HOME}",
+    {},
+    @terminal.Style::default(),
+  )
+  assert_true(segs.length() > 0)
+  assert_true(segs[0].text.length() > 0)
+}
+
+///|
+test "format: env var unset produces no output" {
+  let segs = @module_system.format_string(
+    "${env:MOONSHIP_TEST_NONEXISTENT_VAR}",
+    {},
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "format: env var in conditional shown when set" {
+  // HOME is always set
+  let segs = @module_system.format_string(
+    "(home=${env:HOME})",
+    {},
+    @terminal.Style::default(),
+  )
+  assert_true(segs.map(fn(s) { s.text }).join("").contains("home="))
+}
+
+///|
+test "format: env var in conditional hidden when unset" {
+  let segs = @module_system.format_string(
+    "(val=${env:MOONSHIP_TEST_NONEXISTENT_VAR})",
+    {},
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "collect_variable_names: env var not included" {
+  let nodes = @module_system.parse_format("$mod${env:HOME}")
+  let names = @module_system.collect_variable_names(nodes)
+  assert_eq(names, ["mod"])
+}

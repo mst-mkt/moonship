@@ -1,4 +1,5 @@
 import {
+  "moonbitlang/x/sys" @sys,
   "mst-mkt/moonship/terminal" @terminal,
   "mst-mkt/moonship/context" @context,
 }

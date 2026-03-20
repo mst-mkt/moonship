@@ -27,12 +27,17 @@ fn evaluate(
       Variable(name) =>
         match vars.get(name) {
           Some(val) =>
-            // Variable values can contain inline styles like "[❯](bold green)"
             evaluate(parse_format(val), {}, default_style).each(fn(seg) {
               segments.push(seg)
             })
           None => ()
         }
+      EnvVar(name) => {
+        let val = @sys.get_env_var(name).unwrap_or("")
+        if not(val.is_empty()) {
+          segments.push(Segment::new(val, style=default_style))
+        }
+      }
       Styled(content_nodes, style_spec) => {
         let resolved_style = resolve_style(style_spec, vars)
         let text = nodes_to_text(content_nodes, vars)
@@ -66,6 +71,7 @@ fn nodes_to_text(
       Text(t) => buf.write_string(t)
       Escape(ch) => buf.write_string(unescape(ch))
       Variable(name) => buf.write_string(vars.get(name).unwrap_or(""))
+      EnvVar(name) => buf.write_string(@sys.get_env_var(name).unwrap_or(""))
       Styled(inner, _) => buf.write_string(nodes_to_text(inner, vars))
       Conditional(content) =>
         if has_any_string_var(content, vars) {
@@ -108,6 +114,12 @@ pub fn evaluate_segments(
           Some(segs) => segs.each(fn(seg) { segments.push(seg) })
           None => ()
         }
+      EnvVar(name) => {
+        let val = @sys.get_env_var(name).unwrap_or("")
+        if not(val.is_empty()) {
+          segments.push(Segment::new(val, style=default_style))
+        }
+      }
       Styled(content_nodes, style_spec) => {
         let style = @terminal.parse_style(style_spec)
         let inner = evaluate_segments(content_nodes, segment_vars, style)
@@ -145,33 +157,46 @@ pub fn extract_module_names(format : String) -> Array[String] {
 }
 
 ///|
-/// Check if any variable in the nodes has a non-empty string value.
 fn has_any_string_var(
   nodes : Array[FormatNode],
   vars : Map[String, String],
 ) -> Bool {
-  collect_variable_names(nodes)
-  .iter()
-  .any(fn(name) {
-    match vars.get(name) {
-      Some(val) => not(val.is_empty())
-      None => false
-    }
-  })
+  let has_var = collect_variable_names(nodes)
+    .iter()
+    .any(fn(name) {
+      match vars.get(name) {
+        Some(val) => not(val.is_empty())
+        None => false
+      }
+    })
+  has_var || has_any_env_var(nodes)
 }
 
 ///|
-/// Check if any variable in the nodes has non-empty segments.
 fn has_any_segment_var(
   nodes : Array[FormatNode],
   vars : Map[String, Array[Segment]],
 ) -> Bool {
-  collect_variable_names(nodes)
+  let has_var = collect_variable_names(nodes)
+    .iter()
+    .any(fn(name) {
+      match vars.get(name) {
+        Some(segs) => not(segs.is_empty())
+        None => false
+      }
+    })
+  has_var || has_any_env_var(nodes)
+}
+
+///|
+fn has_any_env_var(nodes : Array[FormatNode]) -> Bool {
+  nodes
   .iter()
-  .any(fn(name) {
-    match vars.get(name) {
-      Some(segs) => not(segs.is_empty())
-      None => false
+  .any(fn(node) {
+    match node {
+      EnvVar(name) => not(@sys.get_env_var(name).unwrap_or("").is_empty())
+      Styled(content, _) | Conditional(content) => has_any_env_var(content)
+      _ => false
     }
   })
 }
