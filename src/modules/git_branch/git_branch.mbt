@@ -79,13 +79,16 @@ fn GitBranchModule::render_branch(
     branch
   }
 
-  let style = @terminal.parse_style(self.style)
   let vars : Map[String, String] = {
     "branch": display_branch,
     "symbol": self.symbol,
     "style": self.style,
   }
-  let segments = @ms.format_string(self.format, vars, style)
+  let segments = @ms.format_string(
+    self.format,
+    vars,
+    @terminal.Style::default(),
+  )
 
   Output(@ms.ModuleOutput::new(segments))
 }

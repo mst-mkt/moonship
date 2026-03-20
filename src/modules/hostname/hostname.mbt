@@ -49,9 +49,12 @@ pub impl @ms.PromptModule for HostnameModule with execute(
 
   let hostname = trim_hostname(raw, self.trim_at)
 
-  let style = @terminal.parse_style(self.style)
   let vars : Map[String, String] = { "hostname": hostname, "style": self.style }
-  let segments = @ms.format_string(self.format, vars, style)
+  let segments = @ms.format_string(
+    self.format,
+    vars,
+    @terminal.Style::default(),
+  )
 
   Output(@ms.ModuleOutput::new(segments))
 }

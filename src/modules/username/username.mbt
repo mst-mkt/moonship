@@ -50,9 +50,12 @@ pub impl @ms.PromptModule for UsernameModule with execute(
   }
 
   let style_str = if is_root { self.style_root } else { self.style_user }
-  let style = @terminal.parse_style(style_str)
   let vars : Map[String, String] = { "user": user, "style": style_str }
-  let segments = @ms.format_string(self.format, vars, style)
+  let segments = @ms.format_string(
+    self.format,
+    vars,
+    @terminal.Style::default(),
+  )
 
   Output(@ms.ModuleOutput::new(segments))
 }

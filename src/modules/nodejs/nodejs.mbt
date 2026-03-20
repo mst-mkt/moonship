@@ -48,13 +48,16 @@ pub impl @ms.PromptModule for NodejsModule with execute(
   guard not(version.is_empty()) else { return Skipped("node not found") }
 
   let display = @exec.strip_v_prefix(version)
-  let style = @terminal.parse_style(self.style)
   let vars : Map[String, String] = {
     "version": display,
     "symbol": self.symbol,
     "style": self.style,
   }
-  let segments = @ms.format_string(self.format, vars, style)
+  let segments = @ms.format_string(
+    self.format,
+    vars,
+    @terminal.Style::default(),
+  )
 
   Output(@ms.ModuleOutput::new(segments))
 }

@@ -40,13 +40,16 @@ pub impl @ms.PromptModule for PackageModule with execute(
   let version = detect_version(ctx.cwd)
   guard not(version.is_empty()) else { return Skipped("no package file found") }
 
-  let style = @terminal.parse_style(self.style)
   let vars : Map[String, String] = {
     "version": version,
     "symbol": self.symbol,
     "style": self.style,
   }
-  let segments = @ms.format_string(self.format, vars, style)
+  let segments = @ms.format_string(
+    self.format,
+    vars,
+    @terminal.Style::default(),
+  )
 
   Output(@ms.ModuleOutput::new(segments))
 }

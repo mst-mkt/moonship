@@ -44,13 +44,16 @@ pub impl @ms.PromptModule for JobsModule with execute(
     ""
   }
 
-  let style = @terminal.parse_style(self.style)
   let vars : Map[String, String] = {
     "symbol": self.symbol,
     "number": number,
     "style": self.style,
   }
-  let segments = @ms.format_string(self.format, vars, style)
+  let segments = @ms.format_string(
+    self.format,
+    vars,
+    @terminal.Style::default(),
+  )
 
   Output(@ms.ModuleOutput::new(segments))
 }

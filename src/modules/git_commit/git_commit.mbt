@@ -47,9 +47,12 @@ pub impl @ms.PromptModule for GitCommitModule with execute(
   }
   guard not(commit_hash.is_empty()) else { return Skipped("no commit") }
 
-  let style = @terminal.parse_style(self.style)
   let vars : Map[String, String] = { "hash": commit_hash, "style": self.style }
-  let segments = @ms.format_string(self.format, vars, style)
+  let segments = @ms.format_string(
+    self.format,
+    vars,
+    @terminal.Style::default(),
+  )
 
   Output(@ms.ModuleOutput::new(segments))
 }

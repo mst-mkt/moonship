@@ -52,9 +52,12 @@ pub impl @ms.PromptModule for GitStateModule with execute(
   let state = detect_state(git_dir, self)
   guard not(state.is_empty()) else { return Skipped("clean state") }
 
-  let style = @terminal.parse_style(self.style)
   let vars : Map[String, String] = { "state": state, "style": self.style }
-  let segments = @ms.format_string(self.format, vars, style)
+  let segments = @ms.format_string(
+    self.format,
+    vars,
+    @terminal.Style::default(),
+  )
 
   Output(@ms.ModuleOutput::new(segments))
 }
