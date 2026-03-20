@@ -46,6 +46,10 @@ pub impl @ms.PromptModule for RustModule with execute(
   guard not(version.is_empty()) else { return Skipped("rustc not found") }
 
   let display = parse_rustc_version(version)
+  guard not(display.is_empty()) else {
+    return Skipped("could not parse rustc version")
+  }
+
   let vars : Map[String, String] = {
     "version": display,
     "symbol": self.symbol,

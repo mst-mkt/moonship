@@ -50,6 +50,10 @@ pub impl @ms.PromptModule for GolangModule with execute(
   guard not(output.is_empty()) else { return Skipped("go not found") }
 
   let display = parse_go_version(output)
+  guard not(display.is_empty()) else {
+    return Skipped("could not parse go version")
+  }
+
   let vars : Map[String, String] = {
     "version": display,
     "symbol": self.symbol,
