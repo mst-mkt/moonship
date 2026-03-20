@@ -67,7 +67,8 @@ fn run_module_list() -> Unit {
 fn run_timings(pa : PromptArgs) -> Unit {
   let ctx = build_context(pa)
   let modules = build_modules(ctx.config)
-  let module_names = @ms.extract_module_names(ctx.config.format)
+  let format = expand_all(ctx.config.format, modules)
+  let module_names = @ms.extract_module_names(format)
 
   let entries : Array[(String, Int64, String)] = []
 

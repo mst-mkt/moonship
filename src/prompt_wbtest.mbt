@@ -134,6 +134,57 @@ test "render: custom format ordering" {
 }
 
 ///|
+test "replace_var: basic" {
+  assert_eq(replace_var("$all", "all", "XY"), "XY")
+}
+
+///|
+test "replace_var: does not match prefix" {
+  assert_eq(replace_var("$all_status", "all", "XY"), "$all_status")
+}
+
+///|
+test "replace_var: matches at end" {
+  assert_eq(replace_var("prefix$all", "all", "XY"), "prefixXY")
+}
+
+///|
+test "replace_var: with surrounding modules" {
+  assert_eq(
+    replace_var("$directory$all$character", "all", "$git_branch"),
+    "$directory$git_branch$character",
+  )
+}
+
+///|
+test "expand_all: includes registered modules" {
+  let modules = build_modules(@config.Config::default())
+  let format = expand_all("$all", modules)
+
+  assert_true(format.contains("$directory"))
+  assert_true(format.contains("$character"))
+  assert_false(format.contains("$all"))
+}
+
+///|
+test "expand_all: excludes explicit modules" {
+  let modules = build_modules(@config.Config::default())
+  let format = expand_all("$directory$all", modules)
+
+  assert_true(format.contains("$character"))
+  // directory is already explicit, should not appear twice
+  let count = format.split("$directory").fold(init=0, fn(n, _) { n + 1 }) - 1
+  assert_eq(count, 1)
+}
+
+///|
+test "expand_all: no $all returns unchanged" {
+  let modules = build_modules(@config.Config::default())
+  let format = "$directory$character"
+  assert_eq(expand_all(format, modules), format)
+}
+
+///|
 test "render: unknown module skipped" {
   let config = @config.Config::from_toml(
     (

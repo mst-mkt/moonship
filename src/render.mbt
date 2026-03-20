@@ -1,15 +1,79 @@
 ///|
+let module_order : Array[String] = [
+  "username", "hostname", "directory", "git_branch", "git_commit", "git_state", "git_status",
+  "cmd_duration", "line_break", "jobs", "character",
+]
+
+///|
 fn render_prompt(ctx : @context.Context) -> String {
   let modules = build_modules(ctx.config)
+  let format = expand_all(ctx.config.format, modules)
   let segment_vars : Map[String, Array[@ms.Segment]] = {}
 
-  for name in @ms.extract_module_names(ctx.config.format) {
+  for name in @ms.extract_module_names(format) {
     guard modules.get(name) is Some(m) else { continue }
     guard m.execute(ctx) is Output(output) else { continue }
     segment_vars[name] = output.segments
   }
 
-  @ms.compose_segments(ctx.config.format, segment_vars).render()
+  @ms.compose_segments(format, segment_vars).render()
+}
+
+///|
+fn expand_all(
+  format : String,
+  modules : Map[String, &@ms.PromptModule],
+) -> String {
+  guard format.contains("$all") else { return format }
+
+  let explicit = @ms.extract_module_names(format)
+    .iter()
+    .filter(fn(name) { name != "all" })
+    .fold(init=Map::new(), fn(set, name) {
+      set[name] = true
+      set
+    })
+
+  let expansion = module_order
+    .iter()
+    .filter(fn(name) { modules.contains(name) && not(explicit.contains(name)) })
+    .map(fn(name) { "$" + name })
+    .collect()
+    .join("")
+
+  replace_var(format, "all", expansion)
+}
+
+///|
+fn replace_var(s : String, var_name : String, replacement : String) -> String {
+  let target = "$" + var_name
+  let buf = StringBuilder::new()
+  let len = s.length()
+  let mut i = 0
+
+  while i < len {
+    let remaining = s[i:].to_string()
+    if remaining.has_prefix(target) {
+      let after = i + target.length()
+      if after >= len || not(is_ident_char(s[after].unsafe_to_char())) {
+        buf.write_string(replacement)
+        i = after
+        continue
+      }
+    }
+    buf.write_char(s[i].unsafe_to_char())
+    i += 1
+  }
+
+  buf.to_string()
+}
+
+///|
+fn is_ident_char(c : Char) -> Bool {
+  match c {
+    'a'..='z' | 'A'..='Z' | '_' | '0'..='9' => true
+    _ => false
+  }
 }
 
 ///|
