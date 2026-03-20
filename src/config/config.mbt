@@ -153,6 +153,12 @@ pub fn Config::default() -> Config {
     style: "bold blue",
     props: { "symbol": "🎯 " },
   }
+  modules["elixir"] = {
+    disabled: false,
+    format: "via [$symbol($version \\(OTP $otp_version\\) )]($style)",
+    style: "bold purple",
+    props: { "symbol": "💧 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",

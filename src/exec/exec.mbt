@@ -13,6 +13,21 @@ pub async fn exec_cmd(cmd : String, args : Array[String]) -> String {
 }
 
 ///|
+pub async fn exec_cmd_full(cmd : String, args : Array[String]) -> String {
+  let (status, data) = @process.collect_stdout(cmd, args[:]) catch {
+    _ => return ""
+  }
+
+  if status != 0 {
+    return ""
+  }
+
+  data.text() catch {
+    _ => ""
+  }
+}
+
+///|
 fn first_line(s : String) -> String {
   let line = match s.find("\n") {
     Some(idx) => s[:idx].to_string()
