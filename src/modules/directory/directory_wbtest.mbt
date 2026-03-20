@@ -182,3 +182,51 @@ test "disabled returns Disabled" {
 
   assert_true(m.execute(ctx) is Disabled)
 }
+
+// --- execute tests ---
+
+///|
+test "execute: returns Output with path" {
+  let ctx = @context.Context::new(
+    cwd="/home/user/project",
+    home_dir="/home/user",
+  )
+  let m = DirectoryModule::new()
+  guard m.execute(ctx) is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("project"))
+}
+
+///|
+test "execute: custom format" {
+  let config = @config.Config::from_toml(
+    (
+      #|[directory]
+      #|format = "dir:[$path]($style)"
+    ),
+  )
+  let ctx = @context.Context::new(cwd="/home/user/project", home_dir="/home/user")
+  let m = DirectoryModule::from_config(config)
+  guard m.execute(ctx) is Output(out) else { fail("expected Output") }
+
+  assert_true(out.render().contains("dir:"))
+  assert_true(out.render().contains("project"))
+}
+
+///|
+test "execute: truncation applied" {
+  let config = @config.Config::from_toml(
+    (
+      #|[directory]
+      #|truncation_length = 1
+    ),
+  )
+  let ctx = @context.Context::new(cwd="/a/b/c/d/e")
+  let m = DirectoryModule::from_config(config)
+  guard m.execute(ctx) is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("e"))
+  assert_false(rendered.contains("/a/b/c/d/e"))
+}

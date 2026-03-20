@@ -45,7 +45,16 @@ pub impl @ms.PromptModule for GitBranchModule with execute(
   }
 
   let (raw_branch, is_detached, commit_hash) = repo.get_branch()
+  self.render_branch(raw_branch, is_detached, commit_hash)
+}
 
+///|
+fn GitBranchModule::render_branch(
+  self : GitBranchModule,
+  raw_branch : String,
+  is_detached : Bool,
+  commit_hash : String,
+) -> @ms.ModuleResult {
   let branch = if is_detached {
     guard not(commit_hash.is_empty()) else {
       return Skipped("detached HEAD with no commit")

@@ -86,6 +86,54 @@ test "format_duration: nonzero" {
 }
 
 ///|
+test "render: non-git directory has character but no git branch" {
+  let ctx = @context.Context::new(cwd="/tmp", home_dir="/tmp")
+  let output = render_prompt(ctx)
+
+  assert_true(output.contains("❯"))
+  // git_branch uses purple (ANSI 35). In /tmp there is no git repo,
+  // so git_branch returns Skipped and no purple styling should appear.
+  assert_false(output.contains(";35m"))
+}
+
+///|
+test "render: custom format with single module excludes others" {
+  let config = @config.Config::from_toml(
+    (
+      #|format = "$character"
+    ),
+  )
+  let ctx = @context.Context::new(
+    cwd="/home/user/project",
+    home_dir="/home/user",
+    config~,
+  )
+  let output = render_prompt(ctx)
+
+  assert_true(output.contains("❯"))
+  // directory is not in format, so "project" should not appear
+  assert_false(output.contains("project"))
+}
+
+///|
+test "render: custom format ordering" {
+  let config = @config.Config::from_toml(
+    (
+      #|format = "$character $directory"
+    ),
+  )
+  let ctx = @context.Context::new(
+    cwd="/home/user/project",
+    home_dir="/home/user",
+    config~,
+  )
+  let output = render_prompt(ctx)
+
+  assert_true(output.contains("❯"))
+  assert_true(output.contains("project"))
+}
+
+///|
 test "render: unknown module skipped" {
   let config = @config.Config::from_toml(
     (

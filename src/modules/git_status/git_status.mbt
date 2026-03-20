@@ -47,7 +47,16 @@ pub impl @ms.PromptModule for GitStatusModule with execute(
   }
 
   let (staged, modified, untracked) = repo.get_status()
+  self.render_status(staged, modified, untracked)
+}
 
+///|
+fn GitStatusModule::render_status(
+  self : GitStatusModule,
+  staged : Int,
+  modified : Int,
+  untracked : Int,
+) -> @ms.ModuleResult {
   let all_status = build_status_string([
     (staged, self.staged),
     (modified, self.modified),

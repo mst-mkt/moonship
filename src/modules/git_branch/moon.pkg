@@ -5,6 +5,11 @@ import {
   "mst-mkt/moonship/terminal" @terminal,
 }
 
+import {
+  "mizchi/libgit2" @libgit2,
+  "moonbitlang/x/fs" @fs,
+} for "wbtest"
+
 options(
   "supported-targets": "native",
 )
