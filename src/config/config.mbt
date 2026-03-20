@@ -267,6 +267,30 @@ pub fn Config::default() -> Config {
     style: "149 bold",
     props: { "symbol": "C++ " },
   }
+  modules["cmake"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold blue",
+    props: { "symbol": "△ " },
+  }
+  modules["terraform"] = {
+    disabled: false,
+    format: "via [$symbol$workspace]($style) ",
+    style: "bold 105",
+    props: { "symbol": "💠 " },
+  }
+  modules["gradle"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold bright-cyan",
+    props: { "symbol": "🅶 " },
+  }
+  modules["maven"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold bright-cyan",
+    props: { "symbol": "🅼 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
