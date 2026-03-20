@@ -177,6 +177,24 @@ pub fn Config::default() -> Config {
     style: "149 bold",
     props: { "symbol": "🐪 " },
   }
+  modules["kotlin"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold blue",
+    props: { "symbol": "🅺 ", "kotlin_binary": "kotlin" },
+  }
+  modules["swift"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold 202",
+    props: { "symbol": "🐦 " },
+  }
+  modules["scala"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "red bold",
+    props: { "symbol": "🆂 " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
