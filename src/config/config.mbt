@@ -77,6 +77,18 @@ pub fn Config::default() -> Config {
     style: "green bold",
     props: { "only_detached": "true" },
   }
+  modules["git_state"] = {
+    disabled: false,
+    format: "\\([$state]($style)\\) ",
+    style: "bold yellow",
+    props: {
+      "rebase": "REBASING",
+      "merge": "MERGING",
+      "revert": "REVERTING",
+      "cherry_pick": "CHERRY-PICKING",
+      "bisect": "BISECTING",
+    },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$hostname]($style) ",

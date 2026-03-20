@@ -13,6 +13,7 @@ import {
   "mst-mkt/moonship/modules/directory" @mod_directory,
   "mst-mkt/moonship/modules/git_branch" @mod_git_branch,
   "mst-mkt/moonship/modules/git_commit" @mod_git_commit,
+  "mst-mkt/moonship/modules/git_state" @mod_git_state,
   "mst-mkt/moonship/modules/git_status" @mod_git_status,
   "mst-mkt/moonship/modules/hostname" @mod_hostname,
   "mst-mkt/moonship/modules/jobs" @mod_jobs,
