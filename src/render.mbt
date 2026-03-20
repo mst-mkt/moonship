@@ -2,7 +2,8 @@
 let module_order : Array[String] = [
   "username", "hostname", "directory", "git_branch", "git_commit", "git_state", "git_status",
   "package", "bun", "dart", "deno", "elixir", "golang", "java", "lua", "nodejs",
-  "python", "ruby", "rust", "cmd_duration", "line_break", "jobs", "character",
+  "perl", "php", "python", "ruby", "rust", "cmd_duration", "line_break", "jobs",
+  "character",
 ]
 
 ///|
@@ -103,6 +104,8 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["dart"] = @mod_dart.DartModule::from_config(config)
   modules["elixir"] = @mod_elixir.ElixirModule::from_config(config)
   modules["lua"] = @mod_lua.LuaModule::from_config(config)
+  modules["perl"] = @mod_perl.PerlModule::from_config(config)
+  modules["php"] = @mod_php.PhpModule::from_config(config)
   modules["hostname"] = @mod_hostname.HostnameModule::from_config(config)
   modules["username"] = @mod_username.UsernameModule::from_config(config)
   modules
