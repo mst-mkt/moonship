@@ -1,7 +1,7 @@
 ///|
 let module_order : Array[String] = [
   "username", "hostname", "directory", "git_branch", "git_commit", "git_state", "git_status",
-  "package", "nodejs", "cmd_duration", "line_break", "jobs", "character",
+  "package", "nodejs", "python", "cmd_duration", "line_break", "jobs", "character",
 ]
 
 ///|
@@ -92,6 +92,7 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["git_state"] = @mod_git_state.GitStateModule::from_config(config)
   modules["package"] = @mod_package.PackageModule::from_config(config)
   modules["nodejs"] = @mod_nodejs.NodejsModule::from_config(config)
+  modules["python"] = @mod_python.PythonModule::from_config(config)
   modules["hostname"] = @mod_hostname.HostnameModule::from_config(config)
   modules["username"] = @mod_username.UsernameModule::from_config(config)
   modules

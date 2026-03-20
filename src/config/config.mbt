@@ -101,6 +101,16 @@ pub fn Config::default() -> Config {
     style: "bold green",
     props: { "symbol": " " },
   }
+  modules["python"] = {
+    disabled: false,
+    format: "via [$symbol$pyenv_prefix($version )(\\($virtualenv\\) )]($style)",
+    style: "yellow bold",
+    props: {
+      "symbol": "🐍 ",
+      "pyenv_version_name": "false",
+      "pyenv_prefix": "pyenv ",
+    },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
