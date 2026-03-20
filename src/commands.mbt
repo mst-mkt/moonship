@@ -1,7 +1,7 @@
 ///|
 fn run_prompt(pa : PromptArgs) -> Unit {
   let shell = @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("")
-  let use_cache = shell == "zsh" || shell == "fish"
+  let use_cache = (shell == "zsh" || shell == "fish") && pa.keymap.is_empty()
   let ctx = build_context(pa)
 
   // Cache hit: return immediately (sync path only)
@@ -32,6 +32,36 @@ fn run_prompt(pa : PromptArgs) -> Unit {
 
 ///|
 extern "C" fn notify_parent() -> Int = "moonship_notify_parent"
+
+///|
+fn run_module(name : String, pa : PromptArgs) -> Unit {
+  let ctx = build_context(pa)
+  let modules = build_modules(ctx.config)
+
+  guard modules.get(name) is Some(m) else {
+    println("moonship: unknown module '\{name}'")
+    return
+  }
+
+  match m.execute(ctx) {
+    Output(out) => println(out.render())
+    Skipped(reason) => println("Module '\{name}' skipped: \{reason}")
+    Disabled => println("Module '\{name}' is disabled")
+  }
+
+  ctx.close_repo()
+}
+
+///|
+fn run_module_list() -> Unit {
+  let modules = build_modules(@config.Config::default())
+  let names = modules.keys().collect()
+  names.sort()
+
+  for name in names {
+    println(name)
+  }
+}
 
 ///|
 fn run_timings(pa : PromptArgs) -> Unit {

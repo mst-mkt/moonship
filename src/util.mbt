@@ -9,7 +9,11 @@ fn get_argv() -> Array[String] {
 ///|
 fn build_context(pa : PromptArgs) -> @context.Context {
   let config = load_config()
-  let cwd = @env.current_dir().unwrap_or(".")
+  let cwd = if pa.path.is_empty() {
+    @env.current_dir().unwrap_or(".")
+  } else {
+    pa.path
+  }
   let home_dir = @sys.get_env_var("HOME").unwrap_or("")
 
   @context.Context::new(
@@ -19,6 +23,8 @@ fn build_context(pa : PromptArgs) -> @context.Context {
     cmd_duration=pa.cmd_duration,
     jobs=pa.jobs,
     terminal_width=pa.terminal_width,
+    keymap=pa.keymap,
+    shlvl=pa.shlvl,
     config~,
   )
 }

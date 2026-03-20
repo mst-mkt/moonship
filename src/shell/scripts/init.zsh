@@ -21,7 +21,7 @@ __moonship_async_callback() {
   local result
   result=$(cat <&$fd 2>/dev/null)
   if [[ -n "$result" ]]; then
-    PROMPT=$'\n'"$result"
+    PROMPT="$result"
     zle && zle reset-prompt
   fi
   zle -F "$fd"
@@ -49,26 +49,35 @@ __moonship_precmd() {
 
   local jobs_count=${(%):-%j}
   local term_width=$COLUMNS
-  local prompt_args=(
+  MOONSHIP_PROMPT_ARGS=(
     --status="$exit_code"
     --cmd-duration="$cmd_duration"
     --jobs="${jobs_count:-0}"
     --terminal-width="${term_width:-80}"
+    --keymap="${KEYMAP:-}"
   )
 
   # Synchronous prompt (uses cache if available)
-  local raw=$("$MOONSHIP_BIN" prompt "${prompt_args[@]}")
-  PROMPT=$'\n'"$raw"
+  local raw=$("$MOONSHIP_BIN" prompt "${MOONSHIP_PROMPT_ARGS[@]}")
+  PROMPT="$raw"
 
   # Async update: recompute in background, update cache, redraw
-  exec {MOONSHIP_ASYNC_FD} < <("$MOONSHIP_BIN" prompt --async "${prompt_args[@]}")
+  exec {MOONSHIP_ASYNC_FD} < <("$MOONSHIP_BIN" prompt --async "${MOONSHIP_PROMPT_ARGS[@]}")
   zle -F "$MOONSHIP_ASYNC_FD" __moonship_async_callback 2>/dev/null
+}
+
+# Keymap change: redraw prompt with new keymap
+__moonship_zle_keymap_select() {
+  local raw=$("$MOONSHIP_BIN" prompt "${MOONSHIP_PROMPT_ARGS[@]}" --keymap="$KEYMAP")
+  PROMPT="$raw"
+  zle reset-prompt
 }
 
 # Install hooks
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd __moonship_precmd
 add-zsh-hook preexec __moonship_preexec
+zle -N zle-keymap-select __moonship_zle_keymap_select
 
 # Trigger initial prompt
 __moonship_precmd

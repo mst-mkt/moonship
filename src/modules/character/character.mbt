@@ -4,6 +4,10 @@ pub struct CharacterModule {
   format : String
   success_symbol : String
   error_symbol : String
+  vimcmd_symbol : String
+  vimcmd_visual_symbol : String
+  vimcmd_replace_symbol : String
+  vimcmd_replace_one_symbol : String
 }
 
 ///|
@@ -17,6 +21,19 @@ pub fn CharacterModule::new(
     format: config.format,
     success_symbol: config.get_prop("success_symbol"),
     error_symbol: config.get_prop("error_symbol"),
+    vimcmd_symbol: config.get_prop("vimcmd_symbol", default="[❮](bold green)"),
+    vimcmd_visual_symbol: config.get_prop(
+      "vimcmd_visual_symbol",
+      default="[❮](bold yellow)",
+    ),
+    vimcmd_replace_symbol: config.get_prop(
+      "vimcmd_replace_symbol",
+      default="[❮](bold purple)",
+    ),
+    vimcmd_replace_one_symbol: config.get_prop(
+      "vimcmd_replace_one_symbol",
+      default="[❮](bold purple)",
+    ),
   }
 }
 
@@ -37,10 +54,12 @@ pub impl @ms.PromptModule for CharacterModule with execute(
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
 
-  let symbol = if ctx.status == 0 {
-    self.success_symbol
-  } else {
-    self.error_symbol
+  let symbol = match ctx.keymap {
+    "vicmd" => self.vimcmd_symbol
+    "visual" => self.vimcmd_visual_symbol
+    "replace" => self.vimcmd_replace_symbol
+    "replace_one" => self.vimcmd_replace_one_symbol
+    _ => if ctx.status == 0 { self.success_symbol } else { self.error_symbol }
   }
 
   let vars : Map[String, String] = { "symbol": symbol }

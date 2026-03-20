@@ -79,3 +79,35 @@ test "name" {
   let m : &@ms.PromptModule = CharacterModule::new()
   assert_eq(m.name(), "character")
 }
+
+///|
+test "vicmd keymap: shows vimcmd symbol" {
+  let ctx = @context.Context::new(cwd="/tmp", keymap="vicmd")
+  let m : &@ms.PromptModule = CharacterModule::new()
+
+  guard m.execute(ctx) is Output(out) else { fail("expected output") }
+
+  assert_true(out.render().contains("❮"))
+}
+
+///|
+test "visual keymap: shows visual symbol" {
+  let ctx = @context.Context::new(cwd="/tmp", keymap="visual")
+  let m : &@ms.PromptModule = CharacterModule::new()
+
+  guard m.execute(ctx) is Output(out) else { fail("expected output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("❮"))
+  assert_true(rendered.contains("33"))
+}
+
+///|
+test "unknown keymap: falls back to success symbol" {
+  let ctx = @context.Context::new(cwd="/tmp", keymap="viins", status=0)
+  let m : &@ms.PromptModule = CharacterModule::new()
+
+  guard m.execute(ctx) is Output(out) else { fail("expected output") }
+
+  assert_true(out.render().contains("❯"))
+}

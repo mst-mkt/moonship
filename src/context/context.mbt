@@ -6,6 +6,8 @@ pub struct Context {
   cmd_duration : Int
   jobs : Int
   terminal_width : Int
+  keymap : String
+  shlvl : Int
   config : @config.Config
   mut git_repo : @git.RepoHandle?
   mut git_resolved : Bool
@@ -19,6 +21,8 @@ pub fn Context::new(
   cmd_duration? : Int = 0,
   jobs? : Int = 0,
   terminal_width? : Int = 80,
+  keymap? : String = "",
+  shlvl? : Int = 0,
   config? : @config.Config = @config.Config::default(),
 ) -> Context {
   {
@@ -28,6 +32,8 @@ pub fn Context::new(
     cmd_duration,
     jobs,
     terminal_width,
+    keymap,
+    shlvl,
     config,
     git_repo: None,
     git_resolved: false,

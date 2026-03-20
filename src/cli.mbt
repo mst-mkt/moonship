@@ -20,12 +20,24 @@ struct PromptArgs {
   cmd_duration : Int
   jobs : Int
   terminal_width : Int
+  keymap : String
+  path : String
+  shlvl : Int
   is_async : Bool
 }
 
 ///|
 fn PromptArgs::default() -> PromptArgs {
-  { status: 0, cmd_duration: 0, jobs: 0, terminal_width: 80, is_async: false }
+  {
+    status: 0,
+    cmd_duration: 0,
+    jobs: 0,
+    terminal_width: 80,
+    keymap: "",
+    path: "",
+    shlvl: 0,
+    is_async: false,
+  }
 }
 
 ///|
@@ -69,6 +81,9 @@ fn parse_prompt_args(
         Some(("jobs", v)) => { ..pa, jobs: parse_int_arg(v) }
         Some(("terminal-width", v)) =>
           { ..pa, terminal_width: parse_int_arg(v) }
+        Some(("keymap", v)) => { ..pa, keymap: v }
+        Some(("path", v)) => { ..pa, path: v }
+        Some(("shlvl", v)) => { ..pa, shlvl: parse_int_arg(v) }
         _ => pa
       }
     })
