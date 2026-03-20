@@ -213,6 +213,30 @@ pub fn Config::default() -> Config {
     style: "bold 125",
     props: { "symbol": "🐰 " },
   }
+  modules["julia"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold purple",
+    props: { "symbol": "ஃ " },
+  }
+  modules["nim"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "yellow bold",
+    props: { "symbol": "👑 " },
+  }
+  modules["gleam"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold #FFAFF3",
+    props: { "symbol": "⭐ " },
+  }
+  modules["erlang"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold red",
+    props: { "symbol": " " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
