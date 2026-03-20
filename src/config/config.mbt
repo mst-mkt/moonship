@@ -123,6 +123,12 @@ pub fn Config::default() -> Config {
     style: "bold cyan",
     props: { "symbol": "🐹 " },
   }
+  modules["java"] = {
+    disabled: false,
+    format: "via [$symbol($version )]($style)",
+    style: "red dimmed",
+    props: { "symbol": "☕ " },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",

@@ -23,6 +23,7 @@ import {
   "mst-mkt/moonship/modules/python" @mod_python,
   "mst-mkt/moonship/modules/rust" @mod_rust,
   "mst-mkt/moonship/modules/golang" @mod_golang,
+  "mst-mkt/moonship/modules/java" @mod_java,
   "mst-mkt/moonship/modules/username" @mod_username,
   "mst-mkt/moonship/shell" @shell,
 }
