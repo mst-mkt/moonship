@@ -19,5 +19,11 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["directory"] = @mod_directory.DirectoryModule::from_config(config)
   modules["git_branch"] = @mod_git_branch.GitBranchModule::from_config(config)
   modules["git_status"] = @mod_git_status.GitStatusModule::from_config(config)
+  modules["cmd_duration"] = @mod_cmd_duration.CmdDurationModule::from_config(
+    config,
+  )
+  modules["jobs"] = @mod_jobs.JobsModule::from_config(config)
+  modules["line_break"] = @mod_line_break.LineBreakModule::from_config(config)
+  modules["git_commit"] = @mod_git_commit.GitCommitModule::from_config(config)
   modules
 }

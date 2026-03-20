@@ -53,6 +53,25 @@ pub fn Config::default() -> Config {
       "deleted": "✘",
     },
   }
+  modules["cmd_duration"] = {
+    disabled: false,
+    format: "took [$duration]($style) ",
+    style: "yellow bold",
+    props: { "min_time": "2000" },
+  }
+  modules["jobs"] = {
+    disabled: false,
+    format: "[$symbol$number]($style) ",
+    style: "bold blue",
+    props: { "symbol": "✦", "number_threshold": "2" },
+  }
+  modules["line_break"] = { disabled: false, format: "", style: "", props: {} }
+  modules["git_commit"] = {
+    disabled: false,
+    format: "[\\($hash\\)]($style) ",
+    style: "green bold",
+    props: { "only_detached": "true" },
+  }
   {
     format: "$directory$git_branch$git_status\n$character",
     scan_timeout: 1000,

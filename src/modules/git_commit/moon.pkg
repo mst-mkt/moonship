@@ -1,0 +1,15 @@
+import {
+  "mst-mkt/moonship/config" @config,
+  "mst-mkt/moonship/context" @context,
+  "mst-mkt/moonship/module_system" @ms,
+  "mst-mkt/moonship/terminal" @terminal,
+}
+
+import {
+  "mizchi/libgit2" @libgit2,
+  "moonbitlang/x/fs" @fs,
+} for "wbtest"
+
+options(
+  "supported-targets": "native",
+)
