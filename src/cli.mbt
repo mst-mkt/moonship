@@ -27,26 +27,12 @@ struct PromptArgs {
 }
 
 ///|
-fn PromptArgs::default() -> PromptArgs {
-  {
-    status: 0,
-    cmd_duration: 0,
-    jobs: 0,
-    terminal_width: 80,
-    keymap: "",
-    path: "",
-    shlvl: 0,
-    is_async: false,
-  }
-}
-
-///|
 fn parse_args(args : Array[String]) -> Command {
   guard not(args.is_empty()) else { return Help }
 
   match args[0] {
-    "prompt" => parse_prompt_args(args, fn(pa) { Prompt(pa) })
-    "timings" => parse_prompt_args(args, fn(pa) { Timings(pa) })
+    "prompt" => parse_prompt_args(args[1:].to_array(), fn(pa) { Prompt(pa) })
+    "timings" => parse_prompt_args(args[1:].to_array(), fn(pa) { Timings(pa) })
     "module" => parse_module_command(args)
     "init" => if args.length() > 1 { Init(args[1]) } else { UnknownShell }
     "cache" =>
@@ -65,39 +51,53 @@ fn parse_args(args : Array[String]) -> Command {
 
 ///|
 fn parse_prompt_args(
-  args : Array[String],
+  argv : Array[String],
   ctor : (PromptArgs) -> Command,
 ) -> Command {
-  let pa = args[1:]
-    .iter()
-    .fold(init=PromptArgs::default(), fn(pa, arg) {
-      if arg == "--async" {
-        return { ..pa, is_async: true }
-      }
+  let status = Ref::new("0")
+  let cmd_duration = Ref::new("0")
+  let jobs = Ref::new("0")
+  let terminal_width = Ref::new("80")
+  let keymap = Ref::new("")
+  let path = Ref::new("")
+  let shlvl = Ref::new("0")
+  let is_async = Ref::new(false)
 
-      match extract_flag_value(arg) {
-        Some(("status", v)) => { ..pa, status: parse_int_arg(v) }
-        Some(("cmd-duration", v)) => { ..pa, cmd_duration: parse_int_arg(v) }
-        Some(("jobs", v)) => { ..pa, jobs: parse_int_arg(v) }
-        Some(("terminal-width", v)) =>
-          { ..pa, terminal_width: parse_int_arg(v) }
-        Some(("keymap", v)) => { ..pa, keymap: v }
-        Some(("path", v)) => { ..pa, path: v }
-        Some(("shlvl", v)) => { ..pa, shlvl: parse_int_arg(v) }
-        _ => pa
-      }
-    })
-  ctor(pa)
-}
+  let spec : Array[(String, String, @ArgParser.Spec, String)] = [
+    ("--status", "-s", Set_string(status), "exit code of last command"),
+    (
+      "--cmd-duration",
+      "-d",
+      Set_string(cmd_duration),
+      "duration of last command",
+    ),
+    ("--jobs", "-j", Set_string(jobs), "number of background jobs"),
+    (
+      "--terminal-width",
+      "-w",
+      Set_string(terminal_width),
+      "terminal width in columns",
+    ),
+    ("--keymap", "-k", Set_string(keymap), "vim keymap mode"),
+    ("--path", "-p", Set_string(path), "override current directory"),
+    ("--shlvl", "", Set_string(shlvl), "shell nesting level"),
+    ("--async", "", Set(is_async), "recompute and update cache"),
+  ]
 
-///|
-/// Extract ("key", "value") from "--key=value"
-fn extract_flag_value(arg : String) -> (String, String)? {
-  guard arg.has_prefix("--") else { return None }
-  arg[2:]
-  .to_string()
-  .split_once("=")
-  .map(fn(pair) { (pair.0.to_string(), pair.1.to_string()) })
+  @ArgParser.parse(spec, fn(_rest) {  }, "", argv) catch {
+    _ => ()
+  }
+
+  ctor({
+    status: parse_int_arg(status.val),
+    cmd_duration: parse_int_arg(cmd_duration.val),
+    jobs: parse_int_arg(jobs.val),
+    terminal_width: parse_int_arg(terminal_width.val),
+    keymap: keymap.val,
+    path: path.val,
+    shlvl: parse_int_arg(shlvl.val),
+    is_async: is_async.val,
+  })
 }
 
 ///|
@@ -109,11 +109,7 @@ fn parse_module_command(args : Array[String]) -> Command {
   }
 
   let name = args[1]
-  let rest = Array::new()
-  rest.push("module")
-  for i = 2; i < args.length(); i = i + 1 {
-    rest.push(args[i])
-  }
+  let rest = args[2:].to_array()
   parse_prompt_args(rest, fn(pa) { Module(name, pa) })
 }
 

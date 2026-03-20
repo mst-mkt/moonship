@@ -50,11 +50,11 @@ __moonship_precmd() {
   local jobs_count=${(%):-%j}
   local term_width=$COLUMNS
   MOONSHIP_PROMPT_ARGS=(
-    --status="$exit_code"
-    --cmd-duration="$cmd_duration"
-    --jobs="${jobs_count:-0}"
-    --terminal-width="${term_width:-80}"
-    --keymap="${KEYMAP:-}"
+    --status "$exit_code"
+    --cmd-duration "$cmd_duration"
+    --jobs "${jobs_count:-0}"
+    --terminal-width "${term_width:-80}"
+    --keymap "${KEYMAP:-}"
   )
 
   # Synchronous prompt (uses cache if available)
@@ -68,7 +68,7 @@ __moonship_precmd() {
 
 # Keymap change: redraw prompt with new keymap
 __moonship_zle_keymap_select() {
-  local raw=$("$MOONSHIP_BIN" prompt "${MOONSHIP_PROMPT_ARGS[@]}" --keymap="$KEYMAP")
+  local raw=$("$MOONSHIP_BIN" prompt "${MOONSHIP_PROMPT_ARGS[@]}" --keymap "$KEYMAP")
   PROMPT="$raw"
   zle reset-prompt
 }

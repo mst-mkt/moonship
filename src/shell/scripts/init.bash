@@ -41,10 +41,10 @@ __moonship_precmd() {
   local term_width=${COLUMNS:-80}
 
   PS1=$("$MOONSHIP_BIN" prompt \
-    --status="$exit_code" \
-    --cmd-duration="$cmd_duration" \
-    --jobs="$jobs_count" \
-    --terminal-width="$term_width")
+    --status "$exit_code" \
+    --cmd-duration "$cmd_duration" \
+    --jobs "$jobs_count" \
+    --terminal-width "$term_width")
 }
 
 PROMPT_COMMAND="__moonship_precmd${PROMPT_COMMAND:+;$PROMPT_COMMAND}"

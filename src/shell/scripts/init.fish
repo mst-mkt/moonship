@@ -21,10 +21,10 @@ function fish_prompt
   set -l jobs_count (count (jobs -p))
   set -l term_width $COLUMNS
   set -l prompt_args \
-    --status="$exit_code" \
-    --cmd-duration="$cmd_duration" \
-    --jobs="$jobs_count" \
-    --terminal-width="$term_width"
+    --status "$exit_code" \
+    --cmd-duration "$cmd_duration" \
+    --jobs "$jobs_count" \
+    --terminal-width "$term_width"
 
   # Synchronous prompt (uses cache if available)
   $MOONSHIP_BIN prompt $prompt_args

@@ -1,4 +1,5 @@
 import {
+  "Yoorkin/ArgParser" @ArgParser,
   "moonbitlang/async",
   "moonbitlang/core/env" @env,
   "moonbitlang/x/sys" @sys,

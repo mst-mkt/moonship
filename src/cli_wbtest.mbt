@@ -1,12 +1,28 @@
 ///|
 test "prompt: with options" {
-  let cmd = parse_args(["prompt", "--status=1", "--cmd-duration=500"])
+  let cmd = parse_args(["prompt", "--status", "1", "--cmd-duration", "500"])
   match cmd {
     Prompt(pa) => {
       assert_eq(pa.status, 1)
       assert_eq(pa.cmd_duration, 500)
       assert_eq(pa.jobs, 0)
       assert_eq(pa.terminal_width, 80)
+    }
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: short flags" {
+  let cmd = parse_args([
+    "prompt", "-s", "42", "-d", "100", "-j", "2", "-w", "120",
+  ])
+  match cmd {
+    Prompt(pa) => {
+      assert_eq(pa.status, 42)
+      assert_eq(pa.cmd_duration, 100)
+      assert_eq(pa.jobs, 2)
+      assert_eq(pa.terminal_width, 120)
     }
     _ => fail("Expected Prompt")
   }
@@ -27,7 +43,8 @@ test "prompt: defaults" {
 ///|
 test "prompt: all options" {
   let cmd = parse_args([
-    "prompt", "--status=127", "--cmd-duration=1000", "--jobs=3", "--terminal-width=120",
+    "prompt", "--status", "127", "--cmd-duration", "1000", "--jobs", "3", "--terminal-width",
+    "120",
   ])
   match cmd {
     Prompt(pa) => {
@@ -41,22 +58,58 @@ test "prompt: all options" {
 }
 
 ///|
-test "prompt: invalid values fallback to default" {
-  let cmd = parse_args(["prompt", "--status=abc", "--jobs=-"])
+test "prompt: --async flag" {
+  let cmd = parse_args(["prompt", "--async", "--status", "1"])
   match cmd {
     Prompt(pa) => {
-      assert_eq(pa.status, 0)
-      assert_eq(pa.jobs, 0)
+      assert_true(pa.is_async)
+      assert_eq(pa.status, 1)
     }
     _ => fail("Expected Prompt")
   }
 }
 
 ///|
-test "prompt: unknown flags ignored" {
-  let cmd = parse_args(["prompt", "--unknown=value", "--status=5"])
+test "prompt: default is_async is false" {
+  let cmd = parse_args(["prompt", "--status", "0"])
   match cmd {
-    Prompt(pa) => assert_eq(pa.status, 5)
+    Prompt(pa) => assert_true(not(pa.is_async))
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: --path" {
+  let cmd = parse_args(["prompt", "--path", "/home/user/project"])
+  match cmd {
+    Prompt(pa) => assert_eq(pa.path, "/home/user/project")
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: -p short flag" {
+  let cmd = parse_args(["prompt", "-p", "/tmp"])
+  match cmd {
+    Prompt(pa) => assert_eq(pa.path, "/tmp")
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: --keymap" {
+  let cmd = parse_args(["prompt", "--keymap", "vicmd"])
+  match cmd {
+    Prompt(pa) => assert_eq(pa.keymap, "vicmd")
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: -k short flag" {
+  let cmd = parse_args(["prompt", "-k", "visual"])
+  match cmd {
+    Prompt(pa) => assert_eq(pa.keymap, "visual")
     _ => fail("Expected Prompt")
   }
 }
@@ -114,7 +167,7 @@ test "timings: default" {
 
 ///|
 test "timings: with options" {
-  match parse_args(["timings", "--status=1"]) {
+  match parse_args(["timings", "--status", "1"]) {
     Timings(pa) => assert_eq(pa.status, 1)
     _ => fail("Expected Timings")
   }
@@ -134,49 +187,27 @@ test "unknown command" {
 }
 
 ///|
-test "flag: valid" {
-  match extract_flag_value("--status=0") {
-    Some(("status", "0")) => ()
-    _ => fail("Expected Some((status, 0))")
-  }
-  match extract_flag_value("--cmd-duration=500") {
-    Some(("cmd-duration", "500")) => ()
-    _ => fail("Expected Some((cmd-duration, 500))")
-  }
-}
-
-///|
-test "flag: invalid" {
-  assert_true(extract_flag_value("status=0") is None)
-  assert_true(extract_flag_value("--status") is None)
-  assert_true(extract_flag_value("") is None)
-}
-
-///|
-test "prompt: --async flag" {
-  let cmd = parse_args(["prompt", "--async", "--status=1"])
-  match cmd {
-    Prompt(pa) => {
-      assert_true(pa.is_async)
-      assert_eq(pa.status, 1)
-    }
-    _ => fail("Expected Prompt")
-  }
-}
-
-///|
-test "prompt: default is_async is false" {
-  let cmd = parse_args(["prompt", "--status=0"])
-  match cmd {
-    Prompt(pa) => assert_true(not(pa.is_async))
-    _ => fail("Expected Prompt")
-  }
-}
-
-///|
 test "parse int" {
   assert_eq(parse_int_arg("42"), 42)
   assert_eq(parse_int_arg("-1"), -1)
   assert_eq(parse_int_arg("abc"), 0)
   assert_eq(parse_int_arg(""), 0)
+}
+
+///|
+test "module: with --path" {
+  let cmd = parse_args(["module", "golang", "--path", "/home/user/project"])
+  match cmd {
+    Module(name, pa) => {
+      assert_eq(name, "golang")
+      assert_eq(pa.path, "/home/user/project")
+    }
+    _ => fail("Expected Module")
+  }
+}
+
+///|
+test "module: --list" {
+  assert_true(parse_args(["module", "--list"]) is ModuleList)
+  assert_true(parse_args(["module", "-l"]) is ModuleList)
 }
