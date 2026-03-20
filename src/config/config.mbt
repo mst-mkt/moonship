@@ -37,20 +37,20 @@ pub fn Config::default() -> Config {
   }
   modules["directory"] = {
     disabled: false,
-    format: "[$path]($style) ",
-    style: "bold cyan",
+    format: "[$path]($style)[$read_only]($read_only_style) ",
+    style: "cyan bold",
     props: { "truncation_length": "3", "truncate_to_repo": "true" },
   }
   modules["git_branch"] = {
     disabled: false,
-    format: "[$symbol$branch]($style) ",
+    format: "on [$symbol$branch(:$remote_branch)]($style) ",
     style: "bold purple",
-    props: { "truncation_length": "20", "symbol": " " },
+    props: { "truncation_length": "9999", "symbol": " " },
   }
   modules["git_status"] = {
     disabled: false,
-    format: "[\\[$all_status\\]]($style) ",
-    style: "bold red",
+    format: "([\\[$all_status$ahead_behind\\]]($style) )",
+    style: "red bold",
     props: {
       "staged": "+",
       "modified": "!",
@@ -73,13 +73,13 @@ pub fn Config::default() -> Config {
   modules["line_break"] = { disabled: false, format: "", style: "", props: {} }
   modules["git_commit"] = {
     disabled: false,
-    format: "[\\($hash\\)]($style) ",
+    format: "[\\($hash$tag\\)]($style) ",
     style: "green bold",
     props: { "only_detached": "true" },
   }
   modules["git_state"] = {
     disabled: false,
-    format: "\\([$state]($style)\\) ",
+    format: "\\([$state( $progress_current/$progress_total)]($style)\\) ",
     style: "bold yellow",
     props: {
       "rebase": "REBASING",
@@ -91,31 +91,31 @@ pub fn Config::default() -> Config {
   }
   modules["package"] = {
     disabled: false,
-    format: "[$symbol$version]($style) ",
+    format: "is [$symbol$version]($style) ",
     style: "208 bold",
     props: { "symbol": "📦 " },
   }
   modules["nodejs"] = {
     disabled: false,
-    format: "[$symbol($version)]($style) ",
+    format: "via [$symbol($version )]($style)",
     style: "bold green",
     props: { "symbol": " " },
   }
   modules["hostname"] = {
     disabled: false,
-    format: "[$hostname]($style) ",
-    style: "bold dimmed green",
+    format: "[$ssh_symbol$hostname]($style) in ",
+    style: "green dimmed bold",
     props: { "ssh_only": "true", "trim_at": "." },
   }
   modules["username"] = {
     disabled: false,
-    format: "[$user]($style) ",
+    format: "[$user]($style) in ",
     style: "",
-    props: { "style_root": "bold red", "style_user": "bold yellow" },
+    props: { "style_root": "red bold", "style_user": "yellow bold" },
   }
   {
-    format: "$directory$git_branch$git_status\n$character",
-    scan_timeout: 1000,
+    format: "$all",
+    scan_timeout: 30,
     command_timeout: 500,
     cache_ttl: 5000,
     add_newline: true,
