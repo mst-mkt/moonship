@@ -46,8 +46,14 @@ pub impl @ms.PromptModule for HostnameModule with execute(
     return Skipped("not in SSH session")
   }
 
-  let raw = @sys.get_env_var("HOSTNAME").unwrap_or("")
-  guard not(raw.is_empty()) else { return Skipped("HOSTNAME not set") }
+  let raw = match @sys.get_env_var("HOSTNAME") {
+    Some(h) if not(h.is_empty()) => h
+    _ => {
+      let h = @exec.exec_cmd("hostname", [])
+      guard not(h.is_empty()) else { return Skipped("hostname not available") }
+      h
+    }
+  }
 
   let hostname = trim_hostname(raw, self.trim_at)
 
