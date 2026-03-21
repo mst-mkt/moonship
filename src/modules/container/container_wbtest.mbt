@@ -39,3 +39,38 @@ test "parse_containerenv_name: empty" {
 test "parse_containerenv_name: no quotes" {
   assert_eq(parse_containerenv_name("name=my-container"), "my-container")
 }
+
+///|
+test "parse_containerenv_name: image with registry path" {
+  assert_eq(
+    parse_containerenv_name(
+      "image=\"registry.fedoraproject.org/fedora-toolbox:35\"",
+    ),
+    "fedora-toolbox:35",
+  )
+}
+
+///|
+test "parse_containerenv_name: image without registry path" {
+  assert_eq(parse_containerenv_name("image=\"ubuntu:22.04\""), "ubuntu:22.04")
+}
+
+///|
+test "parse_containerenv_name: unquoted image with registry path" {
+  assert_eq(
+    parse_containerenv_name(
+      "image=registry.fedoraproject.org/fedora-toolbox:35",
+    ),
+    "fedora-toolbox:35",
+  )
+}
+
+///|
+test "strip_registry_path: with slashes" {
+  assert_eq(strip_registry_path("a/b/c"), "c")
+}
+
+///|
+test "strip_registry_path: no slashes" {
+  assert_eq(strip_registry_path("my-image"), "my-image")
+}

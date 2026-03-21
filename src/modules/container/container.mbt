@@ -122,12 +122,31 @@ fn parse_containerenv_name(content : String) -> String {
       let start = if s.has_prefix("image=\"") { 7 } else { 6 }
       let rest = s[start:].to_string()
 
-      match rest.find("\"") {
-        Some(idx) => return rest[:idx].to_string()
-        None => return rest
+      let image = match rest.find("\"") {
+        Some(idx) => rest[:idx].to_string()
+        None => rest
       }
+
+      return strip_registry_path(image)
     }
   }
 
   ""
+}
+
+///|
+fn strip_registry_path(image : String) -> String {
+  let mut last_slash = -1
+
+  for i = 0; i < image.length(); i = i + 1 {
+    if image[i].unsafe_to_char() == '/' {
+      last_slash = i
+    }
+  }
+
+  if last_slash >= 0 {
+    image[last_slash + 1:].to_string()
+  } else {
+    image
+  }
 }
