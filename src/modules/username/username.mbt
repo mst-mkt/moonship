@@ -43,7 +43,7 @@ pub impl @ms.PromptModule for UsernameModule with execute(
   guard not(user.is_empty()) else { return Skipped("USER not set") }
 
   let is_root = user == "root"
-  let is_ssh = not(@sys.get_env_var("SSH_CONNECTION").unwrap_or("").is_empty())
+  let is_ssh = is_ssh_session()
 
   guard self.show_always || is_root || is_ssh else {
     return Skipped("not root or SSH")
@@ -58,4 +58,17 @@ pub impl @ms.PromptModule for UsernameModule with execute(
   )
 
   Output(@ms.ModuleOutput::new(segments))
+}
+
+///|
+fn is_ssh_session() -> Bool {
+  let vars = ["SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY"]
+
+  for v in vars {
+    if not(@sys.get_env_var(v).unwrap_or("").is_empty()) {
+      return true
+    }
+  }
+
+  false
 }
