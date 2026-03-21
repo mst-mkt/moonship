@@ -1,13 +1,13 @@
 ///|
 let module_order : Array[String] = [
   "username", "hostname", "shlvl", "directory", "git_branch", "git_commit", "git_state",
-  "git_status", "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal",
-  "daml", "dart", "deno", "dotnet", "elixir", "elm", "erlang", "fennel", "fortran",
-  "gleam", "golang", "gradle", "haskell", "haxe", "helm", "java", "julia", "kotlin",
-  "lua", "maven", "mojo", "moonbit", "nim", "nodejs", "ocaml", "odin", "opa", "perl",
-  "php", "purescript", "python", "quarto", "raku", "red", "rlang", "ruby", "rust",
-  "scala", "solidity", "swift", "terraform", "typst", "vagrant", "vlang", "xmake",
-  "zig", "cmd_duration", "line_break", "jobs", "character",
+  "git_status", "docker_context", "package", "buf", "bun", "c", "cmake", "cobol",
+  "cpp", "crystal", "daml", "dart", "deno", "dotnet", "elixir", "elm", "erlang",
+  "fennel", "fortran", "gleam", "golang", "gradle", "haskell", "haxe", "helm", "java",
+  "julia", "kotlin", "lua", "maven", "mojo", "moonbit", "nim", "nodejs", "ocaml",
+  "odin", "opa", "perl", "php", "purescript", "python", "quarto", "raku", "red",
+  "rlang", "ruby", "rust", "scala", "solidity", "swift", "terraform", "typst", "vagrant",
+  "vlang", "xmake", "zig", "cmd_duration", "line_break", "jobs", "character",
 ]
 
 ///|
@@ -108,6 +108,9 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["crystal"] = @mod_crystal.CrystalModule::from_config(config)
   modules["daml"] = @mod_daml.DamlModule::from_config(config)
   modules["dart"] = @mod_dart.DartModule::from_config(config)
+  modules["docker_context"] = @mod_docker_context.DockerContextModule::from_config(
+    config,
+  )
   modules["deno"] = @mod_deno.DenoModule::from_config(config)
   modules["dotnet"] = @mod_dotnet.DotnetModule::from_config(config)
   modules["elixir"] = @mod_elixir.ElixirModule::from_config(config)

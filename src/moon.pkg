@@ -21,6 +21,7 @@ import {
   "mst-mkt/moonship/modules/daml" @mod_daml,
   "mst-mkt/moonship/modules/dart" @mod_dart,
   "mst-mkt/moonship/modules/deno" @mod_deno,
+  "mst-mkt/moonship/modules/docker_context" @mod_docker_context,
   "mst-mkt/moonship/modules/directory" @mod_directory,
   "mst-mkt/moonship/modules/dotnet" @mod_dotnet,
   "mst-mkt/moonship/modules/elixir" @mod_elixir,

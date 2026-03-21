@@ -428,6 +428,12 @@ pub fn Config::default() -> Config {
       "repeat_offset": "0",
     },
   }
+  modules["docker_context"] = {
+    disabled: false,
+    format: "via [$symbol$context]($style) ",
+    style: "blue bold",
+    props: { "symbol": "🐳 ", "only_with_files": "true" },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
