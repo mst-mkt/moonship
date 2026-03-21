@@ -654,9 +654,18 @@ pub fn Config::default() -> Config {
   }
   modules["hg_state"] = {
     disabled: true,
-    format: "(\\($state\\) )",
+    format: "\\([$state]($style)\\) ",
     style: "bold yellow",
-    props: {},
+    props: {
+      "merge": "MERGING",
+      "rebase": "REBASING",
+      "update": "UPDATING",
+      "bisect": "BISECTING",
+      "shelve": "SHELVING",
+      "graft": "GRAFTING",
+      "transplant": "TRANSPLANTING",
+      "histedit": "HISTEDITING",
+    },
   }
   modules["env_var"] = {
     disabled: false,
