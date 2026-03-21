@@ -22,6 +22,7 @@ import {
   "mst-mkt/moonship/modules/container" @mod_container,
   "mst-mkt/moonship/modules/cobol" @mod_cobol,
   "mst-mkt/moonship/modules/cpp" @mod_cpp,
+  "mst-mkt/moonship/modules/custom" @mod_custom,
   "mst-mkt/moonship/modules/crystal" @mod_crystal,
   "mst-mkt/moonship/modules/daml" @mod_daml,
   "mst-mkt/moonship/modules/dart" @mod_dart,

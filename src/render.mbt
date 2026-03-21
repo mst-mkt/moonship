@@ -12,7 +12,7 @@ let module_order : Array[String] = [
   "zig", "guix_shell", "nix_shell", "conda", "pixi", "meson", "spack", "memory_usage",
   "aws", "gcloud", "openstack", "azure", "direnv", "env_var", "mise", "pulumi", "sudo",
   "cmd_duration", "line_break", "jobs", "battery", "time", "status", "container",
-  "netns", "os", "shell", "character",
+  "netns", "os", "shell", "character", "custom",
 ]
 
 ///|
@@ -193,6 +193,7 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["sudo"] = @mod_sudo.SudoModule::from_config(config)
   modules["os"] = @mod_os.OsModule::from_config(config)
   modules["shell"] = @mod_shell.ShellModule::from_config(config)
+  modules["custom"] = @mod_custom.CustomModule::from_config(config)
   modules["guix_shell"] = @mod_guix_shell.GuixShellModule::from_config(config)
   modules["nix_shell"] = @mod_nix_shell.NixShellModule::from_config(config)
   modules["conda"] = @mod_conda.CondaModule::from_config(config)

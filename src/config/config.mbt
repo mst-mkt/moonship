@@ -696,6 +696,12 @@ pub fn Config::default() -> Config {
       "display_style": "red bold",
     },
   }
+  modules["custom"] = {
+    disabled: false,
+    format: "[$symbol($output )]($style)",
+    style: "green bold",
+    props: { "symbol": "", "command": "" },
+  }
   modules["username"] = {
     disabled: false,
     format: "[$user]($style) in ",
