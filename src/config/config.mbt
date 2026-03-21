@@ -670,6 +670,26 @@ pub fn Config::default() -> Config {
     style: "green dimmed bold",
     props: { "ssh_only": "true", "trim_at": "." },
   }
+  modules["netns"] = {
+    disabled: false,
+    format: "[$symbol \\[$name\\]]($style) ",
+    style: "blue bold dimmed",
+    props: { "symbol": "🛜" },
+  }
+  modules["battery"] = {
+    disabled: false,
+    format: "[$symbol$percentage]($style) ",
+    style: "bold green",
+    props: {
+      "full_symbol": "󰁹 ",
+      "charging_symbol": "󰂄 ",
+      "discharging_symbol": "󰂃 ",
+      "unknown_symbol": "󰂑 ",
+      "empty_symbol": "󰂎 ",
+      "display_threshold": "10",
+      "display_style": "red bold",
+    },
+  }
   modules["username"] = {
     disabled: false,
     format: "[$user]($style) in ",
