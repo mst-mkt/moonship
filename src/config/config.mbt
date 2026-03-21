@@ -618,6 +618,22 @@ pub fn Config::default() -> Config {
       "utc_time_offset": "local",
     },
   }
+  modules["fossil_branch"] = {
+    disabled: true,
+    format: "on [$symbol$branch]($style) ",
+    style: "bold purple",
+    props: { "symbol": " " },
+  }
+  modules["fossil_metrics"] = {
+    disabled: true,
+    format: "([+$added]($added_style) )([-$deleted]($deleted_style) )",
+    style: "",
+    props: {
+      "added_style": "bold green",
+      "deleted_style": "bold red",
+      "only_nonzero_diffs": "true",
+    },
+  }
   modules["vcsh"] = {
     disabled: false,
     format: "vcsh [$symbol$repo]($style) ",
