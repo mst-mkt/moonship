@@ -640,6 +640,18 @@ pub fn Config::default() -> Config {
     style: "bold yellow",
     props: { "symbol": "" },
   }
+  modules["hg_branch"] = {
+    disabled: true,
+    format: "on [$symbol$branch(:$topic)]($style) ",
+    style: "bold purple",
+    props: { "symbol": " " },
+  }
+  modules["hg_state"] = {
+    disabled: true,
+    format: "(\\($state\\) )",
+    style: "bold yellow",
+    props: {},
+  }
   modules["env_var"] = {
     disabled: false,
     format: "with [$symbol$env_value]($style) ",

@@ -45,6 +45,8 @@ import {
   "mst-mkt/moonship/modules/gcloud" @mod_gcloud,
   "mst-mkt/moonship/modules/gleam" @mod_gleam,
   "mst-mkt/moonship/modules/guix_shell" @mod_guix_shell,
+  "mst-mkt/moonship/modules/hg_branch" @mod_hg_branch,
+  "mst-mkt/moonship/modules/hg_state" @mod_hg_state,
   "mst-mkt/moonship/modules/golang" @mod_golang,
   "mst-mkt/moonship/modules/gradle" @mod_gradle,
   "mst-mkt/moonship/modules/haskell" @mod_haskell,
