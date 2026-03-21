@@ -10,7 +10,7 @@ let module_order : Array[String] = [
   "swift", "terraform", "typst", "vagrant", "vlang", "xmake", "zig", "guix_shell",
   "nix_shell", "conda", "pixi", "meson", "spack", "memory_usage", "aws", "gcloud",
   "openstack", "azure", "direnv", "mise", "pulumi", "sudo", "cmd_duration", "line_break",
-  "jobs", "status", "container", "os", "shell", "character",
+  "jobs", "time", "status", "container", "os", "shell", "character",
 ]
 
 ///|
@@ -186,6 +186,7 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["memory_usage"] = @mod_memory_usage.MemoryUsageModule::from_config(
     config,
   )
+  modules["time"] = @mod_time.TimeModule::from_config(config)
   modules["status"] = @mod_status.StatusModule::from_config(config)
   modules["container"] = @mod_container.ContainerModule::from_config(config)
   modules

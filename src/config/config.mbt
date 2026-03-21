@@ -608,6 +608,16 @@ pub fn Config::default() -> Config {
     style: "blue bold",
     props: { "symbol": "🐳 ", "only_with_files": "true" },
   }
+  modules["time"] = {
+    disabled: true,
+    format: "at [$time]($style) ",
+    style: "bold yellow",
+    props: {
+      "use_12hr": "false",
+      "time_format": "",
+      "utc_time_offset": "local",
+    },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",

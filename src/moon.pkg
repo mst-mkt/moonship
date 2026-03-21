@@ -93,6 +93,7 @@ import {
   "mst-mkt/moonship/modules/sudo" @mod_sudo,
   "mst-mkt/moonship/modules/swift" @mod_swift,
   "mst-mkt/moonship/modules/terraform" @mod_terraform,
+  "mst-mkt/moonship/modules/time" @mod_time,
   "mst-mkt/moonship/modules/typst" @mod_typst,
   "mst-mkt/moonship/modules/username" @mod_username,
   "mst-mkt/moonship/modules/vagrant" @mod_vagrant,
