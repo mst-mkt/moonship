@@ -17,7 +17,7 @@ pub fn DartModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="🎯 "),
-    detect_files: ["pubspec.yaml", "pubspec.yml", "pubspec.lock"],
+    detect_files: ["pubspec.yaml", "pubspec.yml", "pubspec.lock", ".dart_tool"],
     detect_extensions: [".dart"],
   }
 }

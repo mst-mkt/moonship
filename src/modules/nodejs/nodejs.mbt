@@ -21,7 +21,7 @@ pub fn NodejsModule::new(
     style: config.style,
     not_capable_style: config.get_prop("not_capable_style", default="bold red"),
     symbol: config.get_prop("symbol", default=" "),
-    detect_files: ["package.json", ".node-version", ".nvmrc"],
+    detect_files: ["package.json", ".node-version", ".nvmrc", "node_modules"],
     detect_extensions: [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts"],
   }
 }

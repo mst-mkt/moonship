@@ -19,7 +19,7 @@ pub fn TerraformModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="💠 "),
-    detect_files: [],
+    detect_files: [".terraform"],
     detect_extensions: [".tf", ".tfplan", ".tfstate"],
   }
 }

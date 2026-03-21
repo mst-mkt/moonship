@@ -17,7 +17,7 @@ pub fn MavenModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="🅼 "),
-    detect_files: ["pom.xml"],
+    detect_files: ["pom.xml", ".mvn"],
     detect_extensions: [],
   }
 }

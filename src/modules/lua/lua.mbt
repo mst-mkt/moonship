@@ -19,7 +19,7 @@ pub fn LuaModule::new(
     style: config.style,
     symbol: config.get_prop("symbol", default="🌙 "),
     lua_binary: config.get_prop("lua_binary", default="lua"),
-    detect_files: [".lua-version"],
+    detect_files: [".lua-version", "lua"],
     detect_extensions: [".lua"],
   }
 }

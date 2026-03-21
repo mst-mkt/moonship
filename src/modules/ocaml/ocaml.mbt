@@ -27,7 +27,9 @@ pub fn OCamlModule::new(
       "local_switch_indicator",
       default="*",
     ),
-    detect_files: ["dune", "dune-project", "jbuild", "jbuild-ignore", ".merlin"],
+    detect_files: [
+      "dune", "dune-project", "jbuild", "jbuild-ignore", ".merlin", "_opam", "esy.lock",
+    ],
     detect_extensions: [".opam", ".ml", ".mli", ".re", ".rei"],
   }
 }

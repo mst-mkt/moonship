@@ -17,7 +17,7 @@ pub fn ElmModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="🌳 "),
-    detect_files: ["elm.json", "elm-package.json", ".elm-version"],
+    detect_files: ["elm.json", "elm-package.json", ".elm-version", "elm-stuff"],
     detect_extensions: [".elm"],
   }
 }

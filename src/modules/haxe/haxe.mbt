@@ -17,7 +17,9 @@ pub fn HaxeModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="⌘ "),
-    detect_files: ["haxelib.json", "hxformat.json", ".haxerc"],
+    detect_files: [
+      "haxelib.json", "hxformat.json", ".haxerc", ".haxelib", "haxe_libraries",
+    ],
     detect_extensions: [".hx", ".hxml"],
   }
 }

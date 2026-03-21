@@ -17,7 +17,7 @@ pub fn RlangModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="📐 "),
-    detect_files: ["DESCRIPTION"],
+    detect_files: ["DESCRIPTION", ".Rproj.user"],
     detect_extensions: [".R", ".Rd", ".Rmd", ".Rproj", ".Rsx"],
   }
 }

@@ -17,7 +17,7 @@ pub fn ScalaModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="🆂 "),
-    detect_files: [".scalaenv", ".sbtenv", "build.sbt"],
+    detect_files: [".scalaenv", ".sbtenv", "build.sbt", ".metals"],
     detect_extensions: [".sbt", ".scala"],
   }
 }

@@ -23,6 +23,7 @@ pub fn GolangModule::new(
     symbol: config.get_prop("symbol", default="🐹 "),
     detect_files: [
       "go.mod", "go.sum", "go.work", "glide.yaml", "Gopkg.yml", "Gopkg.lock", ".go-version",
+      "Godeps",
     ],
     detect_extensions: [".go"],
   }
