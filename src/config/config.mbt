@@ -469,6 +469,24 @@ pub fn Config::default() -> Config {
       "map_symbol": "false",
     },
   }
+  modules["nix_shell"] = {
+    disabled: false,
+    format: "via [$symbol$state( \\($name\\))]($style) ",
+    style: "bold blue",
+    props: {
+      "symbol": "❄️  ",
+      "impure_msg": "impure",
+      "pure_msg": "pure",
+      "unknown_msg": "",
+      "heuristic": "false",
+    },
+  }
+  modules["conda"] = {
+    disabled: false,
+    format: "via [$symbol$environment]($style) ",
+    style: "green bold",
+    props: { "symbol": "🅒 ", "ignore_base": "true" },
+  }
   modules["docker_context"] = {
     disabled: false,
     format: "via [$symbol$context]($style) ",
