@@ -1,18 +1,18 @@
 ///|
 let module_order : Array[String] = [
   "username", "hostname", "localip", "shlvl", "singularity", "kubernetes", "nats",
-  "directory", "vcsh", "fossil_branch", "fossil_metrics", "git_branch", "hg_branch",
-  "hg_state", "pijul_channel", "git_commit", "git_state", "git_metrics", "git_status",
-  "docker_context", "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal",
-  "daml", "dart", "deno", "dotnet", "elixir", "elm", "erlang", "fennel", "fortran",
-  "gleam", "golang", "gradle", "haskell", "haxe", "helm", "java", "julia", "kotlin",
-  "lua", "maven", "mojo", "moonbit", "nim", "nodejs", "ocaml", "odin", "opa", "perl",
-  "php", "purescript", "python", "quarto", "raku", "red", "rlang", "ruby", "rust",
-  "scala", "solidity", "swift", "terraform", "typst", "vagrant", "vlang", "xmake",
-  "zig", "guix_shell", "nix_shell", "conda", "pixi", "meson", "spack", "memory_usage",
-  "aws", "gcloud", "openstack", "azure", "direnv", "env_var", "mise", "pulumi", "sudo",
-  "cmd_duration", "line_break", "jobs", "battery", "time", "status", "container",
-  "netns", "os", "shell", "character", "custom",
+  "directory", "vcsh", "fossil_branch", "fossil_metrics", "git_branch", "git_commit",
+  "git_state", "git_metrics", "git_status", "hg_branch", "hg_state", "pijul_channel",
+  "docker_context", "package", "bun", "c", "cmake", "cobol", "cpp", "daml", "dart",
+  "deno", "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang",
+  "gradle", "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven",
+  "mojo", "moonbit", "nim", "nodejs", "ocaml", "odin", "opa", "perl", "php", "pulumi",
+  "purescript", "python", "quarto", "raku", "rlang", "red", "ruby", "rust", "scala",
+  "solidity", "swift", "terraform", "typst", "vlang", "vagrant", "xmake", "zig",
+  "buf", "guix_shell", "nix_shell", "conda", "pixi", "meson", "spack", "memory_usage",
+  "aws", "gcloud", "openstack", "azure", "direnv", "env_var", "mise", "crystal",
+  "custom", "sudo", "cmd_duration", "line_break", "jobs", "battery", "time", "status",
+  "container", "netns", "os", "shell", "character",
 ]
 
 ///|
