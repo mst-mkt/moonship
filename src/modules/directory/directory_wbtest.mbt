@@ -18,12 +18,12 @@ async test "home exact match" {
 
 ///|
 async test "deep path truncation" {
-  assert_eq(format_path("/a/b/c/d/e", "", 3, false, None), "…/c/d/e")
+  assert_eq(format_path("/a/b/c/d/e", "", 3, false, None), "c/d/e")
 }
 
 ///|
 async test "truncation_length=1" {
-  assert_eq(format_path("/a/b/c/d/e", "", 1, false, None), "…/e")
+  assert_eq(format_path("/a/b/c/d/e", "", 1, false, None), "e")
 }
 
 ///|
@@ -73,7 +73,7 @@ async test "exact truncation boundary" {
 
 ///|
 async test "one over truncation boundary" {
-  assert_eq(format_path("/a/b/c/d", "", 3, false, None), "…/b/c/d")
+  assert_eq(format_path("/a/b/c/d", "", 3, false, None), "b/c/d")
 }
 
 ///|
@@ -122,7 +122,7 @@ async test "truncate_to_repo: deep path truncated" {
       true,
       Some("/home/user/repo"),
     ),
-    "…/b/c/d",
+    "b/c/d",
   )
 }
 

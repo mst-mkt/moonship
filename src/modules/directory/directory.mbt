@@ -21,7 +21,7 @@ pub fn DirectoryModule::new(
     style: config.style,
     truncation_length: config.get_int_prop("truncation_length", default=3),
     truncate_to_repo: config.get_prop("truncate_to_repo") == "true",
-    truncation_symbol: config.get_prop("truncation_symbol", default="…/"),
+    truncation_symbol: config.get_prop("truncation_symbol", default=""),
     home_symbol: config.get_prop("home_symbol", default="~"),
   }
 }
@@ -75,7 +75,7 @@ fn format_path(
   truncation_length : Int,
   truncate_to_repo : Bool,
   repo_root : String?,
-  truncation_symbol? : String = "…/",
+  truncation_symbol? : String = "",
   home_symbol? : String = "~",
 ) -> String {
   let display = match (truncate_to_repo, repo_root) {
