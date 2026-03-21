@@ -2,7 +2,6 @@
 pub struct BatteryModule {
   disabled : Bool
   format : String
-  style : String
   full_symbol : String
   charging_symbol : String
   discharging_symbol : String
@@ -21,7 +20,6 @@ pub fn BatteryModule::new(
   {
     disabled: config.disabled,
     format: config.format,
-    style: config.style,
     full_symbol: config.get_prop("full_symbol", default="󰁹 "),
     charging_symbol: config.get_prop("charging_symbol", default="󰂄 "),
     discharging_symbol: config.get_prop("discharging_symbol", default="󰂃 "),
@@ -51,6 +49,9 @@ pub impl @ms.PromptModule for BatteryModule with execute(
 
   let (percentage, status) = read_battery()
   guard percentage >= 0 else { return Skipped("no battery found") }
+  guard percentage <= self.display_threshold else {
+    return Skipped("battery above display threshold")
+  }
 
   let symbol = match status {
     "Charging" => self.charging_symbol
@@ -65,16 +66,10 @@ pub impl @ms.PromptModule for BatteryModule with execute(
     _ => self.unknown_symbol
   }
 
-  let style = if percentage <= self.display_threshold {
-    self.display_style
-  } else {
-    self.style
-  }
-
   let vars : Map[String, String] = {
     "percentage": percentage.to_string() + "%",
     "symbol": symbol,
-    "style": style,
+    "style": self.display_style,
   }
   let segments = @ms.format_string(
     self.format,
