@@ -670,6 +670,12 @@ pub fn Config::default() -> Config {
     style: "green dimmed bold",
     props: { "ssh_only": "true", "trim_at": "." },
   }
+  modules["localip"] = {
+    disabled: true,
+    format: "[$localipv4]($style) ",
+    style: "yellow bold",
+    props: { "ssh_only": "true" },
+  }
   modules["netns"] = {
     disabled: false,
     format: "[$symbol \\[$name\\]]($style) ",

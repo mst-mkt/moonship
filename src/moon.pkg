@@ -59,6 +59,7 @@ import {
   "mst-mkt/moonship/modules/julia" @mod_julia,
   "mst-mkt/moonship/modules/kubernetes" @mod_kubernetes,
   "mst-mkt/moonship/modules/kotlin" @mod_kotlin,
+  "mst-mkt/moonship/modules/localip" @mod_localip,
   "mst-mkt/moonship/modules/line_break" @mod_line_break,
   "mst-mkt/moonship/modules/lua" @mod_lua,
   "mst-mkt/moonship/modules/maven" @mod_maven,
