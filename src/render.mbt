@@ -7,7 +7,7 @@ let module_order : Array[String] = [
   "julia", "kotlin", "lua", "maven", "mojo", "moonbit", "nim", "nodejs", "ocaml",
   "odin", "opa", "perl", "php", "purescript", "python", "quarto", "raku", "red",
   "rlang", "ruby", "rust", "scala", "solidity", "swift", "terraform", "typst", "vagrant",
-  "vlang", "xmake", "zig", "cmd_duration", "line_break", "jobs", "character",
+  "vlang", "xmake", "zig", "sudo", "cmd_duration", "line_break", "jobs", "character",
 ]
 
 ///|
@@ -158,5 +158,6 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["vlang"] = @mod_vlang.VlangModule::from_config(config)
   modules["xmake"] = @mod_xmake.XmakeModule::from_config(config)
   modules["zig"] = @mod_zig.ZigModule::from_config(config)
+  modules["sudo"] = @mod_sudo.SudoModule::from_config(config)
   modules
 }

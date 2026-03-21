@@ -428,6 +428,12 @@ pub fn Config::default() -> Config {
       "repeat_offset": "0",
     },
   }
+  modules["sudo"] = {
+    disabled: true,
+    format: "[as $symbol]($style)",
+    style: "bold blue",
+    props: { "symbol": "🧙 " },
+  }
   modules["docker_context"] = {
     disabled: false,
     format: "via [$symbol$context]($style) ",
