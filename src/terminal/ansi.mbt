@@ -162,6 +162,11 @@ fn apply_style_part(style : Style, part : String) -> Style {
         Default => style
         color => style.with_bg(color)
       }
+    _ if part.has_prefix("fg:") =>
+      match parse_color(part[3:].to_string()) {
+        Default => style
+        color => style.with_fg(color)
+      }
     _ =>
       match parse_color(part) {
         Default => style

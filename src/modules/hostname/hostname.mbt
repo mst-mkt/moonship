@@ -50,6 +50,9 @@ pub impl @ms.PromptModule for HostnameModule with execute(
   let hostname = trim_hostname(raw, self.trim_at)
 
   let vars : Map[String, String] = { "hostname": hostname, "style": self.style }
+  if is_ssh {
+    vars["ssh_symbol"] = "🌐 "
+  }
   let segments = @ms.format_string(
     self.format,
     vars,
