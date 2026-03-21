@@ -517,6 +517,29 @@ pub fn Config::default() -> Config {
     style: "white bold dimmed",
     props: { "symbol": "🐏 ", "threshold": "75" },
   }
+  modules["direnv"] = {
+    disabled: true,
+    format: "[$symbol$loaded/$allowed]($style) ",
+    style: "bold bright-yellow",
+    props: {
+      "symbol": "direnv ",
+      "allowed_msg": "allowed",
+      "not_allowed_msg": "not allowed",
+      "denied_msg": "denied",
+      "loaded_msg": "loaded",
+      "unloaded_msg": "not loaded",
+    },
+  }
+  modules["mise"] = {
+    disabled: true,
+    format: "on [$symbol$health]($style) ",
+    style: "bold purple",
+    props: {
+      "symbol": "mise ",
+      "healthy_symbol": "healthy",
+      "unhealthy_symbol": "unhealthy",
+    },
+  }
   modules["docker_context"] = {
     disabled: false,
     format: "via [$symbol$context]($style) ",
