@@ -99,8 +99,6 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["git_commit"] = @mod_git_commit.GitCommitModule::from_config(config)
   modules["git_state"] = @mod_git_state.GitStateModule::from_config(config)
   modules["package"] = @mod_package.PackageModule::from_config(config)
-  modules["nodejs"] = @mod_nodejs.NodejsModule::from_config(config)
-  modules["python"] = @mod_python.PythonModule::from_config(config)
   modules["buf"] = @mod_buf.BufModule::from_config(config)
   modules["bun"] = @mod_bun.BunModule::from_config(config)
   modules["c"] = @mod_c.CModule::from_config(config)
