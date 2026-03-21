@@ -428,6 +428,29 @@ pub fn Config::default() -> Config {
       "repeat_offset": "0",
     },
   }
+  modules["os"] = {
+    disabled: true,
+    format: "[$symbol]($style)",
+    style: "bold white",
+    props: {},
+  }
+  modules["shell"] = {
+    disabled: true,
+    format: "[$indicator]($style) ",
+    style: "white bold",
+    props: {
+      "bash_indicator": "bsh",
+      "fish_indicator": "fsh",
+      "zsh_indicator": "zsh",
+      "unknown_indicator": "",
+    },
+  }
+  modules["container"] = {
+    disabled: false,
+    format: "[$symbol \\[$name\\]]($style) ",
+    style: "red bold dimmed",
+    props: { "symbol": "⬢" },
+  }
   modules["sudo"] = {
     disabled: true,
     format: "[as $symbol]($style)",
