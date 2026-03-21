@@ -1,7 +1,7 @@
 ///|
 let module_order : Array[String] = [
   "username", "hostname", "shlvl", "singularity", "kubernetes", "nats", "directory",
-  "git_branch", "git_commit", "git_state", "git_metrics", "git_status", "docker_context",
+  "vcsh", "git_branch", "git_commit", "git_state", "git_metrics", "git_status", "docker_context",
   "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal", "daml", "dart",
   "deno", "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang",
   "gradle", "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven",
@@ -160,6 +160,7 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["xmake"] = @mod_xmake.XmakeModule::from_config(config)
   modules["zig"] = @mod_zig.ZigModule::from_config(config)
   modules["kubernetes"] = @mod_kubernetes.KubernetesModule::from_config(config)
+  modules["vcsh"] = @mod_vcsh.VcshModule::from_config(config)
   modules["git_metrics"] = @mod_git_metrics.GitMetricsModule::from_config(
     config,
   )

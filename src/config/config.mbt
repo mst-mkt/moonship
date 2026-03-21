@@ -618,6 +618,12 @@ pub fn Config::default() -> Config {
       "utc_time_offset": "local",
     },
   }
+  modules["vcsh"] = {
+    disabled: false,
+    format: "vcsh [$symbol$repo]($style) ",
+    style: "bold yellow",
+    props: { "symbol": "" },
+  }
   modules["env_var"] = {
     disabled: false,
     format: "with [$symbol$env_value]($style) ",
