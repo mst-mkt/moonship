@@ -2,16 +2,16 @@
 let module_order : Array[String] = [
   "username", "hostname", "shlvl", "singularity", "kubernetes", "nats", "directory",
   "vcsh", "fossil_branch", "fossil_metrics", "git_branch", "hg_branch", "hg_state",
-  "git_commit", "git_state", "git_metrics", "git_status", "docker_context", "package",
-  "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal", "daml", "dart", "deno",
-  "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang", "gradle",
-  "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven", "mojo", "moonbit",
-  "nim", "nodejs", "ocaml", "odin", "opa", "perl", "php", "purescript", "python",
-  "quarto", "raku", "red", "rlang", "ruby", "rust", "scala", "solidity", "swift",
-  "terraform", "typst", "vagrant", "vlang", "xmake", "zig", "guix_shell", "nix_shell",
-  "conda", "pixi", "meson", "spack", "memory_usage", "aws", "gcloud", "openstack",
-  "azure", "direnv", "env_var", "mise", "pulumi", "sudo", "cmd_duration", "line_break",
-  "jobs", "time", "status", "container", "os", "shell", "character",
+  "pijul_channel", "git_commit", "git_state", "git_metrics", "git_status", "docker_context",
+  "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal", "daml", "dart",
+  "deno", "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang",
+  "gradle", "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven",
+  "mojo", "moonbit", "nim", "nodejs", "ocaml", "odin", "opa", "perl", "php", "purescript",
+  "python", "quarto", "raku", "red", "rlang", "ruby", "rust", "scala", "solidity",
+  "swift", "terraform", "typst", "vagrant", "vlang", "xmake", "zig", "guix_shell",
+  "nix_shell", "conda", "pixi", "meson", "spack", "memory_usage", "aws", "gcloud",
+  "openstack", "azure", "direnv", "env_var", "mise", "pulumi", "sudo", "cmd_duration",
+  "line_break", "jobs", "time", "status", "container", "os", "shell", "character",
 ]
 
 ///|
@@ -170,6 +170,9 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   )
   modules["hg_branch"] = @mod_hg_branch.HgBranchModule::from_config(config)
   modules["hg_state"] = @mod_hg_state.HgStateModule::from_config(config)
+  modules["pijul_channel"] = @mod_pijul_channel.PijulChannelModule::from_config(
+    config,
+  )
   modules["git_metrics"] = @mod_git_metrics.GitMetricsModule::from_config(
     config,
   )

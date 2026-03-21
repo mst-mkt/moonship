@@ -71,6 +71,7 @@ import {
   "mst-mkt/moonship/modules/nix_shell" @mod_nix_shell,
   "mst-mkt/moonship/modules/nodejs" @mod_nodejs,
   "mst-mkt/moonship/modules/ocaml" @mod_ocaml,
+  "mst-mkt/moonship/modules/pijul_channel" @mod_pijul_channel,
   "mst-mkt/moonship/modules/odin" @mod_odin,
   "mst-mkt/moonship/modules/openstack" @mod_openstack,
   "mst-mkt/moonship/modules/os_info" @mod_os,

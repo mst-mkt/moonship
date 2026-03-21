@@ -640,6 +640,12 @@ pub fn Config::default() -> Config {
     style: "bold yellow",
     props: { "symbol": "" },
   }
+  modules["pijul_channel"] = {
+    disabled: true,
+    format: "on [$symbol$channel]($style) ",
+    style: "bold purple",
+    props: { "symbol": " " },
+  }
   modules["hg_branch"] = {
     disabled: true,
     format: "on [$symbol$branch(:$topic)]($style) ",
