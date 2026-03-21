@@ -37,6 +37,7 @@ import {
   "mst-mkt/moonship/modules/git_branch" @mod_git_branch,
   "mst-mkt/moonship/modules/git_commit" @mod_git_commit,
   "mst-mkt/moonship/modules/git_state" @mod_git_state,
+  "mst-mkt/moonship/modules/git_metrics" @mod_git_metrics,
   "mst-mkt/moonship/modules/git_status" @mod_git_status,
   "mst-mkt/moonship/modules/gcloud" @mod_gcloud,
   "mst-mkt/moonship/modules/gleam" @mod_gleam,

@@ -89,6 +89,16 @@ pub fn Config::default() -> Config {
       "bisect": "BISECTING",
     },
   }
+  modules["git_metrics"] = {
+    disabled: true,
+    format: "([+$added]($added_style) )([-$deleted]($deleted_style) )",
+    style: "",
+    props: {
+      "added_style": "bold green",
+      "deleted_style": "bold red",
+      "only_nonzero_diffs": "true",
+    },
+  }
   modules["package"] = {
     disabled: false,
     format: "is [$symbol$version]($style) ",
