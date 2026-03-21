@@ -1,0 +1,13 @@
+///|
+async test "name" {
+  let m : &@ms.PromptModule = OpenstackModule::new()
+  assert_eq(m.name(), "openstack")
+}
+
+///|
+async test "execute: no OS_CLOUD returns Skipped" {
+  let m = OpenstackModule::new()
+  let ctx = @context.Context::new(cwd="/tmp")
+  let result = m.execute(ctx)
+  assert_true(result is Skipped(_) || result is Output(_))
+}

@@ -562,6 +562,30 @@ pub fn Config::default() -> Config {
     style: "blue bold",
     props: { "symbol": "󰠅 " },
   }
+  modules["openstack"] = {
+    disabled: false,
+    format: "on [$symbol$cloud(\\($project\\))]($style) ",
+    style: "bold yellow",
+    props: { "symbol": "☁️  " },
+  }
+  modules["singularity"] = {
+    disabled: false,
+    format: "[$symbol\\[$env\\]]($style) ",
+    style: "blue bold dimmed",
+    props: { "symbol": "" },
+  }
+  modules["nats"] = {
+    disabled: true,
+    format: "[$symbol($name )]($style)",
+    style: "bold purple",
+    props: { "symbol": "✉️ " },
+  }
+  modules["pulumi"] = {
+    disabled: false,
+    format: "via [$symbol($username@)$stack]($style) ",
+    style: "bold 5",
+    props: { "symbol": " " },
+  }
   modules["docker_context"] = {
     disabled: false,
     format: "via [$symbol$context]($style) ",

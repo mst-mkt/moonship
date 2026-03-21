@@ -1,15 +1,16 @@
 ///|
 let module_order : Array[String] = [
-  "username", "hostname", "shlvl", "directory", "git_branch", "git_commit", "git_state",
-  "git_status", "docker_context", "package", "buf", "bun", "c", "cmake", "cobol",
-  "cpp", "crystal", "daml", "dart", "deno", "dotnet", "elixir", "elm", "erlang",
-  "fennel", "fortran", "gleam", "golang", "gradle", "haskell", "haxe", "helm", "java",
-  "julia", "kotlin", "lua", "maven", "mojo", "moonbit", "nim", "nodejs", "ocaml",
-  "odin", "opa", "perl", "php", "purescript", "python", "quarto", "raku", "red",
-  "rlang", "ruby", "rust", "scala", "solidity", "swift", "terraform", "typst", "vagrant",
-  "vlang", "xmake", "zig", "guix_shell", "nix_shell", "conda", "pixi", "meson", "spack",
-  "memory_usage", "aws", "gcloud", "azure", "direnv", "mise", "sudo", "cmd_duration",
-  "line_break", "jobs", "status", "container", "os", "shell", "character",
+  "username", "hostname", "shlvl", "singularity", "nats", "directory", "git_branch",
+  "git_commit", "git_state", "git_status", "docker_context", "package", "buf", "bun",
+  "c", "cmake", "cobol", "cpp", "crystal", "daml", "dart", "deno", "dotnet", "elixir",
+  "elm", "erlang", "fennel", "fortran", "gleam", "golang", "gradle", "haskell", "haxe",
+  "helm", "java", "julia", "kotlin", "lua", "maven", "mojo", "moonbit", "nim", "nodejs",
+  "ocaml", "odin", "opa", "perl", "php", "purescript", "python", "quarto", "raku",
+  "red", "rlang", "ruby", "rust", "scala", "solidity", "swift", "terraform", "typst",
+  "vagrant", "vlang", "xmake", "zig", "guix_shell", "nix_shell", "conda", "pixi",
+  "meson", "spack", "memory_usage", "aws", "gcloud", "openstack", "azure", "direnv",
+  "mise", "pulumi", "sudo", "cmd_duration", "line_break", "jobs", "status", "container",
+  "os", "shell", "character",
 ]
 
 ///|
@@ -158,6 +159,12 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["vlang"] = @mod_vlang.VlangModule::from_config(config)
   modules["xmake"] = @mod_xmake.XmakeModule::from_config(config)
   modules["zig"] = @mod_zig.ZigModule::from_config(config)
+  modules["singularity"] = @mod_singularity.SingularityModule::from_config(
+    config,
+  )
+  modules["nats"] = @mod_nats.NatsModule::from_config(config)
+  modules["openstack"] = @mod_openstack.OpenstackModule::from_config(config)
+  modules["pulumi"] = @mod_pulumi.PulumiModule::from_config(config)
   modules["aws"] = @mod_aws.AwsModule::from_config(config)
   modules["gcloud"] = @mod_gcloud.GcloudModule::from_config(config)
   modules["azure"] = @mod_azure.AzureModule::from_config(config)
