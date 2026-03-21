@@ -18,7 +18,7 @@ pub fn MojoModule::new(
     style: config.style,
     symbol: config.get_prop("symbol", default="🔥 "),
     detect_files: [],
-    detect_extensions: [".mojo"],
+    detect_extensions: [".mojo", ".🔥"],
   }
 }
 
