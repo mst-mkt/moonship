@@ -505,6 +505,18 @@ pub fn Config::default() -> Config {
     style: "yellow bold",
     props: { "symbol": "🐃 " },
   }
+  modules["spack"] = {
+    disabled: false,
+    format: "via [$symbol$environment]($style) ",
+    style: "blue bold",
+    props: { "symbol": "🅢 " },
+  }
+  modules["memory_usage"] = {
+    disabled: true,
+    format: "via $symbol[$ram( | $swap)]($style) ",
+    style: "white bold dimmed",
+    props: { "symbol": "🐏 ", "threshold": "75" },
+  }
   modules["docker_context"] = {
     disabled: false,
     format: "via [$symbol$context]($style) ",
