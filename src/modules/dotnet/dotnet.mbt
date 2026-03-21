@@ -55,6 +55,12 @@ pub impl @ms.PromptModule for DotnetModule with execute(
     "symbol": self.symbol,
     "style": self.style,
   }
+
+  let tfm = find_tfm(ctx.cwd, self.detect_extensions)
+  if not(tfm.is_empty()) {
+    vars["tfm"] = tfm
+  }
+
   let segments = @ms.format_string(
     self.format,
     vars,
@@ -62,4 +68,52 @@ pub impl @ms.PromptModule for DotnetModule with execute(
   )
 
   Output(@ms.ModuleOutput::new(segments))
+}
+
+///|
+fn find_tfm(cwd : String, extensions : Array[String]) -> String {
+  let entries = @fs.read_dir(cwd) catch { _ => return "" }
+
+  for entry in entries {
+    for ext in extensions {
+      if entry.has_suffix(ext) {
+        let path = cwd + "/" + entry
+        let content = @fs.read_file_to_string(path) catch { _ => continue }
+        let tfm = extract_tfm(content)
+        if not(tfm.is_empty()) {
+          return tfm
+        }
+      }
+    }
+  }
+
+  ""
+}
+
+///|
+fn extract_tfm(content : String) -> String {
+  let tags = ["<TargetFramework>", "<TargetFrameworks>"]
+
+  for tag in tags {
+    match content.find(tag) {
+      Some(idx) => {
+        let start = idx + tag.length()
+        let remaining = content[start:].to_string()
+        let end_tag = "</"
+
+        match remaining.find(end_tag) {
+          Some(end_idx) => {
+            let value = remaining[:end_idx].to_string()
+            if not(value.is_empty()) {
+              return value
+            }
+          }
+          None => ()
+        }
+      }
+      None => ()
+    }
+  }
+
+  ""
 }

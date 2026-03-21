@@ -77,6 +77,44 @@ async test "execute: detects .fsproj extension" {
 }
 
 ///|
+test "extract_tfm: TargetFramework" {
+  let csproj =
+    #|<Project Sdk="Microsoft.NET.Sdk">
+    #|  <PropertyGroup>
+    #|    <TargetFramework>net8.0</TargetFramework>
+    #|  </PropertyGroup>
+    #|</Project>
+  assert_eq(extract_tfm(csproj), "net8.0")
+}
+
+///|
+test "extract_tfm: TargetFrameworks plural" {
+  let csproj =
+    #|<Project Sdk="Microsoft.NET.Sdk">
+    #|  <PropertyGroup>
+    #|    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    #|  </PropertyGroup>
+    #|</Project>
+  assert_eq(extract_tfm(csproj), "netstandard2.0;net461")
+}
+
+///|
+test "extract_tfm: empty" {
+  assert_eq(extract_tfm(""), "")
+}
+
+///|
+test "extract_tfm: no tfm tag" {
+  let csproj =
+    #|<Project Sdk="Microsoft.NET.Sdk">
+    #|  <PropertyGroup>
+    #|    <OutputType>Exe</OutputType>
+    #|  </PropertyGroup>
+    #|</Project>
+  assert_eq(extract_tfm(csproj), "")
+}
+
+///|
 fn setup_dir(path : String) -> Unit {
   remove_dir_recursive(path)
   @fs.create_dir(path) catch {

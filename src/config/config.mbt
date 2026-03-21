@@ -295,7 +295,11 @@ pub fn Config::default() -> Config {
     disabled: false,
     format: "via [$symbol($version )(\\($switch_indicator$switch_name\\) )]($style)",
     style: "bold yellow",
-    props: { "symbol": "🐫 " },
+    props: {
+      "symbol": "🐫 ",
+      "global_switch_indicator": "",
+      "local_switch_indicator": "*",
+    },
   }
   modules["haxe"] = {
     disabled: false,

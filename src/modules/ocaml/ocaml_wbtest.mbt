@@ -53,6 +53,31 @@ async test "execute: detects .ml extension" {
 }
 
 ///|
+test "parse_opam_switch: global" {
+  let (indicator, name) = parse_opam_switch(
+    "ocaml-base-compiler.4.10.0", "", "*",
+  )
+  assert_eq(indicator, "")
+  assert_eq(name, "ocaml-base-compiler.4.10.0")
+}
+
+///|
+test "parse_opam_switch: local" {
+  let (indicator, name) = parse_opam_switch("/path/to/my-project", "", "*")
+  assert_eq(indicator, "*")
+  assert_eq(name, "my-project")
+}
+
+///|
+test "parse_opam_switch: custom indicators" {
+  let (indicator, name) = parse_opam_switch(
+    "ocaml-base-compiler.4.10.0", "g/", "^",
+  )
+  assert_eq(indicator, "g/")
+  assert_eq(name, "ocaml-base-compiler.4.10.0")
+}
+
+///|
 fn setup_dir(path : String) -> Unit {
   remove_dir_recursive(path)
   @fs.create_dir(path) catch {
