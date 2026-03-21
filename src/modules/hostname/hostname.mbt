@@ -5,6 +5,7 @@ pub struct HostnameModule {
   style : String
   ssh_only : Bool
   trim_at : String
+  ssh_symbol : String
 }
 
 ///|
@@ -19,6 +20,7 @@ pub fn HostnameModule::new(
     style: config.style,
     ssh_only: config.get_prop("ssh_only", default="true") == "true",
     trim_at: config.get_prop("trim_at", default="."),
+    ssh_symbol: config.get_prop("ssh_symbol", default="🌐 "),
   }
 }
 
@@ -51,7 +53,7 @@ pub impl @ms.PromptModule for HostnameModule with execute(
 
   let vars : Map[String, String] = { "hostname": hostname, "style": self.style }
   if is_ssh {
-    vars["ssh_symbol"] = "🌐 "
+    vars["ssh_symbol"] = self.ssh_symbol
   }
   let segments = @ms.format_string(
     self.format,
