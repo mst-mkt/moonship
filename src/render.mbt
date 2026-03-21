@@ -8,8 +8,8 @@ let module_order : Array[String] = [
   "odin", "opa", "perl", "php", "purescript", "python", "quarto", "raku", "red",
   "rlang", "ruby", "rust", "scala", "solidity", "swift", "terraform", "typst", "vagrant",
   "vlang", "xmake", "zig", "guix_shell", "nix_shell", "conda", "pixi", "meson", "spack",
-  "memory_usage", "direnv", "mise", "sudo", "cmd_duration", "line_break", "jobs",
-  "status", "container", "os", "shell", "character",
+  "memory_usage", "aws", "gcloud", "azure", "direnv", "mise", "sudo", "cmd_duration",
+  "line_break", "jobs", "status", "container", "os", "shell", "character",
 ]
 
 ///|
@@ -160,6 +160,9 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["vlang"] = @mod_vlang.VlangModule::from_config(config)
   modules["xmake"] = @mod_xmake.XmakeModule::from_config(config)
   modules["zig"] = @mod_zig.ZigModule::from_config(config)
+  modules["aws"] = @mod_aws.AwsModule::from_config(config)
+  modules["gcloud"] = @mod_gcloud.GcloudModule::from_config(config)
+  modules["azure"] = @mod_azure.AzureModule::from_config(config)
   modules["direnv"] = @mod_direnv.DirenvModule::from_config(config)
   modules["mise"] = @mod_mise.MiseModule::from_config(config)
   modules["sudo"] = @mod_sudo.SudoModule::from_config(config)

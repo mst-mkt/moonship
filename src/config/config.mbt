@@ -540,6 +540,24 @@ pub fn Config::default() -> Config {
       "unhealthy_symbol": "unhealthy",
     },
   }
+  modules["aws"] = {
+    disabled: false,
+    format: "on [$symbol($profile )(\\($region\\) )]($style)",
+    style: "bold yellow",
+    props: { "symbol": "☁️  " },
+  }
+  modules["gcloud"] = {
+    disabled: false,
+    format: "on [$symbol$account(@$domain)(\\($region\\))]($style) ",
+    style: "bold blue",
+    props: { "symbol": "☁️  " },
+  }
+  modules["azure"] = {
+    disabled: true,
+    format: "on [$symbol($subscription)]($style) ",
+    style: "blue bold",
+    props: { "symbol": "󰠅 " },
+  }
   modules["docker_context"] = {
     disabled: false,
     format: "via [$symbol$context]($style) ",
