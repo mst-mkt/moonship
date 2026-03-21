@@ -6,7 +6,8 @@
     "bobzhang/toml": "0.1.8",
     "mizchi/libgit2": "0.1.0",
     "moonbitlang/async": "0.16.8",
-    "Yoorkin/ArgParser": "0.2.1"
+    "Yoorkin/ArgParser": "0.2.1",
+    "moonbit-community/yaml": "0.0.4"
   },
   "readme": "README.md",
   "repository": "https://github.com/mst-mkt/moonship",

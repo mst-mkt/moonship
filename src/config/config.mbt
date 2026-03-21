@@ -584,6 +584,12 @@ pub fn Config::default() -> Config {
     style: "blue bold dimmed",
     props: { "symbol": "" },
   }
+  modules["kubernetes"] = {
+    disabled: true,
+    format: "[$symbol$context( \\($namespace\\))]($style) in ",
+    style: "cyan bold",
+    props: { "symbol": "☸ " },
+  }
   modules["nats"] = {
     disabled: true,
     format: "[$symbol($name )]($style)",

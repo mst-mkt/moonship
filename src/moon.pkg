@@ -51,6 +51,7 @@ import {
   "mst-mkt/moonship/modules/java" @mod_java,
   "mst-mkt/moonship/modules/jobs" @mod_jobs,
   "mst-mkt/moonship/modules/julia" @mod_julia,
+  "mst-mkt/moonship/modules/kubernetes" @mod_kubernetes,
   "mst-mkt/moonship/modules/kotlin" @mod_kotlin,
   "mst-mkt/moonship/modules/line_break" @mod_line_break,
   "mst-mkt/moonship/modules/lua" @mod_lua,

@@ -1,16 +1,16 @@
 ///|
 let module_order : Array[String] = [
-  "username", "hostname", "shlvl", "singularity", "nats", "directory", "git_branch",
-  "git_commit", "git_state", "git_metrics", "git_status", "docker_context", "package",
-  "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal", "daml", "dart", "deno",
-  "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang", "gradle",
-  "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven", "mojo", "moonbit",
-  "nim", "nodejs", "ocaml", "odin", "opa", "perl", "php", "purescript", "python",
-  "quarto", "raku", "red", "rlang", "ruby", "rust", "scala", "solidity", "swift",
-  "terraform", "typst", "vagrant", "vlang", "xmake", "zig", "guix_shell", "nix_shell",
-  "conda", "pixi", "meson", "spack", "memory_usage", "aws", "gcloud", "openstack",
-  "azure", "direnv", "mise", "pulumi", "sudo", "cmd_duration", "line_break", "jobs",
-  "status", "container", "os", "shell", "character",
+  "username", "hostname", "shlvl", "singularity", "kubernetes", "nats", "directory",
+  "git_branch", "git_commit", "git_state", "git_metrics", "git_status", "docker_context",
+  "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal", "daml", "dart",
+  "deno", "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang",
+  "gradle", "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven",
+  "mojo", "moonbit", "nim", "nodejs", "ocaml", "odin", "opa", "perl", "php", "purescript",
+  "python", "quarto", "raku", "red", "rlang", "ruby", "rust", "scala", "solidity",
+  "swift", "terraform", "typst", "vagrant", "vlang", "xmake", "zig", "guix_shell",
+  "nix_shell", "conda", "pixi", "meson", "spack", "memory_usage", "aws", "gcloud",
+  "openstack", "azure", "direnv", "mise", "pulumi", "sudo", "cmd_duration", "line_break",
+  "jobs", "status", "container", "os", "shell", "character",
 ]
 
 ///|
@@ -159,6 +159,7 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["vlang"] = @mod_vlang.VlangModule::from_config(config)
   modules["xmake"] = @mod_xmake.XmakeModule::from_config(config)
   modules["zig"] = @mod_zig.ZigModule::from_config(config)
+  modules["kubernetes"] = @mod_kubernetes.KubernetesModule::from_config(config)
   modules["git_metrics"] = @mod_git_metrics.GitMetricsModule::from_config(
     config,
   )
