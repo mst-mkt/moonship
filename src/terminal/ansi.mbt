@@ -46,7 +46,9 @@ fn style_codes(style : Style) -> Array[String] {
       (style.dimmed, "2"),
       (style.italic, "3"),
       (style.underline, "4"),
+      (style.blink, "5"),
       (style.inverted, "7"),
+      (style.hidden, "8"),
       (style.strikethrough, "9"),
     ]
     .iter()
@@ -77,7 +79,8 @@ pub fn stylize(text : String, style : Style) -> String {
 
 ///|
 pub fn parse_color(name : String) -> Color {
-  match name {
+  let lower = to_lower(name)
+  match lower {
     "black" => Black
     "red" => Red
     "green" => Green
@@ -149,20 +152,23 @@ pub fn parse_style(spec : String) -> Style {
 
 ///|
 fn apply_style_part(style : Style, part : String) -> Style {
-  match part {
+  let lower = to_lower(part)
+  match lower {
     "none" => Style::default()
     "bold" => style.with_bold()
     "italic" => style.with_italic()
     "underline" => style.with_underline()
+    "blink" => style.with_blink()
     "dimmed" => style.with_dimmed()
+    "hidden" => style.with_hidden()
     "inverted" => style.with_inverted()
     "strikethrough" => style.with_strikethrough()
-    _ if part.has_prefix("bg:") =>
+    _ if lower.has_prefix("bg:") =>
       match parse_color(part[3:].to_string()) {
         Default => style
         color => style.with_bg(color)
       }
-    _ if part.has_prefix("fg:") =>
+    _ if lower.has_prefix("fg:") =>
       match parse_color(part[3:].to_string()) {
         Default => style
         color => style.with_fg(color)
@@ -173,4 +179,19 @@ fn apply_style_part(style : Style, part : String) -> Style {
         color => style.with_fg(color)
       }
   }
+}
+
+///|
+fn to_lower(s : String) -> String {
+  let buf = StringBuilder::new()
+
+  for ch in s {
+    if ch >= 'A' && ch <= 'Z' {
+      buf.write_char((ch.to_int() + 32).unsafe_to_char())
+    } else {
+      buf.write_char(ch)
+    }
+  }
+
+  buf.to_string()
 }

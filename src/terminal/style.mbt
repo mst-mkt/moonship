@@ -28,7 +28,9 @@ pub(all) struct Style {
   bold : Bool
   italic : Bool
   underline : Bool
+  blink : Bool
   dimmed : Bool
+  hidden : Bool
   inverted : Bool
   strikethrough : Bool
 }
@@ -41,7 +43,9 @@ pub fn Style::default() -> Style {
     bold: false,
     italic: false,
     underline: false,
+    blink: false,
     dimmed: false,
+    hidden: false,
     inverted: false,
     strikethrough: false,
   }
@@ -80,6 +84,16 @@ pub fn Style::with_dimmed(self : Style) -> Style {
 ///|
 pub fn Style::with_inverted(self : Style) -> Style {
   { ..self, inverted: true }
+}
+
+///|
+pub fn Style::with_blink(self : Style) -> Style {
+  { ..self, blink: true }
+}
+
+///|
+pub fn Style::with_hidden(self : Style) -> Style {
+  { ..self, hidden: true }
 }
 
 ///|

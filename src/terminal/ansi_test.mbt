@@ -188,6 +188,68 @@ test "stylize: bright color" {
 }
 
 ///|
+test "parse_style: blink" {
+  let style = @terminal.parse_style("blink")
+  assert_true(style.blink)
+}
+
+///|
+test "parse_style: hidden" {
+  let style = @terminal.parse_style("hidden")
+  assert_true(style.hidden)
+}
+
+///|
+test "parse_style: case insensitive decorations" {
+  let style = @terminal.parse_style("Bold Italic UNDERLINE")
+  assert_true(style.bold)
+  assert_true(style.italic)
+  assert_true(style.underline)
+}
+
+///|
+test "parse_color: case insensitive" {
+  assert_true(@terminal.parse_color("Red") is Red)
+  assert_true(@terminal.parse_color("BLUE") is Blue)
+  assert_true(@terminal.parse_color("Bright-Red") is BrightRed)
+  assert_true(@terminal.parse_color("BrightGreen") is BrightGreen)
+}
+
+///|
+test "parse_style: case insensitive bg/fg prefix" {
+  let style = @terminal.parse_style("BG:red FG:blue")
+  assert_true(style.bg is Red)
+  assert_true(style.fg is Blue)
+}
+
+///|
+test "stylize: blink code" {
+  let style = @terminal.Style::default().with_blink()
+  let result = @terminal.stylize("x", style)
+  assert_true(result.contains("\u001b[5m"))
+}
+
+///|
+test "stylize: hidden code" {
+  let style = @terminal.Style::default().with_hidden()
+  let result = @terminal.stylize("x", style)
+  assert_true(result.contains("\u001b[8m"))
+}
+
+///|
+test "parse_style: blink and hidden with color" {
+  let style = @terminal.parse_style("blink hidden red")
+  assert_true(style.blink)
+  assert_true(style.hidden)
+  assert_true(style.fg is Red)
+}
+
+///|
+test "parse_color: uppercase hex" {
+  assert_true(@terminal.parse_color("#FF00AA") is Hex(0xFF00AA))
+}
+
+///|
 test "stylize: fg + bg + multiple attrs" {
   let style = @terminal.Style::default()
     .with_bold()
