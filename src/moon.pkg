@@ -31,6 +31,7 @@ import {
   "mst-mkt/moonship/modules/dotnet" @mod_dotnet,
   "mst-mkt/moonship/modules/elixir" @mod_elixir,
   "mst-mkt/moonship/modules/elm" @mod_elm,
+  "mst-mkt/moonship/modules/env_var" @mod_env_var,
   "mst-mkt/moonship/modules/erlang" @mod_erlang,
   "mst-mkt/moonship/modules/fennel" @mod_fennel,
   "mst-mkt/moonship/modules/fortran" @mod_fortran,

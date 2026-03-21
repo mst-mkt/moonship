@@ -9,8 +9,8 @@ let module_order : Array[String] = [
   "python", "quarto", "raku", "red", "rlang", "ruby", "rust", "scala", "solidity",
   "swift", "terraform", "typst", "vagrant", "vlang", "xmake", "zig", "guix_shell",
   "nix_shell", "conda", "pixi", "meson", "spack", "memory_usage", "aws", "gcloud",
-  "openstack", "azure", "direnv", "mise", "pulumi", "sudo", "cmd_duration", "line_break",
-  "jobs", "time", "status", "container", "os", "shell", "character",
+  "openstack", "azure", "direnv", "env_var", "mise", "pulumi", "sudo", "cmd_duration",
+  "line_break", "jobs", "time", "status", "container", "os", "shell", "character",
 ]
 
 ///|
@@ -173,6 +173,7 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["gcloud"] = @mod_gcloud.GcloudModule::from_config(config)
   modules["azure"] = @mod_azure.AzureModule::from_config(config)
   modules["direnv"] = @mod_direnv.DirenvModule::from_config(config)
+  modules["env_var"] = @mod_env_var.EnvVarModule::from_config(config)
   modules["mise"] = @mod_mise.MiseModule::from_config(config)
   modules["sudo"] = @mod_sudo.SudoModule::from_config(config)
   modules["os"] = @mod_os.OsModule::from_config(config)

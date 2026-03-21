@@ -618,6 +618,12 @@ pub fn Config::default() -> Config {
       "utc_time_offset": "local",
     },
   }
+  modules["env_var"] = {
+    disabled: false,
+    format: "with [$symbol$env_value]($style) ",
+    style: "black bold dimmed",
+    props: { "symbol": "", "variable": "", "default": "" },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
