@@ -1,13 +1,13 @@
 ///|
 let module_order : Array[String] = [
-  "username", "hostname", "directory", "git_branch", "git_commit", "git_state", "git_status",
-  "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal", "daml", "dart",
-  "deno", "dotnet", "elixir", "elm", "erlang", "fennel", "fortran", "gleam", "golang",
-  "gradle", "haskell", "haxe", "helm", "java", "julia", "kotlin", "lua", "maven",
-  "mojo", "moonbit", "nim", "nodejs", "ocaml", "odin", "opa", "perl", "php", "purescript",
-  "python", "quarto", "raku", "red", "rlang", "ruby", "rust", "scala", "solidity",
-  "swift", "terraform", "typst", "vagrant", "vlang", "xmake", "zig", "cmd_duration",
-  "line_break", "jobs", "character",
+  "username", "hostname", "shlvl", "directory", "git_branch", "git_commit", "git_state",
+  "git_status", "package", "buf", "bun", "c", "cmake", "cobol", "cpp", "crystal",
+  "daml", "dart", "deno", "dotnet", "elixir", "elm", "erlang", "fennel", "fortran",
+  "gleam", "golang", "gradle", "haskell", "haxe", "helm", "java", "julia", "kotlin",
+  "lua", "maven", "mojo", "moonbit", "nim", "nodejs", "ocaml", "odin", "opa", "perl",
+  "php", "purescript", "python", "quarto", "raku", "red", "rlang", "ruby", "rust",
+  "scala", "solidity", "swift", "terraform", "typst", "vagrant", "vlang", "xmake",
+  "zig", "cmd_duration", "line_break", "jobs", "character",
 ]
 
 ///|
@@ -143,6 +143,7 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["red"] = @mod_red.RedModule::from_config(config)
   modules["rlang"] = @mod_rlang.RlangModule::from_config(config)
   modules["ruby"] = @mod_ruby.RubyModule::from_config(config)
+  modules["shlvl"] = @mod_shlvl.ShlvlModule::from_config(config)
   modules["rust"] = @mod_rust.RustModule::from_config(config)
   modules["scala"] = @mod_scala.ScalaModule::from_config(config)
   modules["solidity"] = @mod_solidity.SolidityModule::from_config(config)

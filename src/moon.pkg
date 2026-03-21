@@ -65,6 +65,7 @@ import {
   "mst-mkt/moonship/modules/ruby" @mod_ruby,
   "mst-mkt/moonship/modules/rust" @mod_rust,
   "mst-mkt/moonship/modules/scala" @mod_scala,
+  "mst-mkt/moonship/modules/shlvl" @mod_shlvl,
   "mst-mkt/moonship/modules/solidity" @mod_solidity,
   "mst-mkt/moonship/modules/swift" @mod_swift,
   "mst-mkt/moonship/modules/terraform" @mod_terraform,

@@ -417,6 +417,17 @@ pub fn Config::default() -> Config {
     style: "bold green",
     props: { "symbol": "△ " },
   }
+  modules["shlvl"] = {
+    disabled: true,
+    format: "[$symbol$shlvl]($style) ",
+    style: "bold yellow",
+    props: {
+      "symbol": "↕️  ",
+      "threshold": "2",
+      "repeat": "false",
+      "repeat_offset": "0",
+    },
+  }
   modules["hostname"] = {
     disabled: false,
     format: "[$ssh_symbol$hostname]($style) in ",
