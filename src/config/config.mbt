@@ -457,6 +457,18 @@ pub fn Config::default() -> Config {
     style: "bold blue",
     props: { "symbol": "🧙 " },
   }
+  modules["status"] = {
+    disabled: true,
+    format: "[$symbol$status]($style) ",
+    style: "bold red",
+    props: {
+      "symbol": "❌",
+      "success_symbol": "",
+      "not_executable_symbol": "🚫",
+      "not_found_symbol": "🔍",
+      "map_symbol": "false",
+    },
+  }
   modules["docker_context"] = {
     disabled: false,
     format: "via [$symbol$context]($style) ",

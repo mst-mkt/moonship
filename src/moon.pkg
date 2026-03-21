@@ -71,6 +71,7 @@ import {
   "mst-mkt/moonship/modules/shell" @mod_shell,
   "mst-mkt/moonship/modules/shlvl" @mod_shlvl,
   "mst-mkt/moonship/modules/solidity" @mod_solidity,
+  "mst-mkt/moonship/modules/status" @mod_status,
   "mst-mkt/moonship/modules/sudo" @mod_sudo,
   "mst-mkt/moonship/modules/swift" @mod_swift,
   "mst-mkt/moonship/modules/terraform" @mod_terraform,
