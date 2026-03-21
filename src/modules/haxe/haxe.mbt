@@ -46,7 +46,7 @@ pub impl @ms.PromptModule for HaxeModule with execute(
   guard not(version.is_empty()) else { return Skipped("haxe not found") }
 
   let vars : Map[String, String] = {
-    "version": version,
+    "version": @exec.add_v_prefix(version),
     "symbol": self.symbol,
     "style": self.style,
   }

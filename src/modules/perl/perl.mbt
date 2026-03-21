@@ -49,7 +49,7 @@ pub impl @ms.PromptModule for PerlModule with execute(
   guard not(output.is_empty()) else { return Skipped("perl not found") }
 
   let vars : Map[String, String] = {
-    "version": output,
+    "version": @exec.add_v_prefix(output),
     "symbol": self.symbol,
     "style": self.style,
   }

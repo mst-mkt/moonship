@@ -62,7 +62,7 @@ pub impl @ms.PromptModule for PixiModule with execute(
   if not(version.is_empty()) {
     let parts = version.split(" ").collect()
     let ver = if parts.length() >= 2 { parts[1].to_string() } else { version }
-    vars["version"] = ver
+    vars["version"] = @exec.add_v_prefix(ver)
   }
 
   if has_env && (self.show_default_environment || env_name != "default") {

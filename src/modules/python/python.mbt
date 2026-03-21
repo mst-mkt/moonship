@@ -68,7 +68,7 @@ pub impl @ms.PromptModule for PythonModule with execute(
   }
 
   if not(version.is_empty()) {
-    vars["version"] = version
+    vars["version"] = @exec.add_v_prefix(version)
   }
 
   if not(virtualenv.is_empty()) {

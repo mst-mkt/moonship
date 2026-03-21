@@ -54,7 +54,7 @@ pub impl @ms.PromptModule for JavaModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "version": display,
+    "version": @exec.add_v_prefix(display),
     "symbol": self.symbol,
     "style": self.style,
   }

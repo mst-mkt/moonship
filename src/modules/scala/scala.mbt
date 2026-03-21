@@ -45,7 +45,7 @@ pub impl @ms.PromptModule for ScalaModule with execute(
   let version = @exec.exec_cmd("scala-cli", ["version", "--scala"])
   if not(version.is_empty()) {
     let vars : Map[String, String] = {
-      "version": version,
+      "version": @exec.add_v_prefix(version),
       "symbol": self.symbol,
       "style": self.style,
     }
@@ -66,7 +66,7 @@ pub impl @ms.PromptModule for ScalaModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "version": display,
+    "version": @exec.add_v_prefix(display),
     "symbol": self.symbol,
     "style": self.style,
   }

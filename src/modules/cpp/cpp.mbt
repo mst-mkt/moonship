@@ -59,7 +59,7 @@ pub impl @ms.PromptModule for CppModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "version": version,
+    "version": @exec.add_v_prefix(version),
     "symbol": self.symbol,
     "style": self.style,
   }

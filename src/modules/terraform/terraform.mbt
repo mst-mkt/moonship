@@ -63,7 +63,9 @@ pub impl @ms.PromptModule for TerraformModule with execute(
     ("tofu", "version"),
   ])
   if not(version_output.is_empty()) {
-    vars["version"] = parse_terraform_version(version_output)
+    vars["version"] = @exec.add_v_prefix(
+      parse_terraform_version(version_output),
+    )
   }
 
   let segments = @ms.format_string(

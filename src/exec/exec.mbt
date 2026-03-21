@@ -42,6 +42,15 @@ fn first_line(s : String) -> String {
 }
 
 ///|
+pub fn add_v_prefix(s : String) -> String {
+  if s.is_empty() || s.has_prefix("v") || s.has_prefix("V") {
+    s
+  } else {
+    "v" + s
+  }
+}
+
+///|
 pub fn strip_v_prefix(s : String) -> String {
   if s.has_prefix("v") || s.has_prefix("V") {
     s[1:].to_string()

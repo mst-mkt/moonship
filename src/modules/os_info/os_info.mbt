@@ -41,7 +41,7 @@ pub impl @ms.PromptModule for OsModule with execute(
   }
 
   if not(version.is_empty()) {
-    vars["version"] = version
+    vars["version"] = @exec.add_v_prefix(version)
   }
 
   let segments = @ms.format_string(

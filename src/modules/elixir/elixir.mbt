@@ -53,7 +53,7 @@ pub impl @ms.PromptModule for ElixirModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "version": elixir_version,
+    "version": @exec.add_v_prefix(elixir_version),
     "symbol": self.symbol,
     "style": self.style,
   }

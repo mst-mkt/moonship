@@ -47,9 +47,8 @@ pub impl @ms.PromptModule for NodejsModule with execute(
   let version = @exec.exec_cmd("node", ["--version"])
   guard not(version.is_empty()) else { return Skipped("node not found") }
 
-  let display = @exec.strip_v_prefix(version)
   let vars : Map[String, String] = {
-    "version": display,
+    "version": @exec.add_v_prefix(version),
     "symbol": self.symbol,
     "style": self.style,
   }
