@@ -7,8 +7,8 @@ let module_order : Array[String] = [
   "julia", "kotlin", "lua", "maven", "mojo", "moonbit", "nim", "nodejs", "ocaml",
   "odin", "opa", "perl", "php", "purescript", "python", "quarto", "raku", "red",
   "rlang", "ruby", "rust", "scala", "solidity", "swift", "terraform", "typst", "vagrant",
-  "vlang", "xmake", "zig", "nix_shell", "conda", "sudo", "cmd_duration", "line_break",
-  "jobs", "status", "container", "os", "shell", "character",
+  "vlang", "xmake", "zig", "guix_shell", "nix_shell", "conda", "pixi", "meson", "sudo",
+  "cmd_duration", "line_break", "jobs", "status", "container", "os", "shell", "character",
 ]
 
 ///|
@@ -162,8 +162,11 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["sudo"] = @mod_sudo.SudoModule::from_config(config)
   modules["os"] = @mod_os.OsModule::from_config(config)
   modules["shell"] = @mod_shell.ShellModule::from_config(config)
+  modules["guix_shell"] = @mod_guix_shell.GuixShellModule::from_config(config)
   modules["nix_shell"] = @mod_nix_shell.NixShellModule::from_config(config)
   modules["conda"] = @mod_conda.CondaModule::from_config(config)
+  modules["pixi"] = @mod_pixi.PixiModule::from_config(config)
+  modules["meson"] = @mod_meson.MesonModule::from_config(config)
   modules["status"] = @mod_status.StatusModule::from_config(config)
   modules["container"] = @mod_container.ContainerModule::from_config(config)
   modules

@@ -487,6 +487,24 @@ pub fn Config::default() -> Config {
     style: "green bold",
     props: { "symbol": "🅒 ", "ignore_base": "true" },
   }
+  modules["pixi"] = {
+    disabled: false,
+    format: "via [$symbol($version )(\\($environment\\) )]($style)",
+    style: "yellow bold",
+    props: { "symbol": "🧚 ", "show_default_environment": "true" },
+  }
+  modules["meson"] = {
+    disabled: false,
+    format: "via [$symbol$project]($style) ",
+    style: "blue bold",
+    props: { "symbol": "⬢ " },
+  }
+  modules["guix_shell"] = {
+    disabled: false,
+    format: "via [$symbol]($style) ",
+    style: "yellow bold",
+    props: { "symbol": "🐃 " },
+  }
   modules["docker_context"] = {
     disabled: false,
     format: "via [$symbol$context]($style) ",
