@@ -1,6 +1,7 @@
 ///|
 pub struct CustomModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -8,23 +9,40 @@ pub struct CustomModule {
 }
 
 ///|
-pub fn CustomModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "custom",
-  ),
-) -> CustomModule {
+pub fn CustomModule::default() -> CustomModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default=""),
-    command: config.get_prop("command", default=""),
+    disabled: false,
+    async_render: false,
+    format: "[$symbol($output )]($style)",
+    style: "green bold",
+    symbol: "",
+    command: "",
+  }
+}
+
+///|
+pub fn CustomModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> CustomModule {
+  let d = CustomModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    command: @config.get_toml_string(table, "command").unwrap_or(d.command),
   }
 }
 
 ///|
 pub fn CustomModule::from_config(config : @config.Config) -> CustomModule {
-  CustomModule::new(config=config.get_module("custom"))
+  match config.get_raw_module("custom") {
+    Some(table) => CustomModule::from_toml_table(table)
+    None => CustomModule::default()
+  }
 }
 
 ///|
@@ -33,8 +51,8 @@ pub impl @ms.PromptModule for CustomModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for CustomModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for CustomModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

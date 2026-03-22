@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = FortranModule::new()
+  let m : &@ms.PromptModule = FortranModule::default()
   assert_eq(m.name(), "fortran")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-fortran-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = FortranModule::new()
+  let m = FortranModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects fpm.toml" {
   let path = "/tmp/moonship-test-fortran-fpm"
   setup_dir(path)
   @fs.write_string_to_file(path + "/fpm.toml", "")
-  let m = FortranModule::new()
+  let m = FortranModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Fortran project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .f90 extension" {
   let path = "/tmp/moonship-test-fortran-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.f90", "")
-  let m = FortranModule::new()
+  let m = FortranModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Fortran project detected"))

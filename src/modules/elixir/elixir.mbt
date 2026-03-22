@@ -1,6 +1,7 @@
 ///|
 pub struct ElixirModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,24 +10,46 @@ pub struct ElixirModule {
 }
 
 ///|
-pub fn ElixirModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "elixir",
-  ),
-) -> ElixirModule {
+pub fn ElixirModule::default() -> ElixirModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="💧 "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version \\(OTP $otp_version\\) )]($style)",
+    style: "bold purple",
+    symbol: "💧 ",
     detect_files: ["mix.exs"],
     detect_extensions: [],
   }
 }
 
 ///|
+pub fn ElixirModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> ElixirModule {
+  let d = ElixirModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn ElixirModule::from_config(config : @config.Config) -> ElixirModule {
-  ElixirModule::new(config=config.get_module("elixir"))
+  match config.get_raw_module("elixir") {
+    Some(table) => ElixirModule::from_toml_table(table)
+    None => ElixirModule::default()
+  }
 }
 
 ///|
@@ -35,8 +58,8 @@ pub impl @ms.PromptModule for ElixirModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for ElixirModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for ElixirModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

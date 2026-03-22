@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = FossilMetricsModule::new()
+  let m : &@ms.PromptModule = FossilMetricsModule::default()
   assert_eq(m.name(), "fossil_metrics")
 }
 
 ///|
 async test "execute: disabled by default" {
-  let m = FossilMetricsModule::new()
+  let m = FossilMetricsModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   assert_true(m.execute(ctx) is Disabled)
 }

@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = DirenvModule::new()
+  let m : &@ms.PromptModule = DirenvModule::default()
   assert_eq(m.name(), "direnv")
 }
 
 ///|
 async test "execute: disabled by default" {
-  let m = DirenvModule::new()
+  let m = DirenvModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   assert_true(m.execute(ctx) is Disabled)
 }

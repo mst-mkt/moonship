@@ -1,6 +1,7 @@
 ///|
 pub struct FossilMetricsModule {
   disabled : Bool
+  async_render : Bool
   format : String
   added_style : String
   deleted_style : String
@@ -8,18 +9,37 @@ pub struct FossilMetricsModule {
 }
 
 ///|
-pub fn FossilMetricsModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "fossil_metrics",
-  ),
-) -> FossilMetricsModule {
+pub fn FossilMetricsModule::default() -> FossilMetricsModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    added_style: config.get_prop("added_style", default="bold green"),
-    deleted_style: config.get_prop("deleted_style", default="bold red"),
-    only_nonzero_diffs: config.get_prop("only_nonzero_diffs", default="true") !=
-    "false",
+    disabled: true,
+    async_render: false,
+    format: "([+$added]($added_style) )([-$deleted]($deleted_style) )",
+    added_style: "bold green",
+    deleted_style: "bold red",
+    only_nonzero_diffs: true,
+  }
+}
+
+///|
+pub fn FossilMetricsModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> FossilMetricsModule {
+  let d = FossilMetricsModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    added_style: @config.get_toml_string(table, "added_style").unwrap_or(
+      d.added_style,
+    ),
+    deleted_style: @config.get_toml_string(table, "deleted_style").unwrap_or(
+      d.deleted_style,
+    ),
+    only_nonzero_diffs: @config.get_toml_bool(table, "only_nonzero_diffs").unwrap_or(
+      d.only_nonzero_diffs,
+    ),
   }
 }
 
@@ -27,7 +47,10 @@ pub fn FossilMetricsModule::new(
 pub fn FossilMetricsModule::from_config(
   config : @config.Config,
 ) -> FossilMetricsModule {
-  FossilMetricsModule::new(config=config.get_module("fossil_metrics"))
+  match config.get_raw_module("fossil_metrics") {
+    Some(table) => FossilMetricsModule::from_toml_table(table)
+    None => FossilMetricsModule::default()
+  }
 }
 
 ///|
@@ -36,8 +59,8 @@ pub impl @ms.PromptModule for FossilMetricsModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for FossilMetricsModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for FossilMetricsModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

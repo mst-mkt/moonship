@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = DenoModule::new()
+  let m : &@ms.PromptModule = DenoModule::default()
   assert_eq(m.name(), "deno")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-deno-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = DenoModule::new()
+  let m = DenoModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects deno.json" {
   let path = "/tmp/moonship-test-deno-json"
   setup_dir(path)
   @fs.write_string_to_file(path + "/deno.json", "")
-  let m = DenoModule::new()
+  let m = DenoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Deno project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects deno.jsonc" {
   let path = "/tmp/moonship-test-deno-jsonc"
   setup_dir(path)
   @fs.write_string_to_file(path + "/deno.jsonc", "")
-  let m = DenoModule::new()
+  let m = DenoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Deno project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects deno.lock" {
   let path = "/tmp/moonship-test-deno-lock"
   setup_dir(path)
   @fs.write_string_to_file(path + "/deno.lock", "")
-  let m = DenoModule::new()
+  let m = DenoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Deno project detected"))
@@ -69,7 +69,7 @@ async test "execute: detects mod.ts" {
   let path = "/tmp/moonship-test-deno-modts"
   setup_dir(path)
   @fs.write_string_to_file(path + "/mod.ts", "")
-  let m = DenoModule::new()
+  let m = DenoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Deno project detected"))
@@ -81,7 +81,7 @@ async test "execute: detects deps.ts" {
   let path = "/tmp/moonship-test-deno-depsts"
   setup_dir(path)
   @fs.write_string_to_file(path + "/deps.ts", "")
-  let m = DenoModule::new()
+  let m = DenoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Deno project detected"))
@@ -93,7 +93,7 @@ async test "execute: detects mod.js" {
   let path = "/tmp/moonship-test-deno-modjs"
   setup_dir(path)
   @fs.write_string_to_file(path + "/mod.js", "")
-  let m = DenoModule::new()
+  let m = DenoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Deno project detected"))
@@ -105,7 +105,7 @@ async test "execute: detects deps.js" {
   let path = "/tmp/moonship-test-deno-depsjs"
   setup_dir(path)
   @fs.write_string_to_file(path + "/deps.js", "")
-  let m = DenoModule::new()
+  let m = DenoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Deno project detected"))

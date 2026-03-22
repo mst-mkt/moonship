@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = ContainerModule::new()
+  let m : &@ms.PromptModule = ContainerModule::default()
   assert_eq(m.name(), "container")
 }
 

@@ -1,22 +1,36 @@
 ///|
 pub struct FossilBranchModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn FossilBranchModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "fossil_branch",
-  ),
-) -> FossilBranchModule {
+pub fn FossilBranchModule::default() -> FossilBranchModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default=" "),
+    disabled: true,
+    async_render: false,
+    format: "on [$symbol$branch]($style) ",
+    style: "bold purple",
+    symbol: " ",
+  }
+}
+
+///|
+pub fn FossilBranchModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> FossilBranchModule {
+  let d = FossilBranchModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
@@ -24,7 +38,10 @@ pub fn FossilBranchModule::new(
 pub fn FossilBranchModule::from_config(
   config : @config.Config,
 ) -> FossilBranchModule {
-  FossilBranchModule::new(config=config.get_module("fossil_branch"))
+  match config.get_raw_module("fossil_branch") {
+    Some(table) => FossilBranchModule::from_toml_table(table)
+    None => FossilBranchModule::default()
+  }
 }
 
 ///|
@@ -33,8 +50,8 @@ pub impl @ms.PromptModule for FossilBranchModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for FossilBranchModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for FossilBranchModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

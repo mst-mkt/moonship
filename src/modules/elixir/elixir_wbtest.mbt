@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = ElixirModule::new()
+  let m : &@ms.PromptModule = ElixirModule::default()
   assert_eq(m.name(), "elixir")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-elixir-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = ElixirModule::new()
+  let m = ElixirModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects mix.exs" {
   let path = "/tmp/moonship-test-elixir-mix"
   setup_dir(path)
   @fs.write_string_to_file(path + "/mix.exs", "")
-  let m = ElixirModule::new()
+  let m = ElixirModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Elixir project detected"))

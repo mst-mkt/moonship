@@ -1,7 +1,7 @@
 ///|
 async test "status 0: bold green symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=0)
-  let m : &@ms.PromptModule = CharacterModule::new()
+  let m : &@ms.PromptModule = CharacterModule::default()
 
   guard m.execute(ctx) is Output(out) else { fail("expected output") }
 
@@ -13,7 +13,7 @@ async test "status 0: bold green symbol" {
 ///|
 async test "non-zero status: bold red symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=1)
-  let m : &@ms.PromptModule = CharacterModule::new()
+  let m : &@ms.PromptModule = CharacterModule::default()
 
   guard m.execute(ctx) is Output(out) else { fail("expected output") }
 
@@ -24,7 +24,7 @@ async test "non-zero status: bold red symbol" {
 
 ///|
 async test "success and error differ" {
-  let m : &@ms.PromptModule = CharacterModule::new()
+  let m : &@ms.PromptModule = CharacterModule::default()
 
   let ok = m
     .execute(@context.Context::new(cwd="/tmp", status=0))
@@ -76,14 +76,14 @@ async test "custom symbol via config" {
 
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = CharacterModule::new()
+  let m : &@ms.PromptModule = CharacterModule::default()
   assert_eq(m.name(), "character")
 }
 
 ///|
 async test "vicmd keymap: shows vimcmd symbol" {
   let ctx = @context.Context::new(cwd="/tmp", keymap="vicmd")
-  let m : &@ms.PromptModule = CharacterModule::new()
+  let m : &@ms.PromptModule = CharacterModule::default()
 
   guard m.execute(ctx) is Output(out) else { fail("expected output") }
 
@@ -93,7 +93,7 @@ async test "vicmd keymap: shows vimcmd symbol" {
 ///|
 async test "visual keymap: shows visual symbol" {
   let ctx = @context.Context::new(cwd="/tmp", keymap="visual")
-  let m : &@ms.PromptModule = CharacterModule::new()
+  let m : &@ms.PromptModule = CharacterModule::default()
 
   guard m.execute(ctx) is Output(out) else { fail("expected output") }
 
@@ -105,7 +105,7 @@ async test "visual keymap: shows visual symbol" {
 ///|
 async test "unknown keymap: falls back to success symbol" {
   let ctx = @context.Context::new(cwd="/tmp", keymap="viins", status=0)
-  let m : &@ms.PromptModule = CharacterModule::new()
+  let m : &@ms.PromptModule = CharacterModule::default()
 
   guard m.execute(ctx) is Output(out) else { fail("expected output") }
 

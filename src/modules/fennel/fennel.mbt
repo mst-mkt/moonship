@@ -1,6 +1,7 @@
 ///|
 pub struct FennelModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,24 +10,46 @@ pub struct FennelModule {
 }
 
 ///|
-pub fn FennelModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "fennel",
-  ),
-) -> FennelModule {
+pub fn FennelModule::default() -> FennelModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🧅 "),
+    disabled: true,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold green",
+    symbol: "🧅 ",
     detect_files: [],
     detect_extensions: [".fnl"],
   }
 }
 
 ///|
+pub fn FennelModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> FennelModule {
+  let d = FennelModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn FennelModule::from_config(config : @config.Config) -> FennelModule {
-  FennelModule::new(config=config.get_module("fennel"))
+  match config.get_raw_module("fennel") {
+    Some(table) => FennelModule::from_toml_table(table)
+    None => FennelModule::default()
+  }
 }
 
 ///|
@@ -35,8 +58,8 @@ pub impl @ms.PromptModule for FennelModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for FennelModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for FennelModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

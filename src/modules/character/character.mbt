@@ -1,6 +1,7 @@
 ///|
 pub struct CharacterModule {
   disabled : Bool
+  async_render : Bool
   format : String
   success_symbol : String
   error_symbol : String
@@ -11,35 +12,58 @@ pub struct CharacterModule {
 }
 
 ///|
-pub fn CharacterModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "character",
-  ),
-) -> CharacterModule {
+pub fn CharacterModule::default() -> CharacterModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    success_symbol: config.get_prop("success_symbol"),
-    error_symbol: config.get_prop("error_symbol"),
-    vimcmd_symbol: config.get_prop("vimcmd_symbol", default="[❮](bold green)"),
-    vimcmd_visual_symbol: config.get_prop(
-      "vimcmd_visual_symbol",
-      default="[❮](bold yellow)",
+    disabled: false,
+    async_render: false,
+    format: "$symbol ",
+    success_symbol: "[❯](bold green)",
+    error_symbol: "[❯](bold red)",
+    vimcmd_symbol: "[❮](bold green)",
+    vimcmd_visual_symbol: "[❮](bold yellow)",
+    vimcmd_replace_symbol: "[❮](bold purple)",
+    vimcmd_replace_one_symbol: "[❮](bold purple)",
+  }
+}
+
+///|
+pub fn CharacterModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> CharacterModule {
+  let d = CharacterModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
     ),
-    vimcmd_replace_symbol: config.get_prop(
-      "vimcmd_replace_symbol",
-      default="[❮](bold purple)",
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    success_symbol: @config.get_toml_string(table, "success_symbol").unwrap_or(
+      d.success_symbol,
     ),
-    vimcmd_replace_one_symbol: config.get_prop(
-      "vimcmd_replace_one_symbol",
-      default="[❮](bold purple)",
+    error_symbol: @config.get_toml_string(table, "error_symbol").unwrap_or(
+      d.error_symbol,
     ),
+    vimcmd_symbol: @config.get_toml_string(table, "vimcmd_symbol").unwrap_or(
+      d.vimcmd_symbol,
+    ),
+    vimcmd_visual_symbol: @config.get_toml_string(table, "vimcmd_visual_symbol").unwrap_or(
+      d.vimcmd_visual_symbol,
+    ),
+    vimcmd_replace_symbol: @config.get_toml_string(
+      table, "vimcmd_replace_symbol",
+    ).unwrap_or(d.vimcmd_replace_symbol),
+    vimcmd_replace_one_symbol: @config.get_toml_string(
+      table, "vimcmd_replace_one_symbol",
+    ).unwrap_or(d.vimcmd_replace_one_symbol),
   }
 }
 
 ///|
 pub fn CharacterModule::from_config(config : @config.Config) -> CharacterModule {
-  CharacterModule::new(config=config.get_module("character"))
+  match config.get_raw_module("character") {
+    Some(table) => CharacterModule::from_toml_table(table)
+    None => CharacterModule::default()
+  }
 }
 
 ///|
@@ -48,8 +72,8 @@ pub impl @ms.PromptModule for CharacterModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for CharacterModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for CharacterModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

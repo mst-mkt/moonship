@@ -1,6 +1,7 @@
 ///|
 pub struct FortranModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -10,16 +11,13 @@ pub struct FortranModule {
 }
 
 ///|
-pub fn FortranModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "fortran",
-  ),
-) -> FortranModule {
+pub fn FortranModule::default() -> FortranModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🅵  "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version(-$name) )]($style)",
+    style: "bold purple",
+    symbol: "🅵  ",
     detect_files: ["fpm.toml"],
     detect_extensions: [
       ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".f77", ".F77", ".f90", ".F90",
@@ -34,8 +32,34 @@ pub fn FortranModule::new(
 }
 
 ///|
+pub fn FortranModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> FortranModule {
+  let d = FortranModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+    commands: d.commands,
+  }
+}
+
+///|
 pub fn FortranModule::from_config(config : @config.Config) -> FortranModule {
-  FortranModule::new(config=config.get_module("fortran"))
+  match config.get_raw_module("fortran") {
+    Some(table) => FortranModule::from_toml_table(table)
+    None => FortranModule::default()
+  }
 }
 
 ///|
@@ -44,8 +68,8 @@ pub impl @ms.PromptModule for FortranModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for FortranModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for FortranModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

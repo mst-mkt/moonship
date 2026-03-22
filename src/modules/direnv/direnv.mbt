@@ -1,6 +1,7 @@
 ///|
 pub struct DirenvModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -14,29 +15,66 @@ pub struct DirenvModule {
 }
 
 ///|
-pub fn DirenvModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "direnv",
-  ),
-) -> DirenvModule {
+pub fn DirenvModule::default() -> DirenvModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="direnv "),
-    allowed_msg: config.get_prop("allowed_msg", default="allowed"),
-    not_allowed_msg: config.get_prop("not_allowed_msg", default="not allowed"),
-    denied_msg: config.get_prop("denied_msg", default="denied"),
-    loaded_msg: config.get_prop("loaded_msg", default="loaded"),
-    unloaded_msg: config.get_prop("unloaded_msg", default="not loaded"),
+    disabled: true,
+    async_render: false,
+    format: "[$symbol$loaded/$allowed]($style) ",
+    style: "bold bright-yellow",
+    symbol: "direnv ",
+    allowed_msg: "allowed",
+    not_allowed_msg: "not allowed",
+    denied_msg: "denied",
+    loaded_msg: "loaded",
+    unloaded_msg: "not loaded",
     detect_files: [".envrc"],
     detect_extensions: [],
   }
 }
 
 ///|
+pub fn DirenvModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> DirenvModule {
+  let d = DirenvModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    allowed_msg: @config.get_toml_string(table, "allowed_msg").unwrap_or(
+      d.allowed_msg,
+    ),
+    not_allowed_msg: @config.get_toml_string(table, "not_allowed_msg").unwrap_or(
+      d.not_allowed_msg,
+    ),
+    denied_msg: @config.get_toml_string(table, "denied_msg").unwrap_or(
+      d.denied_msg,
+    ),
+    loaded_msg: @config.get_toml_string(table, "loaded_msg").unwrap_or(
+      d.loaded_msg,
+    ),
+    unloaded_msg: @config.get_toml_string(table, "unloaded_msg").unwrap_or(
+      d.unloaded_msg,
+    ),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn DirenvModule::from_config(config : @config.Config) -> DirenvModule {
-  DirenvModule::new(config=config.get_module("direnv"))
+  match config.get_raw_module("direnv") {
+    Some(table) => DirenvModule::from_toml_table(table)
+    None => DirenvModule::default()
+  }
 }
 
 ///|
@@ -45,8 +83,8 @@ pub impl @ms.PromptModule for DirenvModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for DirenvModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for DirenvModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

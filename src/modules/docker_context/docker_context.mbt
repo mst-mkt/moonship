@@ -1,6 +1,7 @@
 ///|
 pub struct DockerContextModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -10,18 +11,14 @@ pub struct DockerContextModule {
 }
 
 ///|
-pub fn DockerContextModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "docker_context",
-  ),
-) -> DockerContextModule {
+pub fn DockerContextModule::default() -> DockerContextModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🐳 "),
-    only_with_files: config.get_prop("only_with_files", default="true") !=
-    "false",
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol$context]($style) ",
+    style: "blue bold",
+    symbol: "🐳 ",
+    only_with_files: true,
     detect_files: [
       "compose.yml", "compose.yaml", "docker-compose.yml", "docker-compose.yaml",
       "Dockerfile",
@@ -31,10 +28,38 @@ pub fn DockerContextModule::new(
 }
 
 ///|
+pub fn DockerContextModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> DockerContextModule {
+  let d = DockerContextModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    only_with_files: @config.get_toml_bool(table, "only_with_files").unwrap_or(
+      d.only_with_files,
+    ),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn DockerContextModule::from_config(
   config : @config.Config,
 ) -> DockerContextModule {
-  DockerContextModule::new(config=config.get_module("docker_context"))
+  match config.get_raw_module("docker_context") {
+    Some(table) => DockerContextModule::from_toml_table(table)
+    None => DockerContextModule::default()
+  }
 }
 
 ///|
@@ -43,8 +68,8 @@ pub impl @ms.PromptModule for DockerContextModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for DockerContextModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for DockerContextModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

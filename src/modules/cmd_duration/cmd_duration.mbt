@@ -1,22 +1,36 @@
 ///|
 pub struct CmdDurationModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   min_time : Int
 }
 
 ///|
-pub fn CmdDurationModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "cmd_duration",
-  ),
-) -> CmdDurationModule {
+pub fn CmdDurationModule::default() -> CmdDurationModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    min_time: config.get_int_prop("min_time", default=2000),
+    disabled: false,
+    async_render: false,
+    format: "took [$duration]($style) ",
+    style: "yellow bold",
+    min_time: 2000,
+  }
+}
+
+///|
+pub fn CmdDurationModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> CmdDurationModule {
+  let d = CmdDurationModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    min_time: @config.get_toml_int(table, "min_time").unwrap_or(d.min_time),
   }
 }
 
@@ -24,7 +38,10 @@ pub fn CmdDurationModule::new(
 pub fn CmdDurationModule::from_config(
   config : @config.Config,
 ) -> CmdDurationModule {
-  CmdDurationModule::new(config=config.get_module("cmd_duration"))
+  match config.get_raw_module("cmd_duration") {
+    Some(table) => CmdDurationModule::from_toml_table(table)
+    None => CmdDurationModule::default()
+  }
 }
 
 ///|
@@ -33,8 +50,8 @@ pub impl @ms.PromptModule for CmdDurationModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for CmdDurationModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for CmdDurationModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

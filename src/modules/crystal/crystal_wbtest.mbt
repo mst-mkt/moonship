@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = CrystalModule::new()
+  let m : &@ms.PromptModule = CrystalModule::default()
   assert_eq(m.name(), "crystal")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-crystal-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = CrystalModule::new()
+  let m = CrystalModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects shard.yml" {
   let path = "/tmp/moonship-test-crystal-shard"
   setup_dir(path)
   @fs.write_string_to_file(path + "/shard.yml", "")
-  let m = CrystalModule::new()
+  let m = CrystalModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Crystal project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .cr extension" {
   let path = "/tmp/moonship-test-crystal-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.cr", "")
-  let m = CrystalModule::new()
+  let m = CrystalModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Crystal project detected"))

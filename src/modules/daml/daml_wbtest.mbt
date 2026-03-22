@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = DamlModule::new()
+  let m : &@ms.PromptModule = DamlModule::default()
   assert_eq(m.name(), "daml")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-daml-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = DamlModule::new()
+  let m = DamlModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects daml.yaml" {
   let path = "/tmp/moonship-test-daml-file"
   setup_dir(path)
   @fs.write_string_to_file(path + "/daml.yaml", "")
-  let m = DamlModule::new()
+  let m = DamlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no DAML project detected"))

@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = ErlangModule::new()
+  let m : &@ms.PromptModule = ErlangModule::default()
   assert_eq(m.name(), "erlang")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-erlang-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = ErlangModule::new()
+  let m = ErlangModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects rebar.config" {
   let path = "/tmp/moonship-test-erlang-rebar"
   setup_dir(path)
   @fs.write_string_to_file(path + "/rebar.config", "")
-  let m = ErlangModule::new()
+  let m = ErlangModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Erlang project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects erlang.mk" {
   let path = "/tmp/moonship-test-erlang-mk"
   setup_dir(path)
   @fs.write_string_to_file(path + "/erlang.mk", "")
-  let m = ErlangModule::new()
+  let m = ErlangModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Erlang project detected"))

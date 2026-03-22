@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = FennelModule::new()
+  let m : &@ms.PromptModule = FennelModule::default()
   assert_eq(m.name(), "fennel")
 }
 
@@ -22,7 +22,7 @@ async test "execute: detects .fnl extension" {
   let path = "/tmp/moonship-test-fennel-fnl"
   setup_dir(path)
   @fs.write_string_to_file(path + "/init.fnl", "")
-  let m = FennelModule::new()
+  let m = FennelModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Fennel project detected"))

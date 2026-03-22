@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = CMakeModule::new()
+  let m : &@ms.PromptModule = CMakeModule::default()
   assert_eq(m.name(), "cmake")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-cmake-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = CMakeModule::new()
+  let m = CMakeModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects CMakeLists.txt" {
   let path = "/tmp/moonship-test-cmake-lists"
   setup_dir(path)
   @fs.write_string_to_file(path + "/CMakeLists.txt", "")
-  let m = CMakeModule::new()
+  let m = CMakeModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no CMake project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects CMakeCache.txt" {
   let path = "/tmp/moonship-test-cmake-cache"
   setup_dir(path)
   @fs.write_string_to_file(path + "/CMakeCache.txt", "")
-  let m = CMakeModule::new()
+  let m = CMakeModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no CMake project detected"))

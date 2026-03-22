@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = EnvVarModule::new()
+  let m : &@ms.PromptModule = EnvVarModule::default()
   assert_eq(m.name(), "env_var")
 }
 

@@ -1,28 +1,45 @@
 ///|
 pub struct ContainerModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn ContainerModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "container",
-  ),
-) -> ContainerModule {
+pub fn ContainerModule::default() -> ContainerModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="⬢"),
+    disabled: false,
+    async_render: false,
+    format: "[$symbol \\[$name\\]]($style) ",
+    style: "red bold dimmed",
+    symbol: "⬢",
+  }
+}
+
+///|
+pub fn ContainerModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> ContainerModule {
+  let d = ContainerModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn ContainerModule::from_config(config : @config.Config) -> ContainerModule {
-  ContainerModule::new(config=config.get_module("container"))
+  match config.get_raw_module("container") {
+    Some(table) => ContainerModule::from_toml_table(table)
+    None => ContainerModule::default()
+  }
 }
 
 ///|
@@ -31,8 +48,8 @@ pub impl @ms.PromptModule for ContainerModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for ContainerModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for ContainerModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

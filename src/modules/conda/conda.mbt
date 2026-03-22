@@ -1,6 +1,7 @@
 ///|
 pub struct CondaModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -8,21 +9,40 @@ pub struct CondaModule {
 }
 
 ///|
-pub fn CondaModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("conda"),
-) -> CondaModule {
+pub fn CondaModule::default() -> CondaModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🅒 "),
-    ignore_base: config.get_prop("ignore_base", default="true") != "false",
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol$environment]($style) ",
+    style: "green bold",
+    symbol: "🅒 ",
+    ignore_base: true,
+  }
+}
+
+///|
+pub fn CondaModule::from_toml_table(table : @config.ModuleTable) -> CondaModule {
+  let d = CondaModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    ignore_base: @config.get_toml_bool(table, "ignore_base").unwrap_or(
+      d.ignore_base,
+    ),
   }
 }
 
 ///|
 pub fn CondaModule::from_config(config : @config.Config) -> CondaModule {
-  CondaModule::new(config=config.get_module("conda"))
+  match config.get_raw_module("conda") {
+    Some(table) => CondaModule::from_toml_table(table)
+    None => CondaModule::default()
+  }
 }
 
 ///|
@@ -31,8 +51,8 @@ pub impl @ms.PromptModule for CondaModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for CondaModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for CondaModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

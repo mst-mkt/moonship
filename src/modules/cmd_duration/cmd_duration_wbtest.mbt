@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = CmdDurationModule::new()
+  let m : &@ms.PromptModule = CmdDurationModule::default()
   assert_eq(m.name(), "cmd_duration")
 }
 
@@ -37,14 +37,14 @@ async test "format_duration: exact boundary" {
 ///|
 async test "execute: below min_time returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp", cmd_duration=1000)
-  let m = CmdDurationModule::new()
+  let m = CmdDurationModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
 ///|
 async test "execute: above min_time returns Output" {
   let ctx = @context.Context::new(cwd="/tmp", cmd_duration=5000)
-  let m = CmdDurationModule::new()
+  let m = CmdDurationModule::default()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
 
   assert_true(out.render().contains("5s"))

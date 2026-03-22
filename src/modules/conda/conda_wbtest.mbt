@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = CondaModule::new()
+  let m : &@ms.PromptModule = CondaModule::default()
   assert_eq(m.name(), "conda")
 }
 
@@ -19,7 +19,7 @@ async test "execute: disabled returns Disabled" {
 
 ///|
 async test "execute: no conda env returns Skipped" {
-  let m = CondaModule::new()
+  let m = CondaModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
   // CONDA_DEFAULT_ENV typically not set outside conda

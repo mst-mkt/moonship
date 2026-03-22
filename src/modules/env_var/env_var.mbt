@@ -1,6 +1,7 @@
 ///|
 pub struct EnvVarModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,24 +10,44 @@ pub struct EnvVarModule {
 }
 
 ///|
-pub fn EnvVarModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "env_var",
-  ),
-) -> EnvVarModule {
+pub fn EnvVarModule::default() -> EnvVarModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default=""),
-    variable: config.get_prop("variable", default=""),
-    default_value: config.get_prop("default", default=""),
+    disabled: false,
+    async_render: false,
+    format: "with [$symbol$env_value]($style) ",
+    style: "black bold dimmed",
+    symbol: "",
+    variable: "",
+    default_value: "",
+  }
+}
+
+///|
+pub fn EnvVarModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> EnvVarModule {
+  let d = EnvVarModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    variable: @config.get_toml_string(table, "variable").unwrap_or(d.variable),
+    default_value: @config.get_toml_string(table, "default").unwrap_or(
+      d.default_value,
+    ),
   }
 }
 
 ///|
 pub fn EnvVarModule::from_config(config : @config.Config) -> EnvVarModule {
-  EnvVarModule::new(config=config.get_module("env_var"))
+  match config.get_raw_module("env_var") {
+    Some(table) => EnvVarModule::from_toml_table(table)
+    None => EnvVarModule::default()
+  }
 }
 
 ///|
@@ -35,8 +56,8 @@ pub impl @ms.PromptModule for EnvVarModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for EnvVarModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for EnvVarModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

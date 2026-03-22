@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = DockerContextModule::new()
+  let m : &@ms.PromptModule = DockerContextModule::default()
   assert_eq(m.name(), "docker_context")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no docker files returns Skipped" {
   let path = "/tmp/moonship-test-docker-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = DockerContextModule::new()
+  let m = DockerContextModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects Dockerfile" {
   let path = "/tmp/moonship-test-docker-file"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Dockerfile", "")
-  let m = DockerContextModule::new()
+  let m = DockerContextModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Docker files detected"))
@@ -45,7 +45,7 @@ async test "execute: detects compose.yml" {
   let path = "/tmp/moonship-test-docker-compose"
   setup_dir(path)
   @fs.write_string_to_file(path + "/compose.yml", "")
-  let m = DockerContextModule::new()
+  let m = DockerContextModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Docker files detected"))

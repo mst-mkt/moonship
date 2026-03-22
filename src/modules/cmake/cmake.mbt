@@ -1,6 +1,7 @@
 ///|
 pub struct CMakeModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,22 +10,44 @@ pub struct CMakeModule {
 }
 
 ///|
-pub fn CMakeModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("cmake"),
-) -> CMakeModule {
+pub fn CMakeModule::default() -> CMakeModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="△ "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold blue",
+    symbol: "△ ",
     detect_files: ["CMakeLists.txt", "CMakeCache.txt"],
     detect_extensions: [],
   }
 }
 
 ///|
+pub fn CMakeModule::from_toml_table(table : @config.ModuleTable) -> CMakeModule {
+  let d = CMakeModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn CMakeModule::from_config(config : @config.Config) -> CMakeModule {
-  CMakeModule::new(config=config.get_module("cmake"))
+  match config.get_raw_module("cmake") {
+    Some(table) => CMakeModule::from_toml_table(table)
+    None => CMakeModule::default()
+  }
 }
 
 ///|
@@ -33,8 +56,8 @@ pub impl @ms.PromptModule for CMakeModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for CMakeModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for CMakeModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

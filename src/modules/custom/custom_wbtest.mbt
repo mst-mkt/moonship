@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = CustomModule::new()
+  let m : &@ms.PromptModule = CustomModule::default()
   assert_eq(m.name(), "custom")
 }
 
@@ -19,7 +19,7 @@ async test "execute: disabled returns Disabled" {
 
 ///|
 async test "execute: no command returns Skipped" {
-  let m = CustomModule::new()
+  let m = CustomModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   assert_true(m.execute(ctx) is Skipped(_))
 }

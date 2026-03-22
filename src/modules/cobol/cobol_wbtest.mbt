@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = CobolModule::new()
+  let m : &@ms.PromptModule = CobolModule::default()
   assert_eq(m.name(), "cobol")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-cobol-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = CobolModule::new()
+  let m = CobolModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .cbl extension" {
   let path = "/tmp/moonship-test-cobol-cbl"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.cbl", "")
-  let m = CobolModule::new()
+  let m = CobolModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no COBOL project detected"))

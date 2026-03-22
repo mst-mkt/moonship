@@ -1,6 +1,7 @@
 ///|
 pub struct BufModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,22 +10,44 @@ pub struct BufModule {
 }
 
 ///|
-pub fn BufModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("buf"),
-) -> BufModule {
+pub fn BufModule::default() -> BufModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🐃 "),
+    disabled: false,
+    async_render: false,
+    format: "with [$symbol($version )]($style)",
+    style: "bold blue",
+    symbol: "🐃 ",
     detect_files: ["buf.yaml", "buf.gen.yaml", "buf.work.yaml"],
     detect_extensions: [],
   }
 }
 
 ///|
+pub fn BufModule::from_toml_table(table : @config.ModuleTable) -> BufModule {
+  let d = BufModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn BufModule::from_config(config : @config.Config) -> BufModule {
-  BufModule::new(config=config.get_module("buf"))
+  match config.get_raw_module("buf") {
+    Some(table) => BufModule::from_toml_table(table)
+    None => BufModule::default()
+  }
 }
 
 ///|
@@ -33,8 +56,8 @@ pub impl @ms.PromptModule for BufModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for BufModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for BufModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

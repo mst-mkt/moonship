@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = ElmModule::new()
+  let m : &@ms.PromptModule = ElmModule::default()
   assert_eq(m.name(), "elm")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-elm-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = ElmModule::new()
+  let m = ElmModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects elm.json" {
   let path = "/tmp/moonship-test-elm-json"
   setup_dir(path)
   @fs.write_string_to_file(path + "/elm.json", "")
-  let m = ElmModule::new()
+  let m = ElmModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Elm project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .elm-version" {
   let path = "/tmp/moonship-test-elm-version"
   setup_dir(path)
   @fs.write_string_to_file(path + "/.elm-version", "")
-  let m = ElmModule::new()
+  let m = ElmModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Elm project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects .elm extension" {
   let path = "/tmp/moonship-test-elm-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Main.elm", "")
-  let m = ElmModule::new()
+  let m = ElmModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Elm project detected"))

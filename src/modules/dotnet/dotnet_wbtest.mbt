@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = DotnetModule::new()
+  let m : &@ms.PromptModule = DotnetModule::default()
   assert_eq(m.name(), "dotnet")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-dotnet-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = DotnetModule::new()
+  let m = DotnetModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects global.json" {
   let path = "/tmp/moonship-test-dotnet-global"
   setup_dir(path)
   @fs.write_string_to_file(path + "/global.json", "")
-  let m = DotnetModule::new()
+  let m = DotnetModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no .NET project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .csproj extension" {
   let path = "/tmp/moonship-test-dotnet-csproj"
   setup_dir(path)
   @fs.write_string_to_file(path + "/app.csproj", "")
-  let m = DotnetModule::new()
+  let m = DotnetModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no .NET project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects Directory.Build.props" {
   let path = "/tmp/moonship-test-dotnet-props"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Directory.Build.props", "")
-  let m = DotnetModule::new()
+  let m = DotnetModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no .NET project detected"))
@@ -69,7 +69,7 @@ async test "execute: detects .fsproj extension" {
   let path = "/tmp/moonship-test-dotnet-fsproj"
   setup_dir(path)
   @fs.write_string_to_file(path + "/app.fsproj", "")
-  let m = DotnetModule::new()
+  let m = DotnetModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no .NET project detected"))
