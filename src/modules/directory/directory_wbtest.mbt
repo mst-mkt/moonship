@@ -203,7 +203,7 @@ async test "last_path_component" {
 
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = DirectoryModule::new()
+  let m : &@ms.PromptModule = DirectoryModule::default()
   assert_eq(m.name(), "directory")
 }
 
@@ -230,7 +230,7 @@ async test "execute: returns Output with path" {
     cwd="/home/user/project",
     home_dir="/home/user",
   )
-  let m = DirectoryModule::new()
+  let m = DirectoryModule::default()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
 
   let rendered = out.render()

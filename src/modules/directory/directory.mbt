@@ -1,6 +1,7 @@
 ///|
 pub struct DirectoryModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   truncation_length : Int
@@ -10,25 +11,52 @@ pub struct DirectoryModule {
 }
 
 ///|
-pub fn DirectoryModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "directory",
-  ),
-) -> DirectoryModule {
+pub fn DirectoryModule::default() -> DirectoryModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    truncation_length: config.get_int_prop("truncation_length", default=3),
-    truncate_to_repo: config.get_prop("truncate_to_repo") == "true",
-    truncation_symbol: config.get_prop("truncation_symbol", default=""),
-    home_symbol: config.get_prop("home_symbol", default="~"),
+    disabled: false,
+    async_render: false,
+    format: "[$path]($style)[$read_only]($read_only_style) ",
+    style: "cyan bold",
+    truncation_length: 3,
+    truncate_to_repo: true,
+    truncation_symbol: "",
+    home_symbol: "~",
+  }
+}
+
+///|
+pub fn DirectoryModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> DirectoryModule {
+  let d = DirectoryModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    truncation_length: @config.get_toml_int(table, "truncation_length").unwrap_or(
+      d.truncation_length,
+    ),
+    truncate_to_repo: @config.get_toml_bool(table, "truncate_to_repo").unwrap_or(
+      d.truncate_to_repo,
+    ),
+    truncation_symbol: @config.get_toml_string(table, "truncation_symbol").unwrap_or(
+      d.truncation_symbol,
+    ),
+    home_symbol: @config.get_toml_string(table, "home_symbol").unwrap_or(
+      d.home_symbol,
+    ),
   }
 }
 
 ///|
 pub fn DirectoryModule::from_config(config : @config.Config) -> DirectoryModule {
-  DirectoryModule::new(config=config.get_module("directory"))
+  match config.get_raw_module("directory") {
+    Some(table) => DirectoryModule::from_toml_table(table)
+    None => DirectoryModule::default()
+  }
 }
 
 ///|
@@ -37,8 +65,8 @@ pub impl @ms.PromptModule for DirectoryModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for DirectoryModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for DirectoryModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

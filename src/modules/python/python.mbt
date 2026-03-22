@@ -1,6 +1,7 @@
 ///|
 pub struct PythonModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -11,18 +12,15 @@ pub struct PythonModule {
 }
 
 ///|
-pub fn PythonModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "python",
-  ),
-) -> PythonModule {
+pub fn PythonModule::default() -> PythonModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🐍 "),
-    pyenv_version_name: config.get_prop("pyenv_version_name") == "true",
-    pyenv_prefix: config.get_prop("pyenv_prefix", default="pyenv "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol$pyenv_prefix($version )(\\($virtualenv\\) )]($style)",
+    style: "yellow bold",
+    symbol: "🐍 ",
+    pyenv_version_name: false,
+    pyenv_prefix: "pyenv ",
     detect_files: [
       "requirements.txt", ".python-version", "pyproject.toml", "Pipfile", "tox.ini",
       "setup.py", "__init__.py",
@@ -32,8 +30,39 @@ pub fn PythonModule::new(
 }
 
 ///|
+pub fn PythonModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> PythonModule {
+  let d = PythonModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    pyenv_version_name: @config.get_toml_bool(table, "pyenv_version_name").unwrap_or(
+      d.pyenv_version_name,
+    ),
+    pyenv_prefix: @config.get_toml_string(table, "pyenv_prefix").unwrap_or(
+      d.pyenv_prefix,
+    ),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn PythonModule::from_config(config : @config.Config) -> PythonModule {
-  PythonModule::new(config=config.get_module("python"))
+  match config.get_raw_module("python") {
+    Some(table) => PythonModule::from_toml_table(table)
+    None => PythonModule::default()
+  }
 }
 
 ///|
@@ -42,8 +71,8 @@ pub impl @ms.PromptModule for PythonModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for PythonModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for PythonModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

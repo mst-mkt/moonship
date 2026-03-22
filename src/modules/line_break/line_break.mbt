@@ -1,20 +1,33 @@
 ///|
 pub struct LineBreakModule {
   disabled : Bool
+  async_render : Bool
 }
 
 ///|
-pub fn LineBreakModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "line_break",
-  ),
+pub fn LineBreakModule::default() -> LineBreakModule {
+  { disabled: false, async_render: false }
+}
+
+///|
+pub fn LineBreakModule::from_toml_table(
+  table : @config.ModuleTable,
 ) -> LineBreakModule {
-  { disabled: config.disabled }
+  let d = LineBreakModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+  }
 }
 
 ///|
 pub fn LineBreakModule::from_config(config : @config.Config) -> LineBreakModule {
-  LineBreakModule::new(config=config.get_module("line_break"))
+  match config.get_raw_module("line_break") {
+    Some(table) => LineBreakModule::from_toml_table(table)
+    None => LineBreakModule::default()
+  }
 }
 
 ///|
@@ -23,8 +36,8 @@ pub impl @ms.PromptModule for LineBreakModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for LineBreakModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for LineBreakModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

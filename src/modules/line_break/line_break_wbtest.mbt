@@ -1,13 +1,13 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = LineBreakModule::new()
+  let m : &@ms.PromptModule = LineBreakModule::default()
   assert_eq(m.name(), "line_break")
 }
 
 ///|
 async test "execute: outputs newline" {
   let ctx = @context.Context::new(cwd="/tmp")
-  let m = LineBreakModule::new()
+  let m = LineBreakModule::default()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
 
   assert_eq(out.render(), "\n")
