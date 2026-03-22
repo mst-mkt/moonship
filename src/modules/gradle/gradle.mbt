@@ -5,6 +5,7 @@ pub struct GradleModule {
   style : String
   symbol : String
   detect_files : Array[String]
+  detect_folders : Array[String]
   detect_extensions : Array[String]
 }
 
@@ -19,7 +20,8 @@ pub fn GradleModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="🅶 "),
-    detect_files: ["gradle"],
+    detect_files: [],
+    detect_folders: ["gradle"],
     detect_extensions: [".gradle", ".gradle.kts"],
   }
 }
@@ -40,7 +42,12 @@ pub impl @ms.PromptModule for GradleModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no Gradle project detected")
   }
 

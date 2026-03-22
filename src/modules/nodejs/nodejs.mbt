@@ -6,6 +6,7 @@ pub struct NodejsModule {
   not_capable_style : String
   symbol : String
   detect_files : Array[String]
+  detect_folders : Array[String]
   detect_extensions : Array[String]
 }
 
@@ -21,7 +22,8 @@ pub fn NodejsModule::new(
     style: config.style,
     not_capable_style: config.get_prop("not_capable_style", default="bold red"),
     symbol: config.get_prop("symbol", default=" "),
-    detect_files: ["package.json", ".node-version", ".nvmrc", "node_modules"],
+    detect_files: ["package.json", ".node-version", ".nvmrc"],
+    detect_folders: ["node_modules"],
     detect_extensions: [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts"],
   }
 }
@@ -42,7 +44,12 @@ pub impl @ms.PromptModule for NodejsModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no Node.js project detected")
   }
 

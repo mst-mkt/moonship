@@ -7,6 +7,7 @@ pub struct OCamlModule {
   global_switch_indicator : String
   local_switch_indicator : String
   detect_files : Array[String]
+  detect_folders : Array[String]
   detect_extensions : Array[String]
 }
 
@@ -27,9 +28,8 @@ pub fn OCamlModule::new(
       "local_switch_indicator",
       default="*",
     ),
-    detect_files: [
-      "dune", "dune-project", "jbuild", "jbuild-ignore", ".merlin", "_opam", "esy.lock",
-    ],
+    detect_files: ["dune", "dune-project", "jbuild", "jbuild-ignore", ".merlin"],
+    detect_folders: ["_opam", "esy.lock"],
     detect_extensions: [".opam", ".ml", ".mli", ".re", ".rei"],
   }
 }
@@ -50,7 +50,12 @@ pub impl @ms.PromptModule for OCamlModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no OCaml project detected")
   }
 

@@ -145,9 +145,16 @@ pub fn detect_project(
   cwd : String,
   files : Array[String],
   extensions : Array[String],
+  folders? : Array[String] = [],
 ) -> Bool {
   for file in files {
     if @fs.path_exists(cwd + "/" + file) {
+      return true
+    }
+  }
+
+  for folder in folders {
+    if @fs.path_exists(cwd + "/" + folder) {
       return true
     }
   }

@@ -7,6 +7,7 @@ pub struct MiseModule {
   healthy_symbol : String
   unhealthy_symbol : String
   detect_files : Array[String]
+  detect_folders : Array[String]
   detect_extensions : Array[String]
 }
 
@@ -22,8 +23,9 @@ pub fn MiseModule::new(
     healthy_symbol: config.get_prop("healthy_symbol", default="healthy"),
     unhealthy_symbol: config.get_prop("unhealthy_symbol", default="unhealthy"),
     detect_files: [
-      "mise.toml", "mise.local.toml", ".mise.toml", ".mise.local.toml", ".mise",
+      "mise.toml", "mise.local.toml", ".mise.toml", ".mise.local.toml",
     ],
+    detect_folders: [".mise"],
     detect_extensions: [],
   }
 }
@@ -44,7 +46,12 @@ pub impl @ms.PromptModule for MiseModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no mise project detected")
   }
 

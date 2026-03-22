@@ -6,6 +6,7 @@ pub struct LuaModule {
   symbol : String
   lua_binary : String
   detect_files : Array[String]
+  detect_folders : Array[String]
   detect_extensions : Array[String]
 }
 
@@ -19,7 +20,8 @@ pub fn LuaModule::new(
     style: config.style,
     symbol: config.get_prop("symbol", default="🌙 "),
     lua_binary: config.get_prop("lua_binary", default="lua"),
-    detect_files: [".lua-version", "lua"],
+    detect_files: [".lua-version"],
+    detect_folders: ["lua"],
     detect_extensions: [".lua"],
   }
 }
@@ -40,7 +42,12 @@ pub impl @ms.PromptModule for LuaModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no Lua project detected")
   }
 

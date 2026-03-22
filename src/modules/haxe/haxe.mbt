@@ -5,6 +5,7 @@ pub struct HaxeModule {
   style : String
   symbol : String
   detect_files : Array[String]
+  detect_folders : Array[String]
   detect_extensions : Array[String]
 }
 
@@ -17,9 +18,8 @@ pub fn HaxeModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="⌘ "),
-    detect_files: [
-      "haxelib.json", "hxformat.json", ".haxerc", ".haxelib", "haxe_libraries",
-    ],
+    detect_files: ["haxelib.json", "hxformat.json", ".haxerc"],
+    detect_folders: [".haxelib", "haxe_libraries"],
     detect_extensions: [".hx", ".hxml"],
   }
 }
@@ -40,7 +40,12 @@ pub impl @ms.PromptModule for HaxeModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no Haxe project detected")
   }
 

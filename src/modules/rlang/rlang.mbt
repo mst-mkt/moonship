@@ -5,6 +5,7 @@ pub struct RlangModule {
   style : String
   symbol : String
   detect_files : Array[String]
+  detect_folders : Array[String]
   detect_extensions : Array[String]
 }
 
@@ -17,7 +18,8 @@ pub fn RlangModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="📐 "),
-    detect_files: ["DESCRIPTION", ".Rproj.user"],
+    detect_files: ["DESCRIPTION"],
+    detect_folders: [".Rproj.user"],
     detect_extensions: [".R", ".Rd", ".Rmd", ".Rproj", ".Rsx"],
   }
 }
@@ -38,7 +40,12 @@ pub impl @ms.PromptModule for RlangModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no R project detected")
   }
 

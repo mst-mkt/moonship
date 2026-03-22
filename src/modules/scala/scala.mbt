@@ -5,6 +5,7 @@ pub struct ScalaModule {
   style : String
   symbol : String
   detect_files : Array[String]
+  detect_folders : Array[String]
   detect_extensions : Array[String]
 }
 
@@ -17,7 +18,8 @@ pub fn ScalaModule::new(
     format: config.format,
     style: config.style,
     symbol: config.get_prop("symbol", default="🆂 "),
-    detect_files: [".scalaenv", ".sbtenv", "build.sbt", ".metals"],
+    detect_files: [".scalaenv", ".sbtenv", "build.sbt"],
+    detect_folders: [".metals"],
     detect_extensions: [".sbt", ".scala"],
   }
 }
@@ -38,7 +40,12 @@ pub impl @ms.PromptModule for ScalaModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no Scala project detected")
   }
 
