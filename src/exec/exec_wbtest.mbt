@@ -137,6 +137,96 @@ fn setup_dir(path : String) -> Unit {
 }
 
 ///|
+test "extract_semver: basic" {
+  assert_eq(extract_semver("1.2.3"), "1.2.3")
+}
+
+///|
+test "extract_semver: with trailing non-digit" {
+  assert_eq(extract_semver("1.2.3-beta"), "1.2.3")
+}
+
+///|
+test "extract_semver: leading text" {
+  assert_eq(extract_semver("abc"), "")
+}
+
+///|
+test "extract_semver: only two parts" {
+  assert_eq(extract_semver("1.2"), "")
+}
+
+///|
+test "extract_semver: trailing dot" {
+  assert_eq(extract_semver("1.2.3."), "1.2.3")
+}
+
+///|
+test "extract_semver: empty string" {
+  assert_eq(extract_semver(""), "")
+}
+
+///|
+test "extract_semver: single number" {
+  assert_eq(extract_semver("5"), "")
+}
+
+///|
+test "extract_semver: many dots" {
+  assert_eq(extract_semver("1.2.3.4"), "1.2.3.4")
+}
+
+///|
+test "find_semver: v prefix not matched" {
+  assert_eq(find_semver("v1.2.3"), "")
+}
+
+///|
+test "find_semver: version keyword with semver" {
+  assert_eq(find_semver("version 1.2.3"), "1.2.3")
+}
+
+///|
+test "find_semver: no version" {
+  assert_eq(find_semver("no version here"), "")
+}
+
+///|
+test "find_semver: multiple candidates picks first semver" {
+  assert_eq(find_semver("v1 2.3.4 extra"), "2.3.4")
+}
+
+///|
+test "detect_compiler_name: empty output" {
+  assert_eq(detect_compiler_name("", [("gcc", "GCC")]), "")
+}
+
+///|
+test "detect_compiler_name: empty compilers" {
+  assert_eq(detect_compiler_name("some output", []), "")
+}
+
+///|
+test "add_v_prefix: already has v" {
+  assert_eq(add_v_prefix("v1.0"), "v1.0")
+}
+
+///|
+test "add_v_prefix: already has V" {
+  assert_eq(add_v_prefix("V1.0"), "V1.0")
+}
+
+///|
+test "add_v_prefix: empty" {
+  assert_eq(add_v_prefix(""), "")
+}
+
+///|
+test "add_v_prefix: normal" {
+  assert_eq(add_v_prefix("1.0"), "v1.0")
+}
+
+///|
 fn remove_dir_recursive(path : String) -> Unit {
   if not(@fs.path_exists(path)) {
     return

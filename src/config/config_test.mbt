@@ -352,3 +352,218 @@ test "default config has no raw_modules" {
   assert_true(config.get_raw_module("character") is None)
   assert_true(config.get_raw_module("directory") is None)
 }
+
+// --- Config parsing error cases ---
+
+///|
+test "from_toml: invalid syntax raises" {
+  let result = try? @config.Config::from_toml("[invalid")
+  assert_true(result is Err(_))
+}
+
+///|
+test "from_json: invalid syntax raises" {
+  let result = try? @config.Config::from_json("{{bad")
+  assert_true(result is Err(_))
+}
+
+///|
+test "from_json: non-object root raises" {
+  let result = try? @config.Config::from_json("[1,2,3]")
+  assert_true(result is Err(_))
+}
+
+///|
+test "from_json: empty string raises" {
+  let result = try? @config.Config::from_json("")
+  assert_true(result is Err(_))
+}
+
+///|
+test "from_toml: empty string is valid default config" {
+  let config = @config.Config::from_toml("")
+  let default = @config.Config::default()
+  assert_eq(config.format, default.format)
+  assert_eq(config.scan_timeout, default.scan_timeout)
+  assert_eq(config.command_timeout, default.command_timeout)
+  assert_eq(config.cache_ttl, default.cache_ttl)
+  assert_eq(config.add_newline, default.add_newline)
+}
+
+// --- ModuleTable accessor edge cases ---
+
+///|
+test "get_string: on non-string value returns None" {
+  let json =
+    #|{
+    #|  "mod": {
+    #|    "count": 42
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("mod") is Some(table)
+  assert_true(table.get_string("count") is None)
+}
+
+///|
+test "get_int: on non-int value returns None" {
+  let json =
+    #|{
+    #|  "mod": {
+    #|    "name": "hello"
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("mod") is Some(table)
+  assert_true(table.get_int("name") is None)
+}
+
+///|
+test "get_bool: on non-bool value returns None" {
+  let json =
+    #|{
+    #|  "mod": {
+    #|    "count": 42
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("mod") is Some(table)
+  assert_true(table.get_bool("count") is None)
+}
+
+///|
+test "get_string_array: on non-array value returns None" {
+  let json =
+    #|{
+    #|  "mod": {
+    #|    "name": "hello"
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("mod") is Some(table)
+  assert_true(table.get_string_array("name") is None)
+}
+
+///|
+test "get_string_array: empty array returns Some([])" {
+  let json =
+    #|{
+    #|  "mod": {
+    #|    "items": []
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("mod") is Some(table)
+  guard table.get_string_array("items") is Some(items)
+  assert_eq(items.length(), 0)
+}
+
+// --- Config from JSON edge cases ---
+
+///|
+test "from_json: null values filtered at top level" {
+  let json =
+    #|{
+    #|  "format": "$all",
+    #|  "character": null
+    #|}
+  let config = @config.Config::from_json(json)
+  assert_true(config.get_raw_module("character") is None)
+}
+
+///|
+test "from_json: nested objects become modules" {
+  let json =
+    #|{
+    #|  "git_status": {
+    #|    "style": "red",
+    #|    "disabled": false
+    #|  },
+    #|  "directory": {
+    #|    "truncation_length": 3
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("git_status") is Some(gs)
+  guard config.get_raw_module("directory") is Some(dir)
+  assert_eq(gs.get_string("style"), Some("red"))
+  assert_eq(gs.get_bool("disabled"), Some(false))
+  assert_eq(dir.get_int("truncation_length"), Some(3))
+}
+
+///|
+test "from_json: arrays in module config" {
+  let json =
+    #|{
+    #|  "node": {
+    #|    "detect_files": ["package.json", ".nvmrc"],
+    #|    "symbol": "⬢"
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("node") is Some(table)
+  guard table.get_string_array("detect_files") is Some(files)
+  assert_eq(files.length(), 2)
+  assert_eq(files[0], "package.json")
+  assert_eq(files[1], ".nvmrc")
+  assert_eq(table.get_string("symbol"), Some("⬢"))
+}
+
+// --- Config warnings ---
+
+///|
+test "Config::default has empty warnings" {
+  let config = @config.Config::default()
+  assert_eq(config.warnings.length(), 0)
+}
+
+///|
+test "with_warnings sets warnings correctly" {
+  let config = @config.Config::default()
+  let warned = config.with_warnings(["warn1", "warn2"])
+  assert_eq(warned.warnings.length(), 2)
+  assert_eq(warned.warnings[0], "warn1")
+  assert_eq(warned.warnings[1], "warn2")
+
+  assert_eq(warned.format, config.format)
+}
+
+// --- Config to_toml edge cases ---
+
+///|
+test "to_toml: module with array values" {
+  let json =
+    #|{
+    #|  "rust": {
+    #|    "detect_files": ["Cargo.toml", "Cargo.lock"],
+    #|    "symbol": "🦀"
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  let output = config.to_toml()
+  assert_true(output.contains("[rust]"))
+  assert_true(
+    output.contains("detect_files = [\"Cargo.toml\", \"Cargo.lock\"]"),
+  )
+  assert_true(output.contains("symbol = \"🦀\""))
+}
+
+///|
+test "to_toml: module with all field types" {
+  let json =
+    #|{
+    #|  "example": {
+    #|    "name": "test",
+    #|    "count": 10,
+    #|    "enabled": true,
+    #|    "tags": ["a", "b"]
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  let output = config.to_toml()
+  assert_true(output.contains("[example]"))
+  assert_true(output.contains("name = \"test\""))
+  assert_true(output.contains("count = 10"))
+  assert_true(output.contains("enabled = true"))
+  assert_true(output.contains("tags = [\"a\", \"b\"]"))
+}

@@ -664,3 +664,118 @@ test "collect_variable_names: env var not included" {
   let names = @module_system.collect_variable_names(nodes)
   assert_eq(names, ["mod"])
 }
+
+// --- parse_format: additional edge cases ---
+
+///|
+test "parse_format: empty template" {
+  let nodes = @module_system.parse_format("")
+  assert_eq(nodes.length(), 0)
+}
+
+///|
+test "parse_format: just text no special chars" {
+  let nodes = @module_system.parse_format("hello world 123")
+  assert_eq(nodes.length(), 1)
+  assert_true(nodes[0] is Text("hello world 123"))
+}
+
+///|
+test "parse_format: escape backslash" {
+  let nodes = @module_system.parse_format("\\\\")
+  assert_eq(nodes.length(), 1)
+  assert_true(nodes[0] is Escape('\\'))
+}
+
+///|
+test "parse_format: escape tab" {
+  let nodes = @module_system.parse_format("\\t")
+  assert_eq(nodes.length(), 1)
+  assert_true(nodes[0] is Escape('t'))
+}
+
+///|
+test "parse_format: multiple escape sequences" {
+  let nodes = @module_system.parse_format("\\n\\t")
+  assert_eq(nodes.length(), 2)
+  assert_true(nodes[0] is Escape('n'))
+  assert_true(nodes[1] is Escape('t'))
+}
+
+///|
+test "parse_format: variable with underscores and digits" {
+  let nodes = @module_system.parse_format("$a_b_1")
+  assert_eq(nodes.length(), 1)
+  assert_true(nodes[0] is Variable("a_b_1"))
+}
+
+///|
+test "parse_format: env var empty name" {
+  let nodes = @module_system.parse_format("${env:}")
+  assert_eq(nodes.length(), 1)
+  assert_true(nodes[0] is EnvVar(""))
+}
+
+///|
+test "parse_format: env var unclosed brace" {
+  let nodes = @module_system.parse_format("${env:missing")
+  // unclosed brace means parse_dollar returns None, $ is skipped
+  assert_true(nodes.length() > 0)
+  // Should not produce an EnvVar node
+  let has_env_var = nodes.iter().any(fn(n) { n is EnvVar(_) })
+  assert_false(has_env_var)
+}
+
+///|
+test "parse_format: bracket without style is Text" {
+  let nodes = @module_system.parse_format("[text]")
+  // [text] without following (style) produces Text("[") then Text("text]")
+  assert_true(nodes.length() > 0)
+  let has_styled = nodes.iter().any(fn(n) { n is Styled(_) })
+  assert_false(has_styled)
+}
+
+///|
+test "parse_format: empty conditional" {
+  let nodes = @module_system.parse_format("()")
+  assert_eq(nodes.length(), 1)
+  guard nodes[0] is Conditional(content) else { fail("expected Conditional") }
+  assert_eq(content.length(), 0)
+}
+
+///|
+test "parse_format: dollar at end" {
+  let nodes = @module_system.parse_format("abc$")
+  // $ at end: parse_dollar returns None, $ is skipped
+  // "abc" is Text, then $ is consumed with no node produced
+  assert_true(nodes.length() >= 1)
+  assert_true(nodes[0] is Text("abc"))
+}
+
+///|
+test "parse_format: mixed template" {
+  let nodes = @module_system.parse_format(
+    "$a [styled](bold) (conditional $b) text",
+  )
+  // Should contain: Variable("a"), Text(" "), Styled, Text(" "), Conditional, Text(" text")
+  let has_variable = nodes.iter().any(fn(n) { n is Variable("a") })
+  let has_styled = nodes.iter().any(fn(n) { n is Styled(_) })
+  let has_conditional = nodes.iter().any(fn(n) { n is Conditional(_) })
+  let has_text = nodes.iter().any(fn(n) { n is Text(_) })
+  assert_true(has_variable)
+  assert_true(has_styled)
+  assert_true(has_conditional)
+  assert_true(has_text)
+}
+
+///|
+test "parse_format: nested conditional with styled content and var" {
+  let nodes = @module_system.parse_format("([inner $var](style))")
+  assert_eq(nodes.length(), 1)
+  guard nodes[0] is Conditional(content) else { fail("expected Conditional") }
+  assert_eq(content.length(), 1)
+  guard content[0] is Styled(inner, spec) else { fail("expected Styled") }
+  assert_eq(spec, "style")
+  let has_var = inner.iter().any(fn(n) { n is Variable("var") })
+  assert_true(has_var)
+}

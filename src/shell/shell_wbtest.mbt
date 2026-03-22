@@ -62,3 +62,56 @@ test "wrap_for_shell: fish passes through" {
   let input = "\u001b[1mtest\u001b[0m"
   assert_eq(wrap_for_shell("fish", input), input)
 }
+
+///|
+test "wrap_ansi_for_zsh: empty string" {
+  assert_eq(wrap_ansi_for_zsh(""), "")
+}
+
+///|
+test "wrap_ansi_for_zsh: multiple sequences each wrapped" {
+  let input = "\u001b[1mhello\u001b[0m \u001b[32mworld\u001b[0m"
+  let result = wrap_ansi_for_zsh(input)
+  assert_eq(
+    result, "%{\u001b[1m%}hello%{\u001b[0m%} %{\u001b[32m%}world%{\u001b[0m%}",
+  )
+}
+
+///|
+test "wrap_ansi_for_zsh: text between sequences preserved" {
+  let input = "\u001b[1mfoo\u001b[0mbar\u001b[2mbaz\u001b[0m"
+  let result = wrap_ansi_for_zsh(input)
+  assert_true(result.contains("foo"))
+  assert_true(result.contains("bar"))
+  assert_true(result.contains("baz"))
+}
+
+///|
+test "wrap_ansi_for_zsh: incomplete ESC without bracket not wrapped" {
+  // ESC followed by a non-bracket char: should not be wrapped
+  let input = "\u001bXhello"
+  let result = wrap_ansi_for_zsh(input)
+  assert_false(result.contains("%{"))
+  assert_true(result.contains("hello"))
+}
+
+///|
+test "wrap_ansi_for_zsh: ESC bracket without m wraps until end" {
+  let input = "\u001b[999"
+  let result = wrap_ansi_for_zsh(input)
+  assert_true(result.contains("%{"))
+  assert_true(result.contains("%}"))
+}
+
+///|
+test "wrap_for_shell: bash passes through" {
+  let input = "\u001b[1mtest\u001b[0m"
+  assert_eq(wrap_for_shell("bash", input), input)
+}
+
+///|
+test "wrap_for_shell: zsh wraps sequences" {
+  let input = "\u001b[31mred\u001b[0m"
+  let result = wrap_for_shell("zsh", input)
+  assert_eq(result, "%{\u001b[31m%}red%{\u001b[0m%}")
+}

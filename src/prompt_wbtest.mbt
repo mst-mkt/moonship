@@ -187,6 +187,70 @@ async test "expand_all: no $all returns unchanged" {
   assert_eq(expand_all(format, modules), format)
 }
 
+// --- replace_var: additional edge cases ---
+
+///|
+async test "replace_var: no match" {
+  assert_eq(replace_var("$other", "all", "XY"), "$other")
+}
+
+///|
+async test "replace_var: multiple occurrences" {
+  assert_eq(replace_var("$all$all", "all", "X"), "XX")
+}
+
+///|
+async test "replace_var: empty string" {
+  assert_eq(replace_var("", "all", "XY"), "")
+}
+
+///|
+async test "replace_var: replacement with empty string" {
+  assert_eq(replace_var("a$all b", "all", ""), "a b")
+}
+
+///|
+async test "replace_var: partial match does not replace" {
+  assert_eq(replace_var("$allison", "all", "XY"), "$allison")
+}
+
+// --- starts_with_at ---
+
+///|
+async test "starts_with_at: basic match" {
+  assert_true(starts_with_at("hello world", 0, "hello"))
+}
+
+///|
+async test "starts_with_at: match at offset" {
+  assert_true(starts_with_at("hello world", 6, "world"))
+}
+
+///|
+async test "starts_with_at: no match" {
+  assert_false(starts_with_at("hello world", 0, "world"))
+}
+
+///|
+async test "starts_with_at: offset at end" {
+  assert_false(starts_with_at("hello", 5, "x"))
+}
+
+///|
+async test "starts_with_at: empty prefix" {
+  assert_true(starts_with_at("hello", 0, ""))
+}
+
+///|
+async test "starts_with_at: prefix longer than remaining" {
+  assert_false(starts_with_at("hi", 1, "hello"))
+}
+
+///|
+async test "starts_with_at: exact match at offset" {
+  assert_true(starts_with_at("abcdef", 3, "def"))
+}
+
 ///|
 async test "render: unknown module skipped" {
   let config = @config.Config::from_toml(
