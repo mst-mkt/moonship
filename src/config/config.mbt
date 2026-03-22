@@ -1,5 +1,15 @@
 ///|
-pub struct ModuleTable(Map[String, @toml.TomlValue])
+pub(all) enum ConfigValue {
+  CString(String)
+  CInt(Int)
+  CBool(Bool)
+  CFloat(Double)
+  CArray(Array[ConfigValue])
+  CTable(Map[String, ConfigValue])
+}
+
+///|
+pub struct ModuleTable(Map[String, ConfigValue])
 
 ///|
 pub struct Config {
@@ -29,30 +39,37 @@ pub fn Config::get_raw_module(self : Config, name : String) -> ModuleTable? {
 }
 
 ///|
-/// Parse a TOML string into a Config, merging with defaults.
+/// Parse a TOML string into a Config.
 pub fn Config::from_toml(toml_str : String) -> Config raise {
   let value = @toml.parse(toml_str)
   guard value is TomlTable(table) else {
     raise Failure::Failure("expected TOML table at root")
   }
 
+  let config_table = toml_table_to_config(table)
+  parse_config_table(config_table)
+}
+
+///|
+fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
   let default = Config::default()
-  let format = get_string(table, "format").unwrap_or(default.format)
-  let scan_timeout = get_int(table, "scan_timeout").unwrap_or(
+
+  let format = get_cv_string(table, "format").unwrap_or(default.format)
+  let scan_timeout = get_cv_int(table, "scan_timeout").unwrap_or(
     default.scan_timeout,
   )
-  let command_timeout = get_int(table, "command_timeout").unwrap_or(
+  let command_timeout = get_cv_int(table, "command_timeout").unwrap_or(
     default.command_timeout,
   )
-  let cache_ttl = get_int(table, "cache_ttl").unwrap_or(default.cache_ttl)
-  let add_newline = get_bool(table, "add_newline").unwrap_or(
+  let cache_ttl = get_cv_int(table, "cache_ttl").unwrap_or(default.cache_ttl)
+  let add_newline = get_cv_bool(table, "add_newline").unwrap_or(
     default.add_newline,
   )
 
   let raw_modules : Map[String, ModuleTable] = {}
 
-  table.each(fn(name, mod_value) {
-    guard mod_value is TomlTable(mod_table) else { return }
+  table.each(fn(name, value) {
+    guard value is CTable(mod_table) else { return }
     raw_modules[name] = ModuleTable(mod_table)
   })
 
@@ -95,19 +112,14 @@ fn raw_module_to_toml(name : String, table : ModuleTable) -> String {
 
   for key in keys {
     match table.0.get(key) {
-      Some(TomlString(s)) => lines.push("\{key} = \{quote(s)}")
-      Some(TomlInteger(n)) => lines.push("\{key} = \{n}")
-      Some(TomlBoolean(b)) => lines.push("\{key} = \{b}")
-      Some(TomlFloat(f)) => lines.push("\{key} = \{f}")
-      Some(TomlArray(arr)) => {
+      Some(CString(s)) => lines.push("\{key} = \{quote(s)}")
+      Some(CInt(n)) => lines.push("\{key} = \{n}")
+      Some(CBool(b)) => lines.push("\{key} = \{b}")
+      Some(CFloat(f)) => lines.push("\{key} = \{f}")
+      Some(CArray(arr)) => {
         let items = arr
           .iter()
-          .filter_map(fn(v) {
-            match v {
-              TomlString(s) => Some(quote(s))
-              _ => None
-            }
-          })
+          .map(fn(v) { config_value_to_toml_literal(v) })
           .collect()
           .join(", ")
         lines.push("\{key} = [\{items}]")
@@ -139,9 +151,22 @@ fn quote(s : String) -> String {
 }
 
 ///|
+fn config_value_to_toml_literal(v : ConfigValue) -> String {
+  match v {
+    CString(s) => quote(s)
+    CInt(n) => n.to_string()
+    CBool(b) => b.to_string()
+    CFloat(f) => f.to_string()
+    CArray(_) | CTable(_) => "\"\""
+  }
+}
+
+// --- Public helpers for modules ---
+
+///|
 pub fn get_toml_string(table : ModuleTable, key : String) -> String? {
   match table.0.get(key) {
-    Some(TomlString(s)) => Some(s)
+    Some(CString(s)) => Some(s)
     _ => None
   }
 }
@@ -149,7 +174,7 @@ pub fn get_toml_string(table : ModuleTable, key : String) -> String? {
 ///|
 pub fn get_toml_int(table : ModuleTable, key : String) -> Int? {
   match table.0.get(key) {
-    Some(TomlInteger(n)) => Some(n.to_int())
+    Some(CInt(n)) => Some(n)
     _ => None
   }
 }
@@ -157,7 +182,7 @@ pub fn get_toml_int(table : ModuleTable, key : String) -> Int? {
 ///|
 pub fn get_toml_bool(table : ModuleTable, key : String) -> Bool? {
   match table.0.get(key) {
-    Some(TomlBoolean(b)) => Some(b)
+    Some(CBool(b)) => Some(b)
     _ => None
   }
 }
@@ -168,12 +193,12 @@ pub fn get_toml_string_array(
   key : String,
 ) -> Array[String]? {
   match table.0.get(key) {
-    Some(TomlArray(arr)) => {
+    Some(CArray(arr)) => {
       let result : Array[String] = []
 
       for item in arr {
         match item {
-          TomlString(s) => result.push(s)
+          CString(s) => result.push(s)
           _ => ()
         }
       }
@@ -184,26 +209,54 @@ pub fn get_toml_string_array(
   }
 }
 
+// --- TOML conversion ---
+
 ///|
-fn get_string(table : Map[String, @toml.TomlValue], key : String) -> String? {
+fn toml_to_config(v : @toml.TomlValue) -> ConfigValue {
+  match v {
+    TomlString(s) => CString(s)
+    TomlInteger(n) => CInt(n.to_int())
+    TomlBoolean(b) => CBool(b)
+    TomlFloat(f) => CFloat(f)
+    TomlArray(arr) => CArray(arr.map(toml_to_config))
+    TomlTable(t) => CTable(toml_table_to_config(t))
+    _ => CString("")
+  }
+}
+
+///|
+fn toml_table_to_config(
+  table : Map[String, @toml.TomlValue],
+) -> Map[String, ConfigValue] {
+  let result : Map[String, ConfigValue] = {}
+
+  table.each(fn(key, value) { result[key] = toml_to_config(value) })
+
+  result
+}
+
+// --- Private helpers for top-level config parsing ---
+
+///|
+fn get_cv_string(table : Map[String, ConfigValue], key : String) -> String? {
   match table.get(key) {
-    Some(TomlString(s)) => Some(s)
+    Some(CString(s)) => Some(s)
     _ => None
   }
 }
 
 ///|
-fn get_int(table : Map[String, @toml.TomlValue], key : String) -> Int? {
+fn get_cv_int(table : Map[String, ConfigValue], key : String) -> Int? {
   match table.get(key) {
-    Some(TomlInteger(n)) => Some(n.to_int())
+    Some(CInt(n)) => Some(n)
     _ => None
   }
 }
 
 ///|
-fn get_bool(table : Map[String, @toml.TomlValue], key : String) -> Bool? {
+fn get_cv_bool(table : Map[String, ConfigValue], key : String) -> Bool? {
   match table.get(key) {
-    Some(TomlBoolean(b)) => Some(b)
+    Some(CBool(b)) => Some(b)
     _ => None
   }
 }
