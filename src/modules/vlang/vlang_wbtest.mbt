@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = VlangModule::new()
+  let m : &@ms.PromptModule = VlangModule::default()
   assert_eq(m.name(), "vlang")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-vlang-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = VlangModule::new()
+  let m = VlangModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects v.mod" {
   let path = "/tmp/moonship-test-vlang-file"
   setup_dir(path)
   @fs.write_string_to_file(path + "/v.mod", "")
-  let m = VlangModule::new()
+  let m = VlangModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no V project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .v extension" {
   let path = "/tmp/moonship-test-vlang-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.v", "")
-  let m = VlangModule::new()
+  let m = VlangModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no V project detected"))

@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = RakuModule::new()
+  let m : &@ms.PromptModule = RakuModule::default()
   assert_eq(m.name(), "raku")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-raku-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = RakuModule::new()
+  let m = RakuModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects META6.json" {
   let path = "/tmp/moonship-test-raku-file"
   setup_dir(path)
   @fs.write_string_to_file(path + "/META6.json", "")
-  let m = RakuModule::new()
+  let m = RakuModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Raku project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .raku extension" {
   let path = "/tmp/moonship-test-raku-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.raku", "")
-  let m = RakuModule::new()
+  let m = RakuModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Raku project detected"))

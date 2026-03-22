@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = SwiftModule::new()
+  let m : &@ms.PromptModule = SwiftModule::default()
   assert_eq(m.name(), "swift")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-swift-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = SwiftModule::new()
+  let m = SwiftModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects Package.swift" {
   let path = "/tmp/moonship-test-swift-package"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Package.swift", "")
-  let m = SwiftModule::new()
+  let m = SwiftModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Swift project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .swift extension" {
   let path = "/tmp/moonship-test-swift-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.swift", "")
-  let m = SwiftModule::new()
+  let m = SwiftModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Swift project detected"))

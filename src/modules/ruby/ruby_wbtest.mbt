@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = RubyModule::new()
+  let m : &@ms.PromptModule = RubyModule::default()
   assert_eq(m.name(), "ruby")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-ruby-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = RubyModule::new()
+  let m = RubyModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects Gemfile" {
   let path = "/tmp/moonship-test-ruby-gemfile"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Gemfile", "")
-  let m = RubyModule::new()
+  let m = RubyModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Ruby project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .ruby-version" {
   let path = "/tmp/moonship-test-ruby-version"
   setup_dir(path)
   @fs.write_string_to_file(path + "/.ruby-version", "")
-  let m = RubyModule::new()
+  let m = RubyModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Ruby project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects .rb extension" {
   let path = "/tmp/moonship-test-ruby-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/app.rb", "")
-  let m = RubyModule::new()
+  let m = RubyModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Ruby project detected"))

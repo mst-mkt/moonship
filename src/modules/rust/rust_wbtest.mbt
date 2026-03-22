@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = RustModule::new()
+  let m : &@ms.PromptModule = RustModule::default()
   assert_eq(m.name(), "rust")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-rust-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = RustModule::new()
+  let m = RustModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
 }
@@ -32,7 +32,7 @@ async test "execute: detects Cargo.toml" {
   let path = "/tmp/moonship-test-rust-cargo"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Cargo.toml", "")
-  let m = RustModule::new()
+  let m = RustModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -43,7 +43,7 @@ async test "execute: detects .rs extension" {
   let path = "/tmp/moonship-test-rust-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.rs", "")
-  let m = RustModule::new()
+  let m = RustModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)

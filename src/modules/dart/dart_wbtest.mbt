@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = DartModule::new()
+  let m : &@ms.PromptModule = DartModule::default()
   assert_eq(m.name(), "dart")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-dart-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = DartModule::new()
+  let m = DartModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects pubspec.yaml" {
   let path = "/tmp/moonship-test-dart-pubspec"
   setup_dir(path)
   @fs.write_string_to_file(path + "/pubspec.yaml", "")
-  let m = DartModule::new()
+  let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Dart project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects pubspec.yml" {
   let path = "/tmp/moonship-test-dart-yml"
   setup_dir(path)
   @fs.write_string_to_file(path + "/pubspec.yml", "")
-  let m = DartModule::new()
+  let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Dart project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects pubspec.lock" {
   let path = "/tmp/moonship-test-dart-lock"
   setup_dir(path)
   @fs.write_string_to_file(path + "/pubspec.lock", "")
-  let m = DartModule::new()
+  let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Dart project detected"))
@@ -69,7 +69,7 @@ async test "execute: detects .dart extension" {
   let path = "/tmp/moonship-test-dart-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.dart", "")
-  let m = DartModule::new()
+  let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Dart project detected"))

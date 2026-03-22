@@ -1,6 +1,7 @@
 ///|
 pub struct ShellModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   bash_indicator : String
@@ -10,23 +11,50 @@ pub struct ShellModule {
 }
 
 ///|
-pub fn ShellModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("shell"),
-) -> ShellModule {
+pub fn ShellModule::default() -> ShellModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    bash_indicator: config.get_prop("bash_indicator", default="bsh"),
-    fish_indicator: config.get_prop("fish_indicator", default="fsh"),
-    zsh_indicator: config.get_prop("zsh_indicator", default="zsh"),
-    unknown_indicator: config.get_prop("unknown_indicator", default=""),
+    disabled: true,
+    async_render: false,
+    format: "[$indicator]($style) ",
+    style: "white bold",
+    bash_indicator: "bsh",
+    fish_indicator: "fsh",
+    zsh_indicator: "zsh",
+    unknown_indicator: "",
+  }
+}
+
+///|
+pub fn ShellModule::from_toml_table(table : @config.ModuleTable) -> ShellModule {
+  let d = ShellModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    bash_indicator: @config.get_toml_string(table, "bash_indicator").unwrap_or(
+      d.bash_indicator,
+    ),
+    fish_indicator: @config.get_toml_string(table, "fish_indicator").unwrap_or(
+      d.fish_indicator,
+    ),
+    zsh_indicator: @config.get_toml_string(table, "zsh_indicator").unwrap_or(
+      d.zsh_indicator,
+    ),
+    unknown_indicator: @config.get_toml_string(table, "unknown_indicator").unwrap_or(
+      d.unknown_indicator,
+    ),
   }
 }
 
 ///|
 pub fn ShellModule::from_config(config : @config.Config) -> ShellModule {
-  ShellModule::new(config=config.get_module("shell"))
+  match config.get_raw_module("shell") {
+    Some(table) => ShellModule::from_toml_table(table)
+    None => ShellModule::default()
+  }
 }
 
 ///|
@@ -35,8 +63,8 @@ pub impl @ms.PromptModule for ShellModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for ShellModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for ShellModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

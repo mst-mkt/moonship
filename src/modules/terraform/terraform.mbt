@@ -1,6 +1,7 @@
 ///|
 pub struct TerraformModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -10,16 +11,13 @@ pub struct TerraformModule {
 }
 
 ///|
-pub fn TerraformModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "terraform",
-  ),
-) -> TerraformModule {
+pub fn TerraformModule::default() -> TerraformModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="💠 "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol$workspace]($style) ",
+    style: "bold 105",
+    symbol: "💠 ",
     detect_files: [],
     detect_folders: [".terraform"],
     detect_extensions: [".tf", ".tfplan", ".tfstate"],
@@ -27,8 +25,36 @@ pub fn TerraformModule::new(
 }
 
 ///|
+pub fn TerraformModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> TerraformModule {
+  let d = TerraformModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
+      d.detect_folders,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn TerraformModule::from_config(config : @config.Config) -> TerraformModule {
-  TerraformModule::new(config=config.get_module("terraform"))
+  match config.get_raw_module("terraform") {
+    Some(table) => TerraformModule::from_toml_table(table)
+    None => TerraformModule::default()
+  }
 }
 
 ///|
@@ -37,8 +63,8 @@ pub impl @ms.PromptModule for TerraformModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for TerraformModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for TerraformModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

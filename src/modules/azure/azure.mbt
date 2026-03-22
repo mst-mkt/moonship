@@ -1,26 +1,43 @@
 ///|
 pub struct AzureModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn AzureModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("azure"),
-) -> AzureModule {
+pub fn AzureModule::default() -> AzureModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="󰠅 "),
+    disabled: true,
+    async_render: false,
+    format: "on [$symbol($subscription)]($style) ",
+    style: "blue bold",
+    symbol: "󰠅 ",
+  }
+}
+
+///|
+pub fn AzureModule::from_toml_table(table : @config.ModuleTable) -> AzureModule {
+  let d = AzureModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn AzureModule::from_config(config : @config.Config) -> AzureModule {
-  AzureModule::new(config=config.get_module("azure"))
+  match config.get_raw_module("azure") {
+    Some(table) => AzureModule::from_toml_table(table)
+    None => AzureModule::default()
+  }
 }
 
 ///|
@@ -29,8 +46,8 @@ pub impl @ms.PromptModule for AzureModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for AzureModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for AzureModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

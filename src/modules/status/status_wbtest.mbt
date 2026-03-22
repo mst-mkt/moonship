@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = StatusModule::new()
+  let m : &@ms.PromptModule = StatusModule::default()
   assert_eq(m.name(), "status")
 }
 
 ///|
 async test "execute: disabled by default" {
-  let m = StatusModule::new()
+  let m = StatusModule::default()
   let ctx = @context.Context::new(cwd="/tmp", status=1)
   assert_true(m.execute(ctx) is Disabled)
 }

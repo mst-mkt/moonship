@@ -1,6 +1,7 @@
 ///|
 pub struct RlangModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -10,14 +11,13 @@ pub struct RlangModule {
 }
 
 ///|
-pub fn RlangModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("rlang"),
-) -> RlangModule {
+pub fn RlangModule::default() -> RlangModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="📐 "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "blue bold",
+    symbol: "📐 ",
     detect_files: ["DESCRIPTION"],
     detect_folders: [".Rproj.user"],
     detect_extensions: [".R", ".Rd", ".Rmd", ".Rproj", ".Rsx"],
@@ -25,8 +25,34 @@ pub fn RlangModule::new(
 }
 
 ///|
+pub fn RlangModule::from_toml_table(table : @config.ModuleTable) -> RlangModule {
+  let d = RlangModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
+      d.detect_folders,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn RlangModule::from_config(config : @config.Config) -> RlangModule {
-  RlangModule::new(config=config.get_module("rlang"))
+  match config.get_raw_module("rlang") {
+    Some(table) => RlangModule::from_toml_table(table)
+    None => RlangModule::default()
+  }
 }
 
 ///|
@@ -35,8 +61,8 @@ pub impl @ms.PromptModule for RlangModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for RlangModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for RlangModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

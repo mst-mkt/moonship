@@ -1,6 +1,7 @@
 ///|
 pub struct TimeModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   use_12hr : Bool
@@ -9,22 +10,44 @@ pub struct TimeModule {
 }
 
 ///|
-pub fn TimeModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("time"),
-) -> TimeModule {
+pub fn TimeModule::default() -> TimeModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    use_12hr: config.get_prop("use_12hr") == "true",
-    time_format: config.get_prop("time_format", default=""),
-    utc_time_offset: config.get_prop("utc_time_offset", default="local"),
+    disabled: true,
+    async_render: false,
+    format: "at [$time]($style) ",
+    style: "bold yellow",
+    use_12hr: false,
+    time_format: "",
+    utc_time_offset: "local",
+  }
+}
+
+///|
+pub fn TimeModule::from_toml_table(table : @config.ModuleTable) -> TimeModule {
+  let d = TimeModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    use_12hr: @config.get_toml_bool(table, "use_12hr").unwrap_or(d.use_12hr),
+    time_format: @config.get_toml_string(table, "time_format").unwrap_or(
+      d.time_format,
+    ),
+    utc_time_offset: @config.get_toml_string(table, "utc_time_offset").unwrap_or(
+      d.utc_time_offset,
+    ),
   }
 }
 
 ///|
 pub fn TimeModule::from_config(config : @config.Config) -> TimeModule {
-  TimeModule::new(config=config.get_module("time"))
+  match config.get_raw_module("time") {
+    Some(table) => TimeModule::from_toml_table(table)
+    None => TimeModule::default()
+  }
 }
 
 ///|
@@ -33,8 +56,8 @@ pub impl @ms.PromptModule for TimeModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for TimeModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for TimeModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

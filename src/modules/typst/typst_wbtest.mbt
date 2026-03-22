@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = TypstModule::new()
+  let m : &@ms.PromptModule = TypstModule::default()
   assert_eq(m.name(), "typst")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-typst-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = TypstModule::new()
+  let m = TypstModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects template.typ" {
   let path = "/tmp/moonship-test-typst-file"
   setup_dir(path)
   @fs.write_string_to_file(path + "/template.typ", "")
-  let m = TypstModule::new()
+  let m = TypstModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Typst project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .typ extension" {
   let path = "/tmp/moonship-test-typst-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.typ", "")
-  let m = TypstModule::new()
+  let m = TypstModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Typst project detected"))

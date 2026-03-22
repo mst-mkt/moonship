@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = SudoModule::new()
+  let m : &@ms.PromptModule = SudoModule::default()
   assert_eq(m.name(), "sudo")
 }
 
 ///|
 async test "execute: disabled by default" {
-  let m = SudoModule::new()
+  let m = SudoModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   assert_true(m.execute(ctx) is Disabled)
 }

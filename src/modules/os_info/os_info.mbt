@@ -1,20 +1,40 @@
 ///|
 pub struct OsModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
 }
 
 ///|
-pub fn OsModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("os"),
-) -> OsModule {
-  { disabled: config.disabled, format: config.format, style: config.style }
+pub fn OsModule::default() -> OsModule {
+  {
+    disabled: true,
+    async_render: false,
+    format: "[$symbol]($style)",
+    style: "bold white",
+  }
+}
+
+///|
+pub fn OsModule::from_toml_table(table : @config.ModuleTable) -> OsModule {
+  let d = OsModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+  }
 }
 
 ///|
 pub fn OsModule::from_config(config : @config.Config) -> OsModule {
-  OsModule::new(config=config.get_module("os"))
+  match config.get_raw_module("os") {
+    Some(table) => OsModule::from_toml_table(table)
+    None => OsModule::default()
+  }
 }
 
 ///|
@@ -23,8 +43,8 @@ pub impl @ms.PromptModule for OsModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for OsModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for OsModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

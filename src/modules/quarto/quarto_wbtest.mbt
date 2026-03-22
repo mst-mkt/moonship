@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = QuartoModule::new()
+  let m : &@ms.PromptModule = QuartoModule::default()
   assert_eq(m.name(), "quarto")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-quarto-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = QuartoModule::new()
+  let m = QuartoModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects _quarto.yml" {
   let path = "/tmp/moonship-test-quarto-yml"
   setup_dir(path)
   @fs.write_string_to_file(path + "/_quarto.yml", "")
-  let m = QuartoModule::new()
+  let m = QuartoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Quarto project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .qmd extension" {
   let path = "/tmp/moonship-test-quarto-qmd"
   setup_dir(path)
   @fs.write_string_to_file(path + "/doc.qmd", "")
-  let m = QuartoModule::new()
+  let m = QuartoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Quarto project detected"))

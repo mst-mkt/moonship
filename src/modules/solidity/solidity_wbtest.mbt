@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = SolidityModule::new()
+  let m : &@ms.PromptModule = SolidityModule::default()
   assert_eq(m.name(), "solidity")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-solidity-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = SolidityModule::new()
+  let m = SolidityModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .sol extension" {
   let path = "/tmp/moonship-test-solidity-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/contract.sol", "")
-  let m = SolidityModule::new()
+  let m = SolidityModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Solidity project detected"))

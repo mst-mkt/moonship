@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = XmakeModule::new()
+  let m : &@ms.PromptModule = XmakeModule::default()
   assert_eq(m.name(), "xmake")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-xmake-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = XmakeModule::new()
+  let m = XmakeModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects xmake.lua" {
   let path = "/tmp/moonship-test-xmake-file"
   setup_dir(path)
   @fs.write_string_to_file(path + "/xmake.lua", "")
-  let m = XmakeModule::new()
+  let m = XmakeModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no xmake project detected"))

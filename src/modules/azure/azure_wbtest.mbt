@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = AzureModule::new()
+  let m : &@ms.PromptModule = AzureModule::default()
   assert_eq(m.name(), "azure")
 }
 
 ///|
 async test "execute: disabled by default" {
-  let m = AzureModule::new()
+  let m = AzureModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   assert_true(m.execute(ctx) is Disabled)
 }

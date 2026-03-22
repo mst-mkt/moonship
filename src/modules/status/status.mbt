@@ -1,6 +1,7 @@
 ///|
 pub struct StatusModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -11,29 +12,54 @@ pub struct StatusModule {
 }
 
 ///|
-pub fn StatusModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "status",
-  ),
-) -> StatusModule {
+pub fn StatusModule::default() -> StatusModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="❌"),
-    success_symbol: config.get_prop("success_symbol", default=""),
-    not_executable_symbol: config.get_prop(
-      "not_executable_symbol",
-      default="🚫",
+    disabled: true,
+    async_render: false,
+    format: "[$symbol$status]($style) ",
+    style: "bold red",
+    symbol: "❌",
+    success_symbol: "",
+    not_executable_symbol: "🚫",
+    not_found_symbol: "🔍",
+    map_symbol: false,
+  }
+}
+
+///|
+pub fn StatusModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> StatusModule {
+  let d = StatusModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
     ),
-    not_found_symbol: config.get_prop("not_found_symbol", default="🔍"),
-    map_symbol: config.get_prop("map_symbol") == "true",
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    success_symbol: @config.get_toml_string(table, "success_symbol").unwrap_or(
+      d.success_symbol,
+    ),
+    not_executable_symbol: @config.get_toml_string(
+      table, "not_executable_symbol",
+    ).unwrap_or(d.not_executable_symbol),
+    not_found_symbol: @config.get_toml_string(table, "not_found_symbol").unwrap_or(
+      d.not_found_symbol,
+    ),
+    map_symbol: @config.get_toml_bool(table, "map_symbol").unwrap_or(
+      d.map_symbol,
+    ),
   }
 }
 
 ///|
 pub fn StatusModule::from_config(config : @config.Config) -> StatusModule {
-  StatusModule::new(config=config.get_module("status"))
+  match config.get_raw_module("status") {
+    Some(table) => StatusModule::from_toml_table(table)
+    None => StatusModule::default()
+  }
 }
 
 ///|
@@ -42,8 +68,8 @@ pub impl @ms.PromptModule for StatusModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for StatusModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for StatusModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

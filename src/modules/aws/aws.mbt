@@ -1,26 +1,43 @@
 ///|
 pub struct AwsModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn AwsModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("aws"),
-) -> AwsModule {
+pub fn AwsModule::default() -> AwsModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="☁️  "),
+    disabled: false,
+    async_render: false,
+    format: "on [$symbol($profile )(\\($region\\) )]($style)",
+    style: "bold yellow",
+    symbol: "☁️  ",
+  }
+}
+
+///|
+pub fn AwsModule::from_toml_table(table : @config.ModuleTable) -> AwsModule {
+  let d = AwsModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn AwsModule::from_config(config : @config.Config) -> AwsModule {
-  AwsModule::new(config=config.get_module("aws"))
+  match config.get_raw_module("aws") {
+    Some(table) => AwsModule::from_toml_table(table)
+    None => AwsModule::default()
+  }
 }
 
 ///|
@@ -29,8 +46,8 @@ pub impl @ms.PromptModule for AwsModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for AwsModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for AwsModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

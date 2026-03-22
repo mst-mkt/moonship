@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = ScalaModule::new()
+  let m : &@ms.PromptModule = ScalaModule::default()
   assert_eq(m.name(), "scala")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-scala-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = ScalaModule::new()
+  let m = ScalaModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects build.sbt" {
   let path = "/tmp/moonship-test-scala-sbt"
   setup_dir(path)
   @fs.write_string_to_file(path + "/build.sbt", "")
-  let m = ScalaModule::new()
+  let m = ScalaModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Scala project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .scala extension" {
   let path = "/tmp/moonship-test-scala-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Main.scala", "")
-  let m = ScalaModule::new()
+  let m = ScalaModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Scala project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects .scalaenv" {
   let path = "/tmp/moonship-test-scala-env"
   setup_dir(path)
   @fs.write_string_to_file(path + "/.scalaenv", "")
-  let m = ScalaModule::new()
+  let m = ScalaModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Scala project detected"))

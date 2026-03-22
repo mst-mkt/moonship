@@ -1,6 +1,7 @@
 ///|
 pub struct ShlvlModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -10,23 +11,44 @@ pub struct ShlvlModule {
 }
 
 ///|
-pub fn ShlvlModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("shlvl"),
-) -> ShlvlModule {
+pub fn ShlvlModule::default() -> ShlvlModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="↕️  "),
-    threshold: config.get_int_prop("threshold", default=2),
-    repeat: config.get_prop("repeat") == "true",
-    repeat_offset: config.get_int_prop("repeat_offset", default=0),
+    disabled: true,
+    async_render: false,
+    format: "[$symbol$shlvl]($style) ",
+    style: "bold yellow",
+    symbol: "↕️  ",
+    threshold: 2,
+    repeat: false,
+    repeat_offset: 0,
+  }
+}
+
+///|
+pub fn ShlvlModule::from_toml_table(table : @config.ModuleTable) -> ShlvlModule {
+  let d = ShlvlModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    threshold: @config.get_toml_int(table, "threshold").unwrap_or(d.threshold),
+    repeat: @config.get_toml_bool(table, "repeat").unwrap_or(d.repeat),
+    repeat_offset: @config.get_toml_int(table, "repeat_offset").unwrap_or(
+      d.repeat_offset,
+    ),
   }
 }
 
 ///|
 pub fn ShlvlModule::from_config(config : @config.Config) -> ShlvlModule {
-  ShlvlModule::new(config=config.get_module("shlvl"))
+  match config.get_raw_module("shlvl") {
+    Some(table) => ShlvlModule::from_toml_table(table)
+    None => ShlvlModule::default()
+  }
 }
 
 ///|
@@ -35,8 +57,8 @@ pub impl @ms.PromptModule for ShlvlModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for ShlvlModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for ShlvlModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

@@ -1,26 +1,43 @@
 ///|
 pub struct VcshModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn VcshModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("vcsh"),
-) -> VcshModule {
+pub fn VcshModule::default() -> VcshModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default=""),
+    disabled: false,
+    async_render: false,
+    format: "vcsh [$symbol$repo]($style) ",
+    style: "bold yellow",
+    symbol: "",
+  }
+}
+
+///|
+pub fn VcshModule::from_toml_table(table : @config.ModuleTable) -> VcshModule {
+  let d = VcshModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn VcshModule::from_config(config : @config.Config) -> VcshModule {
-  VcshModule::new(config=config.get_module("vcsh"))
+  match config.get_raw_module("vcsh") {
+    Some(table) => VcshModule::from_toml_table(table)
+    None => VcshModule::default()
+  }
 }
 
 ///|
@@ -29,8 +46,8 @@ pub impl @ms.PromptModule for VcshModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for VcshModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for VcshModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

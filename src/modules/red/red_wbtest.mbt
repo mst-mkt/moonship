@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = RedModule::new()
+  let m : &@ms.PromptModule = RedModule::default()
   assert_eq(m.name(), "red")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-red-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = RedModule::new()
+  let m = RedModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .red extension" {
   let path = "/tmp/moonship-test-red-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.red", "")
-  let m = RedModule::new()
+  let m = RedModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Red project detected"))

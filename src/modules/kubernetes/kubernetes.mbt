@@ -1,22 +1,36 @@
 ///|
 pub struct KubernetesModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn KubernetesModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "kubernetes",
-  ),
-) -> KubernetesModule {
+pub fn KubernetesModule::default() -> KubernetesModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="☸ "),
+    disabled: true,
+    async_render: false,
+    format: "[$symbol$context( \\($namespace\\))]($style) in ",
+    style: "cyan bold",
+    symbol: "☸ ",
+  }
+}
+
+///|
+pub fn KubernetesModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> KubernetesModule {
+  let d = KubernetesModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
@@ -24,7 +38,10 @@ pub fn KubernetesModule::new(
 pub fn KubernetesModule::from_config(
   config : @config.Config,
 ) -> KubernetesModule {
-  KubernetesModule::new(config=config.get_module("kubernetes"))
+  match config.get_raw_module("kubernetes") {
+    Some(table) => KubernetesModule::from_toml_table(table)
+    None => KubernetesModule::default()
+  }
 }
 
 ///|
@@ -33,8 +50,8 @@ pub impl @ms.PromptModule for KubernetesModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for KubernetesModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for KubernetesModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

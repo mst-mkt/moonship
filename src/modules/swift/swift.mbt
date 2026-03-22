@@ -1,6 +1,7 @@
 ///|
 pub struct SwiftModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,22 +10,44 @@ pub struct SwiftModule {
 }
 
 ///|
-pub fn SwiftModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("swift"),
-) -> SwiftModule {
+pub fn SwiftModule::default() -> SwiftModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🐦 "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold 202",
+    symbol: "🐦 ",
     detect_files: ["Package.swift"],
     detect_extensions: [".swift"],
   }
 }
 
 ///|
+pub fn SwiftModule::from_toml_table(table : @config.ModuleTable) -> SwiftModule {
+  let d = SwiftModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn SwiftModule::from_config(config : @config.Config) -> SwiftModule {
-  SwiftModule::new(config=config.get_module("swift"))
+  match config.get_raw_module("swift") {
+    Some(table) => SwiftModule::from_toml_table(table)
+    None => SwiftModule::default()
+  }
 }
 
 ///|
@@ -33,8 +56,8 @@ pub impl @ms.PromptModule for SwiftModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for SwiftModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for SwiftModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

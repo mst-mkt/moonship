@@ -1,6 +1,7 @@
 ///|
 pub struct PulumiModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,24 +10,46 @@ pub struct PulumiModule {
 }
 
 ///|
-pub fn PulumiModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "pulumi",
-  ),
-) -> PulumiModule {
+pub fn PulumiModule::default() -> PulumiModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default=" "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($username@)$stack]($style) ",
+    style: "bold 5",
+    symbol: " ",
     detect_files: ["Pulumi.yaml", "Pulumi.yml"],
     detect_extensions: [],
   }
 }
 
 ///|
+pub fn PulumiModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> PulumiModule {
+  let d = PulumiModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn PulumiModule::from_config(config : @config.Config) -> PulumiModule {
-  PulumiModule::new(config=config.get_module("pulumi"))
+  match config.get_raw_module("pulumi") {
+    Some(table) => PulumiModule::from_toml_table(table)
+    None => PulumiModule::default()
+  }
 }
 
 ///|
@@ -35,8 +58,8 @@ pub impl @ms.PromptModule for PulumiModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for PulumiModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for PulumiModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

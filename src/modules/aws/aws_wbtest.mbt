@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = AwsModule::new()
+  let m : &@ms.PromptModule = AwsModule::default()
   assert_eq(m.name(), "aws")
 }
 
 ///|
 async test "execute: no aws env returns Skipped" {
-  let m = AwsModule::new()
+  let m = AwsModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
   assert_true(result is Skipped(_) || result is Output(_))

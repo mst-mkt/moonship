@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = UsernameModule::new()
+  let m : &@ms.PromptModule = UsernameModule::default()
   assert_eq(m.name(), "username")
 }
 
@@ -40,7 +40,7 @@ async test "execute: show_always shows username" {
 ///|
 async test "execute: default hides for normal user" {
   let ctx = @context.Context::new(cwd="/tmp")
-  let m = UsernameModule::new()
+  let m = UsernameModule::default()
 
   // In normal test environment (not root, not SSH), should be Skipped
   assert_true(m.execute(ctx) is Skipped(_))

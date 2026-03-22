@@ -1,6 +1,7 @@
 ///|
 pub struct UsernameModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style_root : String
   style_user : String
@@ -8,23 +9,46 @@ pub struct UsernameModule {
 }
 
 ///|
-pub fn UsernameModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "username",
-  ),
-) -> UsernameModule {
+pub fn UsernameModule::default() -> UsernameModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style_root: config.get_prop("style_root", default="bold red"),
-    style_user: config.get_prop("style_user", default="bold yellow"),
-    show_always: config.get_prop("show_always") == "true",
+    disabled: false,
+    async_render: false,
+    format: "[$user]($style) in ",
+    style_root: "red bold",
+    style_user: "yellow bold",
+    show_always: false,
+  }
+}
+
+///|
+pub fn UsernameModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> UsernameModule {
+  let d = UsernameModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style_root: @config.get_toml_string(table, "style_root").unwrap_or(
+      d.style_root,
+    ),
+    style_user: @config.get_toml_string(table, "style_user").unwrap_or(
+      d.style_user,
+    ),
+    show_always: @config.get_toml_bool(table, "show_always").unwrap_or(
+      d.show_always,
+    ),
   }
 }
 
 ///|
 pub fn UsernameModule::from_config(config : @config.Config) -> UsernameModule {
-  UsernameModule::new(config=config.get_module("username"))
+  match config.get_raw_module("username") {
+    Some(table) => UsernameModule::from_toml_table(table)
+    None => UsernameModule::default()
+  }
 }
 
 ///|
@@ -33,8 +57,8 @@ pub impl @ms.PromptModule for UsernameModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for UsernameModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for UsernameModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

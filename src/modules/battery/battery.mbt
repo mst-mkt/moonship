@@ -1,6 +1,7 @@
 ///|
 pub struct BatteryModule {
   disabled : Bool
+  async_render : Bool
   format : String
   full_symbol : String
   charging_symbol : String
@@ -12,27 +13,62 @@ pub struct BatteryModule {
 }
 
 ///|
-pub fn BatteryModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "battery",
-  ),
-) -> BatteryModule {
+pub fn BatteryModule::default() -> BatteryModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    full_symbol: config.get_prop("full_symbol", default="󰁹 "),
-    charging_symbol: config.get_prop("charging_symbol", default="󰂄 "),
-    discharging_symbol: config.get_prop("discharging_symbol", default="󰂃 "),
-    unknown_symbol: config.get_prop("unknown_symbol", default="󰂑 "),
-    empty_symbol: config.get_prop("empty_symbol", default="󰂎 "),
-    display_threshold: config.get_int_prop("display_threshold", default=10),
-    display_style: config.get_prop("display_style", default="red bold"),
+    disabled: false,
+    async_render: false,
+    format: "[$symbol$percentage]($style) ",
+    full_symbol: "󰁹 ",
+    charging_symbol: "󰂄 ",
+    discharging_symbol: "󰂃 ",
+    unknown_symbol: "󰂑 ",
+    empty_symbol: "󰂎 ",
+    display_threshold: 10,
+    display_style: "red bold",
+  }
+}
+
+///|
+pub fn BatteryModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> BatteryModule {
+  let d = BatteryModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    full_symbol: @config.get_toml_string(table, "full_symbol").unwrap_or(
+      d.full_symbol,
+    ),
+    charging_symbol: @config.get_toml_string(table, "charging_symbol").unwrap_or(
+      d.charging_symbol,
+    ),
+    discharging_symbol: @config.get_toml_string(table, "discharging_symbol").unwrap_or(
+      d.discharging_symbol,
+    ),
+    unknown_symbol: @config.get_toml_string(table, "unknown_symbol").unwrap_or(
+      d.unknown_symbol,
+    ),
+    empty_symbol: @config.get_toml_string(table, "empty_symbol").unwrap_or(
+      d.empty_symbol,
+    ),
+    display_threshold: @config.get_toml_int(table, "display_threshold").unwrap_or(
+      d.display_threshold,
+    ),
+    display_style: @config.get_toml_string(table, "display_style").unwrap_or(
+      d.display_style,
+    ),
   }
 }
 
 ///|
 pub fn BatteryModule::from_config(config : @config.Config) -> BatteryModule {
-  BatteryModule::new(config=config.get_module("battery"))
+  match config.get_raw_module("battery") {
+    Some(table) => BatteryModule::from_toml_table(table)
+    None => BatteryModule::default()
+  }
 }
 
 ///|
@@ -41,8 +77,8 @@ pub impl @ms.PromptModule for BatteryModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for BatteryModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for BatteryModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

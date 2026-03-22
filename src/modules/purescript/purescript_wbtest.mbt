@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = PureScriptModule::new()
+  let m : &@ms.PromptModule = PureScriptModule::default()
   assert_eq(m.name(), "purescript")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-purescript-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = PureScriptModule::new()
+  let m = PureScriptModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects spago.dhall" {
   let path = "/tmp/moonship-test-purescript-spago"
   setup_dir(path)
   @fs.write_string_to_file(path + "/spago.dhall", "")
-  let m = PureScriptModule::new()
+  let m = PureScriptModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no PureScript project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .purs extension" {
   let path = "/tmp/moonship-test-purescript-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Main.purs", "")
-  let m = PureScriptModule::new()
+  let m = PureScriptModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no PureScript project detected"))
