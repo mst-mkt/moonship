@@ -76,6 +76,7 @@ pub struct Config {
   cache_ttl : Int
   add_newline : Bool
   raw_modules : Map[String, ModuleTable]
+  warnings : Array[String]
 }
 
 ///|
@@ -87,7 +88,13 @@ pub fn Config::default() -> Config {
     cache_ttl: 5000,
     add_newline: true,
     raw_modules: {},
+    warnings: [],
   }
+}
+
+///|
+pub fn Config::with_warnings(self : Config, warnings : Array[String]) -> Config {
+  { ..self, warnings, }
 }
 
 ///|
@@ -139,7 +146,15 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
       acc
     })
 
-  { format, scan_timeout, command_timeout, cache_ttl, add_newline, raw_modules }
+  {
+    format,
+    scan_timeout,
+    command_timeout,
+    cache_ttl,
+    add_newline,
+    raw_modules,
+    warnings: [],
+  }
 }
 
 ///|

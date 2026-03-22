@@ -3,6 +3,7 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
   let shell = @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("")
   let use_cache = (shell == "zsh" || shell == "fish") && pa.keymap.is_empty()
   let ctx = build_context(pa)
+  emit_warnings(ctx.config.warnings)
 
   // Cache hit: return immediately (sync path only)
   if use_cache && not(pa.is_async) {
@@ -48,8 +49,18 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
 extern "C" fn notify_parent() -> Int = "moonship_notify_parent"
 
 ///|
+async fn emit_warnings(warnings : Array[String]) -> Unit {
+  for msg in warnings {
+    @stdio.stderr.write("moonship: warning: \{msg}\n") catch {
+      _ => ()
+    }
+  }
+}
+
+///|
 async fn run_module(name : String, pa : PromptArgs) -> Unit {
   let ctx = build_context(pa)
+  emit_warnings(ctx.config.warnings)
   let modules = build_modules(ctx.config)
 
   guard modules.get(name) is Some(m) else {
@@ -78,6 +89,7 @@ fn run_module_list() -> Unit {
 ///|
 async fn run_timings(pa : PromptArgs) -> Unit {
   let ctx = build_context(pa)
+  emit_warnings(ctx.config.warnings)
   let modules = build_modules(ctx.config)
   let format = expand_all(ctx.config.format, modules)
   let module_names = @ms.extract_module_names(format)

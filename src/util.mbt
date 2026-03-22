@@ -45,7 +45,10 @@ fn load_config() -> @config.Config {
   guard not(path.is_empty()) else { return @config.Config::default() }
 
   let content = @fs.read_file_to_string(path) catch {
-    _ => return @config.Config::default()
+    e =>
+      return @config.Config::default().with_warnings([
+        "failed to read '\{path}': \{e}",
+      ])
   }
 
   parse_config(path, content)
@@ -72,11 +75,17 @@ fn parse_config(path : String, content : String) -> @config.Config {
 
   if is_json {
     @config.Config::from_json(content) catch {
-      _ => @config.Config::default()
+      e =>
+        return @config.Config::default().with_warnings([
+          "failed to parse '\{path}': \{e}",
+        ])
     }
   } else {
     @config.Config::from_toml(content) catch {
-      _ => @config.Config::default()
+      e =>
+        return @config.Config::default().with_warnings([
+          "failed to parse '\{path}': \{e}",
+        ])
     }
   }
 }

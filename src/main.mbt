@@ -16,6 +16,7 @@ async fn main {
     Time => println(@async.now().to_string())
     PrintConfig => {
       let config = load_config()
+      emit_warnings(config.warnings)
       println(config.to_toml())
     }
     Schema => run_schema()
