@@ -21,32 +21,24 @@ pub fn UsernameModule::default() -> UsernameModule {
 }
 
 ///|
-pub fn UsernameModule::from_toml_table(
+pub fn UsernameModule::from_table(
   table : @config.ModuleTable,
 ) -> UsernameModule {
   let d = UsernameModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style_root: @config.get_toml_string(table, "style_root").unwrap_or(
-      d.style_root,
-    ),
-    style_user: @config.get_toml_string(table, "style_user").unwrap_or(
-      d.style_user,
-    ),
-    show_always: @config.get_toml_bool(table, "show_always").unwrap_or(
-      d.show_always,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style_root: table.get_string("style_root").unwrap_or(d.style_root),
+    style_user: table.get_string("style_user").unwrap_or(d.style_user),
+    show_always: table.get_bool("show_always").unwrap_or(d.show_always),
   }
 }
 
 ///|
 pub fn UsernameModule::from_config(config : @config.Config) -> UsernameModule {
   match config.get_raw_module("username") {
-    Some(table) => UsernameModule::from_toml_table(table)
+    Some(table) => UsernameModule::from_table(table)
     None => UsernameModule::default()
   }
 }

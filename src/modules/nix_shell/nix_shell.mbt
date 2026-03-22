@@ -27,33 +27,27 @@ pub fn NixShellModule::default() -> NixShellModule {
 }
 
 ///|
-pub fn NixShellModule::from_toml_table(
+pub fn NixShellModule::from_table(
   table : @config.ModuleTable,
 ) -> NixShellModule {
   let d = NixShellModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    impure_msg: @config.get_toml_string(table, "impure_msg").unwrap_or(
-      d.impure_msg,
-    ),
-    pure_msg: @config.get_toml_string(table, "pure_msg").unwrap_or(d.pure_msg),
-    unknown_msg: @config.get_toml_string(table, "unknown_msg").unwrap_or(
-      d.unknown_msg,
-    ),
-    heuristic: @config.get_toml_bool(table, "heuristic").unwrap_or(d.heuristic),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    impure_msg: table.get_string("impure_msg").unwrap_or(d.impure_msg),
+    pure_msg: table.get_string("pure_msg").unwrap_or(d.pure_msg),
+    unknown_msg: table.get_string("unknown_msg").unwrap_or(d.unknown_msg),
+    heuristic: table.get_bool("heuristic").unwrap_or(d.heuristic),
   }
 }
 
 ///|
 pub fn NixShellModule::from_config(config : @config.Config) -> NixShellModule {
   match config.get_raw_module("nix_shell") {
-    Some(table) => NixShellModule::from_toml_table(table)
+    Some(table) => NixShellModule::from_table(table)
     None => NixShellModule::default()
   }
 }

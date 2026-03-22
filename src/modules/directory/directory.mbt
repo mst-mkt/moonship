@@ -25,36 +25,32 @@ pub fn DirectoryModule::default() -> DirectoryModule {
 }
 
 ///|
-pub fn DirectoryModule::from_toml_table(
+pub fn DirectoryModule::from_table(
   table : @config.ModuleTable,
 ) -> DirectoryModule {
   let d = DirectoryModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    truncation_length: @config.get_toml_int(table, "truncation_length").unwrap_or(
-      d.truncation_length,
-    ),
-    truncate_to_repo: @config.get_toml_bool(table, "truncate_to_repo").unwrap_or(
-      d.truncate_to_repo,
-    ),
-    truncation_symbol: @config.get_toml_string(table, "truncation_symbol").unwrap_or(
-      d.truncation_symbol,
-    ),
-    home_symbol: @config.get_toml_string(table, "home_symbol").unwrap_or(
-      d.home_symbol,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    truncation_length: table
+    .get_int("truncation_length")
+    .unwrap_or(d.truncation_length),
+    truncate_to_repo: table
+    .get_bool("truncate_to_repo")
+    .unwrap_or(d.truncate_to_repo),
+    truncation_symbol: table
+    .get_string("truncation_symbol")
+    .unwrap_or(d.truncation_symbol),
+    home_symbol: table.get_string("home_symbol").unwrap_or(d.home_symbol),
   }
 }
 
 ///|
 pub fn DirectoryModule::from_config(config : @config.Config) -> DirectoryModule {
   match config.get_raw_module("directory") {
-    Some(table) => DirectoryModule::from_toml_table(table)
+    Some(table) => DirectoryModule::from_table(table)
     None => DirectoryModule::default()
   }
 }

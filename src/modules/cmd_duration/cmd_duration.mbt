@@ -19,18 +19,16 @@ pub fn CmdDurationModule::default() -> CmdDurationModule {
 }
 
 ///|
-pub fn CmdDurationModule::from_toml_table(
+pub fn CmdDurationModule::from_table(
   table : @config.ModuleTable,
 ) -> CmdDurationModule {
   let d = CmdDurationModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    min_time: @config.get_toml_int(table, "min_time").unwrap_or(d.min_time),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    min_time: table.get_int("min_time").unwrap_or(d.min_time),
   }
 }
 
@@ -39,7 +37,7 @@ pub fn CmdDurationModule::from_config(
   config : @config.Config,
 ) -> CmdDurationModule {
   match config.get_raw_module("cmd_duration") {
-    Some(table) => CmdDurationModule::from_toml_table(table)
+    Some(table) => CmdDurationModule::from_table(table)
     None => CmdDurationModule::default()
   }
 }

@@ -29,44 +29,34 @@ pub fn BatteryModule::default() -> BatteryModule {
 }
 
 ///|
-pub fn BatteryModule::from_toml_table(
-  table : @config.ModuleTable,
-) -> BatteryModule {
+pub fn BatteryModule::from_table(table : @config.ModuleTable) -> BatteryModule {
   let d = BatteryModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    full_symbol: @config.get_toml_string(table, "full_symbol").unwrap_or(
-      d.full_symbol,
-    ),
-    charging_symbol: @config.get_toml_string(table, "charging_symbol").unwrap_or(
-      d.charging_symbol,
-    ),
-    discharging_symbol: @config.get_toml_string(table, "discharging_symbol").unwrap_or(
-      d.discharging_symbol,
-    ),
-    unknown_symbol: @config.get_toml_string(table, "unknown_symbol").unwrap_or(
-      d.unknown_symbol,
-    ),
-    empty_symbol: @config.get_toml_string(table, "empty_symbol").unwrap_or(
-      d.empty_symbol,
-    ),
-    display_threshold: @config.get_toml_int(table, "display_threshold").unwrap_or(
-      d.display_threshold,
-    ),
-    display_style: @config.get_toml_string(table, "display_style").unwrap_or(
-      d.display_style,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    full_symbol: table.get_string("full_symbol").unwrap_or(d.full_symbol),
+    charging_symbol: table
+    .get_string("charging_symbol")
+    .unwrap_or(d.charging_symbol),
+    discharging_symbol: table
+    .get_string("discharging_symbol")
+    .unwrap_or(d.discharging_symbol),
+    unknown_symbol: table
+    .get_string("unknown_symbol")
+    .unwrap_or(d.unknown_symbol),
+    empty_symbol: table.get_string("empty_symbol").unwrap_or(d.empty_symbol),
+    display_threshold: table
+    .get_int("display_threshold")
+    .unwrap_or(d.display_threshold),
+    display_style: table.get_string("display_style").unwrap_or(d.display_style),
   }
 }
 
 ///|
 pub fn BatteryModule::from_config(config : @config.Config) -> BatteryModule {
   match config.get_raw_module("battery") {
-    Some(table) => BatteryModule::from_toml_table(table)
+    Some(table) => BatteryModule::from_table(table)
     None => BatteryModule::default()
   }
 }

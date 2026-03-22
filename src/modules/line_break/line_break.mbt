@@ -10,22 +10,20 @@ pub fn LineBreakModule::default() -> LineBreakModule {
 }
 
 ///|
-pub fn LineBreakModule::from_toml_table(
+pub fn LineBreakModule::from_table(
   table : @config.ModuleTable,
 ) -> LineBreakModule {
   let d = LineBreakModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
   }
 }
 
 ///|
 pub fn LineBreakModule::from_config(config : @config.Config) -> LineBreakModule {
   match config.get_raw_module("line_break") {
-    Some(table) => LineBreakModule::from_toml_table(table)
+    Some(table) => LineBreakModule::from_table(table)
     None => LineBreakModule::default()
   }
 }

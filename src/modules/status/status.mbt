@@ -27,37 +27,31 @@ pub fn StatusModule::default() -> StatusModule {
 }
 
 ///|
-pub fn StatusModule::from_toml_table(
-  table : @config.ModuleTable,
-) -> StatusModule {
+pub fn StatusModule::from_table(table : @config.ModuleTable) -> StatusModule {
   let d = StatusModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    success_symbol: @config.get_toml_string(table, "success_symbol").unwrap_or(
-      d.success_symbol,
-    ),
-    not_executable_symbol: @config.get_toml_string(
-      table, "not_executable_symbol",
-    ).unwrap_or(d.not_executable_symbol),
-    not_found_symbol: @config.get_toml_string(table, "not_found_symbol").unwrap_or(
-      d.not_found_symbol,
-    ),
-    map_symbol: @config.get_toml_bool(table, "map_symbol").unwrap_or(
-      d.map_symbol,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    success_symbol: table
+    .get_string("success_symbol")
+    .unwrap_or(d.success_symbol),
+    not_executable_symbol: table
+    .get_string("not_executable_symbol")
+    .unwrap_or(d.not_executable_symbol),
+    not_found_symbol: table
+    .get_string("not_found_symbol")
+    .unwrap_or(d.not_found_symbol),
+    map_symbol: table.get_bool("map_symbol").unwrap_or(d.map_symbol),
   }
 }
 
 ///|
 pub fn StatusModule::from_config(config : @config.Config) -> StatusModule {
   match config.get_raw_module("status") {
-    Some(table) => StatusModule::from_toml_table(table)
+    Some(table) => StatusModule::from_table(table)
     None => StatusModule::default()
   }
 }

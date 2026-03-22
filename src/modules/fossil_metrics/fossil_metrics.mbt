@@ -21,25 +21,19 @@ pub fn FossilMetricsModule::default() -> FossilMetricsModule {
 }
 
 ///|
-pub fn FossilMetricsModule::from_toml_table(
+pub fn FossilMetricsModule::from_table(
   table : @config.ModuleTable,
 ) -> FossilMetricsModule {
   let d = FossilMetricsModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    added_style: @config.get_toml_string(table, "added_style").unwrap_or(
-      d.added_style,
-    ),
-    deleted_style: @config.get_toml_string(table, "deleted_style").unwrap_or(
-      d.deleted_style,
-    ),
-    only_nonzero_diffs: @config.get_toml_bool(table, "only_nonzero_diffs").unwrap_or(
-      d.only_nonzero_diffs,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    added_style: table.get_string("added_style").unwrap_or(d.added_style),
+    deleted_style: table.get_string("deleted_style").unwrap_or(d.deleted_style),
+    only_nonzero_diffs: table
+    .get_bool("only_nonzero_diffs")
+    .unwrap_or(d.only_nonzero_diffs),
   }
 }
 
@@ -48,7 +42,7 @@ pub fn FossilMetricsModule::from_config(
   config : @config.Config,
 ) -> FossilMetricsModule {
   match config.get_raw_module("fossil_metrics") {
-    Some(table) => FossilMetricsModule::from_toml_table(table)
+    Some(table) => FossilMetricsModule::from_table(table)
     None => FossilMetricsModule::default()
   }
 }

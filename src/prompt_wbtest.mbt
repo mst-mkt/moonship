@@ -17,12 +17,15 @@ async test "render: status 1 red symbol" {
 }
 
 ///|
-async test "render: all disabled produces empty" {
+async test "render: all referenced modules disabled produces empty" {
   let config = @config.Config::from_toml(
     (
+      #|format = "$character$directory$line_break"
       #|[character]
       #|disabled = true
       #|[directory]
+      #|disabled = true
+      #|[line_break]
       #|disabled = true
       #|
     ),
@@ -30,7 +33,7 @@ async test "render: all disabled produces empty" {
   let ctx = @context.Context::new(cwd="/tmp", config~)
   let output = render_prompt(ctx, build_modules(ctx.config))
 
-  assert_eq(output, "\n")
+  assert_eq(output, "")
 }
 
 ///|

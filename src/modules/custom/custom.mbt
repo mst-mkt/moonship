@@ -21,26 +21,22 @@ pub fn CustomModule::default() -> CustomModule {
 }
 
 ///|
-pub fn CustomModule::from_toml_table(
-  table : @config.ModuleTable,
-) -> CustomModule {
+pub fn CustomModule::from_table(table : @config.ModuleTable) -> CustomModule {
   let d = CustomModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    command: @config.get_toml_string(table, "command").unwrap_or(d.command),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    command: table.get_string("command").unwrap_or(d.command),
   }
 }
 
 ///|
 pub fn CustomModule::from_config(config : @config.Config) -> CustomModule {
   match config.get_raw_module("custom") {
-    Some(table) => CustomModule::from_toml_table(table)
+    Some(table) => CustomModule::from_table(table)
     None => CustomModule::default()
   }
 }

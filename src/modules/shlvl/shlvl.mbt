@@ -25,28 +25,24 @@ pub fn ShlvlModule::default() -> ShlvlModule {
 }
 
 ///|
-pub fn ShlvlModule::from_toml_table(table : @config.ModuleTable) -> ShlvlModule {
+pub fn ShlvlModule::from_table(table : @config.ModuleTable) -> ShlvlModule {
   let d = ShlvlModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    threshold: @config.get_toml_int(table, "threshold").unwrap_or(d.threshold),
-    repeat: @config.get_toml_bool(table, "repeat").unwrap_or(d.repeat),
-    repeat_offset: @config.get_toml_int(table, "repeat_offset").unwrap_or(
-      d.repeat_offset,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    threshold: table.get_int("threshold").unwrap_or(d.threshold),
+    repeat: table.get_bool("repeat").unwrap_or(d.repeat),
+    repeat_offset: table.get_int("repeat_offset").unwrap_or(d.repeat_offset),
   }
 }
 
 ///|
 pub fn ShlvlModule::from_config(config : @config.Config) -> ShlvlModule {
   match config.get_raw_module("shlvl") {
-    Some(table) => ShlvlModule::from_toml_table(table)
+    Some(table) => ShlvlModule::from_table(table)
     None => ShlvlModule::default()
   }
 }

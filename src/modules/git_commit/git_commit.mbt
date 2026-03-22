@@ -19,27 +19,23 @@ pub fn GitCommitModule::default() -> GitCommitModule {
 }
 
 ///|
-pub fn GitCommitModule::from_toml_table(
+pub fn GitCommitModule::from_table(
   table : @config.ModuleTable,
 ) -> GitCommitModule {
   let d = GitCommitModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    only_detached: @config.get_toml_bool(table, "only_detached").unwrap_or(
-      d.only_detached,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    only_detached: table.get_bool("only_detached").unwrap_or(d.only_detached),
   }
 }
 
 ///|
 pub fn GitCommitModule::from_config(config : @config.Config) -> GitCommitModule {
   match config.get_raw_module("git_commit") {
-    Some(table) => GitCommitModule::from_toml_table(table)
+    Some(table) => GitCommitModule::from_table(table)
     None => GitCommitModule::default()
   }
 }

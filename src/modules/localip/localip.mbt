@@ -19,25 +19,21 @@ pub fn LocalipModule::default() -> LocalipModule {
 }
 
 ///|
-pub fn LocalipModule::from_toml_table(
-  table : @config.ModuleTable,
-) -> LocalipModule {
+pub fn LocalipModule::from_table(table : @config.ModuleTable) -> LocalipModule {
   let d = LocalipModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    ssh_only: @config.get_toml_bool(table, "ssh_only").unwrap_or(d.ssh_only),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    ssh_only: table.get_bool("ssh_only").unwrap_or(d.ssh_only),
   }
 }
 
 ///|
 pub fn LocalipModule::from_config(config : @config.Config) -> LocalipModule {
   match config.get_raw_module("localip") {
-    Some(table) => LocalipModule::from_toml_table(table)
+    Some(table) => LocalipModule::from_table(table)
     None => LocalipModule::default()
   }
 }

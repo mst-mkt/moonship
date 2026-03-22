@@ -56,6 +56,7 @@ fn find_config_file(dir : String) -> String {
   let candidates = [
     "\{dir}/moonship.jsonc",
     "\{dir}/moonship.json",
+    "\{dir}/moonship.json5",
     "\{dir}/moonship.toml",
   ]
 
@@ -70,7 +71,9 @@ fn find_config_file(dir : String) -> String {
 
 ///|
 fn parse_config(path : String, content : String) -> @config.Config {
-  let is_json = path.has_suffix(".json") || path.has_suffix(".jsonc")
+  let is_json = path.has_suffix(".json") ||
+    path.has_suffix(".jsonc") ||
+    path.has_suffix(".json5")
 
   if is_json {
     @config.Config::from_json(content) catch {

@@ -27,30 +27,30 @@ pub fn GitBranchModule::default() -> GitBranchModule {
 }
 
 ///|
-pub fn GitBranchModule::from_toml_table(
+pub fn GitBranchModule::from_table(
   table : @config.ModuleTable,
 ) -> GitBranchModule {
   let d = GitBranchModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    truncation_length: @config.get_toml_int(table, "truncation_length").unwrap_or(
-      d.truncation_length,
-    ),
-    truncation_symbol: @config.get_toml_string(table, "truncation_symbol").unwrap_or(
-      d.truncation_symbol,
-    ),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    only_attached: @config.get_toml_bool(table, "only_attached").unwrap_or(
-      d.only_attached,
-    ),
-    ignore_branches: match @config.get_toml_string(table, "ignore_branches") {
-      Some(s) => parse_string_list(s)
-      None => d.ignore_branches
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    truncation_length: table
+    .get_int("truncation_length")
+    .unwrap_or(d.truncation_length),
+    truncation_symbol: table
+    .get_string("truncation_symbol")
+    .unwrap_or(d.truncation_symbol),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    only_attached: table.get_bool("only_attached").unwrap_or(d.only_attached),
+    ignore_branches: match table.get_string_array("ignore_branches") {
+      Some(arr) => arr
+      None =>
+        match table.get_string("ignore_branches") {
+          Some(s) => parse_string_list(s)
+          None => d.ignore_branches
+        }
     },
   }
 }
@@ -58,7 +58,7 @@ pub fn GitBranchModule::from_toml_table(
 ///|
 pub fn GitBranchModule::from_config(config : @config.Config) -> GitBranchModule {
   match config.get_raw_module("git_branch") {
-    Some(table) => GitBranchModule::from_toml_table(table)
+    Some(table) => GitBranchModule::from_table(table)
     None => GitBranchModule::default()
   }
 }

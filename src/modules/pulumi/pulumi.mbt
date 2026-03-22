@@ -23,31 +23,27 @@ pub fn PulumiModule::default() -> PulumiModule {
 }
 
 ///|
-pub fn PulumiModule::from_toml_table(
-  table : @config.ModuleTable,
-) -> PulumiModule {
+pub fn PulumiModule::from_table(table : @config.ModuleTable) -> PulumiModule {
   let d = PulumiModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
-      d.detect_files,
-    ),
-    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
-      d.detect_extensions,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    detect_files: table
+    .get_string_array("detect_files")
+    .unwrap_or(d.detect_files),
+    detect_extensions: table
+    .get_string_array("detect_extensions")
+    .unwrap_or(d.detect_extensions),
   }
 }
 
 ///|
 pub fn PulumiModule::from_config(config : @config.Config) -> PulumiModule {
   match config.get_raw_module("pulumi") {
-    Some(table) => PulumiModule::from_toml_table(table)
+    Some(table) => PulumiModule::from_table(table)
     None => PulumiModule::default()
   }
 }

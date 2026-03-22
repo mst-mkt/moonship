@@ -19,25 +19,23 @@ pub fn GuixShellModule::default() -> GuixShellModule {
 }
 
 ///|
-pub fn GuixShellModule::from_toml_table(
+pub fn GuixShellModule::from_table(
   table : @config.ModuleTable,
 ) -> GuixShellModule {
   let d = GuixShellModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn GuixShellModule::from_config(config : @config.Config) -> GuixShellModule {
   match config.get_raw_module("guix_shell") {
-    Some(table) => GuixShellModule::from_toml_table(table)
+    Some(table) => GuixShellModule::from_table(table)
     None => GuixShellModule::default()
   }
 }

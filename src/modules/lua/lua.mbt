@@ -27,35 +27,31 @@ pub fn LuaModule::default() -> LuaModule {
 }
 
 ///|
-pub fn LuaModule::from_toml_table(table : @config.ModuleTable) -> LuaModule {
+pub fn LuaModule::from_table(table : @config.ModuleTable) -> LuaModule {
   let d = LuaModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    lua_binary: @config.get_toml_string(table, "lua_binary").unwrap_or(
-      d.lua_binary,
-    ),
-    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
-      d.detect_files,
-    ),
-    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
-      d.detect_folders,
-    ),
-    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
-      d.detect_extensions,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    lua_binary: table.get_string("lua_binary").unwrap_or(d.lua_binary),
+    detect_files: table
+    .get_string_array("detect_files")
+    .unwrap_or(d.detect_files),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
+    detect_extensions: table
+    .get_string_array("detect_extensions")
+    .unwrap_or(d.detect_extensions),
   }
 }
 
 ///|
 pub fn LuaModule::from_config(config : @config.Config) -> LuaModule {
   match config.get_raw_module("lua") {
-    Some(table) => LuaModule::from_toml_table(table)
+    Some(table) => LuaModule::from_table(table)
     None => LuaModule::default()
   }
 }

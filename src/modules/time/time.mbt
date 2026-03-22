@@ -23,29 +23,25 @@ pub fn TimeModule::default() -> TimeModule {
 }
 
 ///|
-pub fn TimeModule::from_toml_table(table : @config.ModuleTable) -> TimeModule {
+pub fn TimeModule::from_table(table : @config.ModuleTable) -> TimeModule {
   let d = TimeModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    use_12hr: @config.get_toml_bool(table, "use_12hr").unwrap_or(d.use_12hr),
-    time_format: @config.get_toml_string(table, "time_format").unwrap_or(
-      d.time_format,
-    ),
-    utc_time_offset: @config.get_toml_string(table, "utc_time_offset").unwrap_or(
-      d.utc_time_offset,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    use_12hr: table.get_bool("use_12hr").unwrap_or(d.use_12hr),
+    time_format: table.get_string("time_format").unwrap_or(d.time_format),
+    utc_time_offset: table
+    .get_string("utc_time_offset")
+    .unwrap_or(d.utc_time_offset),
   }
 }
 
 ///|
 pub fn TimeModule::from_config(config : @config.Config) -> TimeModule {
   match config.get_raw_module("time") {
-    Some(table) => TimeModule::from_toml_table(table)
+    Some(table) => TimeModule::from_table(table)
     None => TimeModule::default()
   }
 }

@@ -23,29 +23,25 @@ pub fn HostnameModule::default() -> HostnameModule {
 }
 
 ///|
-pub fn HostnameModule::from_toml_table(
+pub fn HostnameModule::from_table(
   table : @config.ModuleTable,
 ) -> HostnameModule {
   let d = HostnameModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    ssh_only: @config.get_toml_bool(table, "ssh_only").unwrap_or(d.ssh_only),
-    trim_at: @config.get_toml_string(table, "trim_at").unwrap_or(d.trim_at),
-    ssh_symbol: @config.get_toml_string(table, "ssh_symbol").unwrap_or(
-      d.ssh_symbol,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    ssh_only: table.get_bool("ssh_only").unwrap_or(d.ssh_only),
+    trim_at: table.get_string("trim_at").unwrap_or(d.trim_at),
+    ssh_symbol: table.get_string("ssh_symbol").unwrap_or(d.ssh_symbol),
   }
 }
 
 ///|
 pub fn HostnameModule::from_config(config : @config.Config) -> HostnameModule {
   match config.get_raw_module("hostname") {
-    Some(table) => HostnameModule::from_toml_table(table)
+    Some(table) => HostnameModule::from_table(table)
     None => HostnameModule::default()
   }
 }

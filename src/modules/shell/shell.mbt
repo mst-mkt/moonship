@@ -25,34 +25,30 @@ pub fn ShellModule::default() -> ShellModule {
 }
 
 ///|
-pub fn ShellModule::from_toml_table(table : @config.ModuleTable) -> ShellModule {
+pub fn ShellModule::from_table(table : @config.ModuleTable) -> ShellModule {
   let d = ShellModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    bash_indicator: @config.get_toml_string(table, "bash_indicator").unwrap_or(
-      d.bash_indicator,
-    ),
-    fish_indicator: @config.get_toml_string(table, "fish_indicator").unwrap_or(
-      d.fish_indicator,
-    ),
-    zsh_indicator: @config.get_toml_string(table, "zsh_indicator").unwrap_or(
-      d.zsh_indicator,
-    ),
-    unknown_indicator: @config.get_toml_string(table, "unknown_indicator").unwrap_or(
-      d.unknown_indicator,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    bash_indicator: table
+    .get_string("bash_indicator")
+    .unwrap_or(d.bash_indicator),
+    fish_indicator: table
+    .get_string("fish_indicator")
+    .unwrap_or(d.fish_indicator),
+    zsh_indicator: table.get_string("zsh_indicator").unwrap_or(d.zsh_indicator),
+    unknown_indicator: table
+    .get_string("unknown_indicator")
+    .unwrap_or(d.unknown_indicator),
   }
 }
 
 ///|
 pub fn ShellModule::from_config(config : @config.Config) -> ShellModule {
   match config.get_raw_module("shell") {
-    Some(table) => ShellModule::from_toml_table(table)
+    Some(table) => ShellModule::from_table(table)
     None => ShellModule::default()
   }
 }

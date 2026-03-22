@@ -29,37 +29,33 @@ pub fn GolangModule::default() -> GolangModule {
 }
 
 ///|
-pub fn GolangModule::from_toml_table(
-  table : @config.ModuleTable,
-) -> GolangModule {
+pub fn GolangModule::from_table(table : @config.ModuleTable) -> GolangModule {
   let d = GolangModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    not_capable_style: @config.get_toml_string(table, "not_capable_style").unwrap_or(
-      d.not_capable_style,
-    ),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
-      d.detect_files,
-    ),
-    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
-      d.detect_folders,
-    ),
-    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
-      d.detect_extensions,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    not_capable_style: table
+    .get_string("not_capable_style")
+    .unwrap_or(d.not_capable_style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    detect_files: table
+    .get_string_array("detect_files")
+    .unwrap_or(d.detect_files),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
+    detect_extensions: table
+    .get_string_array("detect_extensions")
+    .unwrap_or(d.detect_extensions),
   }
 }
 
 ///|
 pub fn GolangModule::from_config(config : @config.Config) -> GolangModule {
   match config.get_raw_module("golang") {
-    Some(table) => GolangModule::from_toml_table(table)
+    Some(table) => GolangModule::from_table(table)
     None => GolangModule::default()
   }
 }

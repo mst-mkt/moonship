@@ -17,10 +17,7 @@ test "module config from TOML" {
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("character") is Some(table)
-  assert_eq(
-    @config.get_toml_string(table, "success_symbol"),
-    Some("[→](bold blue)"),
-  )
+  assert_eq(table.get_string("success_symbol"), Some("[→](bold blue)"))
 }
 
 ///|
@@ -43,7 +40,7 @@ test "module disabled from TOML" {
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("git_branch") is Some(table)
-  assert_eq(@config.get_toml_bool(table, "disabled"), Some(true))
+  assert_eq(table.get_bool("disabled"), Some(true))
 }
 
 ///|
@@ -56,9 +53,9 @@ test "unknown module added" {
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("custom_module") is Some(table)
-  assert_eq(@config.get_toml_string(table, "format"), Some("$text"))
-  assert_eq(@config.get_toml_string(table, "style"), Some("bold"))
-  assert_eq(@config.get_toml_string(table, "key"), Some("value"))
+  assert_eq(table.get_string("format"), Some("$text"))
+  assert_eq(table.get_string("style"), Some("bold"))
+  assert_eq(table.get_string("key"), Some("value"))
 }
 
 ///|
@@ -77,18 +74,18 @@ test "numeric property from TOML" {
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("directory") is Some(table)
-  assert_eq(@config.get_toml_int(table, "truncation_length"), Some(5))
+  assert_eq(table.get_int("truncation_length"), Some(5))
 }
 
 ///|
-test "get_toml_int: missing key returns None" {
+test "get_int: missing key returns None" {
   let toml =
     #|[directory]
     #|style = "bold"
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("directory") is Some(table)
-  assert_true(@config.get_toml_int(table, "nonexistent") is None)
+  assert_true(table.get_int("nonexistent") is None)
 }
 
 ///|
@@ -99,7 +96,7 @@ test "async: parsed from TOML" {
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("git_status") is Some(table)
-  assert_eq(@config.get_toml_bool(table, "async"), Some(true))
+  assert_eq(table.get_bool("async"), Some(true))
 }
 
 ///|
@@ -110,7 +107,7 @@ test "async: false when explicitly set" {
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("git_status") is Some(table)
-  assert_eq(@config.get_toml_bool(table, "async"), Some(false))
+  assert_eq(table.get_bool("async"), Some(false))
 }
 
 ///|
@@ -154,8 +151,8 @@ test "async: roundtrip TOML" {
   let reparsed = @config.Config::from_toml(output)
   guard reparsed.get_raw_module("git_status") is Some(gs)
   guard reparsed.get_raw_module("git_branch") is Some(gb)
-  assert_eq(@config.get_toml_bool(gs, "async"), Some(true))
-  assert_eq(@config.get_toml_bool(gb, "async"), Some(false))
+  assert_eq(gs.get_bool("async"), Some(true))
+  assert_eq(gb.get_bool("async"), Some(false))
 }
 
 ///|
@@ -167,33 +164,33 @@ test "unknown module with async" {
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("my_custom") is Some(table)
-  assert_eq(@config.get_toml_bool(table, "async"), Some(true))
-  assert_eq(@config.get_toml_string(table, "format"), Some("$text"))
+  assert_eq(table.get_bool("async"), Some(true))
+  assert_eq(table.get_string("format"), Some("$text"))
 }
 
 ///|
-test "get_toml_string_array: parses array" {
+test "get_string_array: parses array" {
   let toml =
     #|[python]
     #|detect_files = ["requirements.txt", "setup.py"]
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("python") is Some(table)
-  guard @config.get_toml_string_array(table, "detect_files") is Some(files)
+  guard table.get_string_array("detect_files") is Some(files)
   assert_eq(files.length(), 2)
   assert_eq(files[0], "requirements.txt")
   assert_eq(files[1], "setup.py")
 }
 
 ///|
-test "get_toml_string_array: missing key returns None" {
+test "get_string_array: missing key returns None" {
   let toml =
     #|[python]
     #|symbol = "🐍 "
     #|
   let config = @config.Config::from_toml(toml)
   guard config.get_raw_module("python") is Some(table)
-  assert_true(@config.get_toml_string_array(table, "detect_files") is None)
+  assert_true(table.get_string_array("detect_files") is None)
 }
 
 ///|
@@ -212,8 +209,8 @@ test "from_json: parses JSONC config" {
   assert_eq(config.format, "$character")
   assert_eq(config.scan_timeout, 100)
   guard config.get_raw_module("character") is Some(table)
-  assert_eq(@config.get_toml_bool(table, "disabled"), Some(true))
-  assert_eq(@config.get_toml_string(table, "symbol"), Some("→"))
+  assert_eq(table.get_bool("disabled"), Some(true))
+  assert_eq(table.get_string("symbol"), Some("→"))
 }
 
 ///|
@@ -227,8 +224,8 @@ test "from_json: integer and boolean types" {
     #|}
   let config = @config.Config::from_json(json)
   guard config.get_raw_module("directory") is Some(table)
-  assert_eq(@config.get_toml_int(table, "truncation_length"), Some(5))
-  assert_eq(@config.get_toml_bool(table, "truncate_to_repo"), Some(true))
+  assert_eq(table.get_int("truncation_length"), Some(5))
+  assert_eq(table.get_bool("truncate_to_repo"), Some(true))
 }
 
 ///|
@@ -241,7 +238,7 @@ test "from_json: string array" {
     #|}
   let config = @config.Config::from_json(json)
   guard config.get_raw_module("python") is Some(table)
-  guard @config.get_toml_string_array(table, "detect_files") is Some(files)
+  guard table.get_string_array("detect_files") is Some(files)
   assert_eq(files.length(), 2)
   assert_eq(files[0], "requirements.txt")
   assert_eq(files[1], "setup.py")
@@ -266,8 +263,87 @@ test "from_json: null values are skipped" {
     #|}
   let config = @config.Config::from_json(json)
   guard config.get_raw_module("character") is Some(table)
-  assert_eq(@config.get_toml_string(table, "symbol"), Some("→"))
-  assert_true(@config.get_toml_string(table, "style") is None)
+  assert_eq(table.get_string("symbol"), Some("→"))
+  assert_true(table.get_string("style") is None)
+}
+
+///|
+test "add_newline: parsed and roundtripped" {
+  let toml =
+    #|add_newline = false
+    #|
+  let config = @config.Config::from_toml(toml)
+  assert_eq(config.add_newline, false)
+  let output = config.to_toml()
+  assert_true(output.contains("add_newline = false"))
+}
+
+///|
+test "get_string_array: mixed types returns None" {
+  let json =
+    #|{
+    #|  "python": {
+    #|    "detect_files": ["a.py", 42]
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("python") is Some(table)
+  assert_true(table.get_string_array("detect_files") is None)
+}
+
+///|
+test "escape_string: handles special characters" {
+  assert_eq(@config.escape_string("hello"), "\"hello\"")
+  assert_eq(@config.escape_string("he\"llo"), "\"he\\\"llo\"")
+  assert_eq(@config.escape_string("a\\b"), "\"a\\\\b\"")
+  assert_eq(@config.escape_string("a\nb"), "\"a\\nb\"")
+  assert_eq(@config.escape_string("a\tb"), "\"a\\tb\"")
+  assert_eq(@config.escape_string("a\rb"), "\"a\\rb\"")
+}
+
+///|
+test "from_json to to_toml cross-format" {
+  let json =
+    #|{
+    #|  "format": "$character",
+    #|  "git_status": {
+    #|    "async": true,
+    #|    "style": "red"
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  let toml_output = config.to_toml()
+  let reparsed = @config.Config::from_toml(toml_output)
+  assert_eq(reparsed.format, "$character")
+  guard reparsed.get_raw_module("git_status") is Some(table)
+  assert_eq(table.get_bool("async"), Some(true))
+  assert_eq(table.get_string("style"), Some("red"))
+}
+
+///|
+test "to_toml: arrays serialized correctly" {
+  let json =
+    #|{
+    #|  "python": {
+    #|    "detect_files": ["requirements.txt", "setup.py"]
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  let output = config.to_toml()
+  assert_true(output.contains("[python]"))
+  assert_true(
+    output.contains("detect_files = [\"requirements.txt\", \"setup.py\"]"),
+  )
+}
+
+///|
+test "empty module section uses defaults" {
+  let toml =
+    #|[python]
+    #|
+  let config = @config.Config::from_toml(toml)
+  guard config.get_raw_module("python") is Some(table)
+  assert_true(table.get_string("symbol") is None)
 }
 
 ///|

@@ -30,37 +30,31 @@ pub fn PythonModule::default() -> PythonModule {
 }
 
 ///|
-pub fn PythonModule::from_toml_table(
-  table : @config.ModuleTable,
-) -> PythonModule {
+pub fn PythonModule::from_table(table : @config.ModuleTable) -> PythonModule {
   let d = PythonModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    pyenv_version_name: @config.get_toml_bool(table, "pyenv_version_name").unwrap_or(
-      d.pyenv_version_name,
-    ),
-    pyenv_prefix: @config.get_toml_string(table, "pyenv_prefix").unwrap_or(
-      d.pyenv_prefix,
-    ),
-    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
-      d.detect_files,
-    ),
-    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
-      d.detect_extensions,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    pyenv_version_name: table
+    .get_bool("pyenv_version_name")
+    .unwrap_or(d.pyenv_version_name),
+    pyenv_prefix: table.get_string("pyenv_prefix").unwrap_or(d.pyenv_prefix),
+    detect_files: table
+    .get_string_array("detect_files")
+    .unwrap_or(d.detect_files),
+    detect_extensions: table
+    .get_string_array("detect_extensions")
+    .unwrap_or(d.detect_extensions),
   }
 }
 
 ///|
 pub fn PythonModule::from_config(config : @config.Config) -> PythonModule {
   match config.get_raw_module("python") {
-    Some(table) => PythonModule::from_toml_table(table)
+    Some(table) => PythonModule::from_table(table)
     None => PythonModule::default()
   }
 }

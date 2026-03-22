@@ -33,46 +33,34 @@ pub fn DirenvModule::default() -> DirenvModule {
 }
 
 ///|
-pub fn DirenvModule::from_toml_table(
-  table : @config.ModuleTable,
-) -> DirenvModule {
+pub fn DirenvModule::from_table(table : @config.ModuleTable) -> DirenvModule {
   let d = DirenvModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    allowed_msg: @config.get_toml_string(table, "allowed_msg").unwrap_or(
-      d.allowed_msg,
-    ),
-    not_allowed_msg: @config.get_toml_string(table, "not_allowed_msg").unwrap_or(
-      d.not_allowed_msg,
-    ),
-    denied_msg: @config.get_toml_string(table, "denied_msg").unwrap_or(
-      d.denied_msg,
-    ),
-    loaded_msg: @config.get_toml_string(table, "loaded_msg").unwrap_or(
-      d.loaded_msg,
-    ),
-    unloaded_msg: @config.get_toml_string(table, "unloaded_msg").unwrap_or(
-      d.unloaded_msg,
-    ),
-    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
-      d.detect_files,
-    ),
-    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
-      d.detect_extensions,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    allowed_msg: table.get_string("allowed_msg").unwrap_or(d.allowed_msg),
+    not_allowed_msg: table
+    .get_string("not_allowed_msg")
+    .unwrap_or(d.not_allowed_msg),
+    denied_msg: table.get_string("denied_msg").unwrap_or(d.denied_msg),
+    loaded_msg: table.get_string("loaded_msg").unwrap_or(d.loaded_msg),
+    unloaded_msg: table.get_string("unloaded_msg").unwrap_or(d.unloaded_msg),
+    detect_files: table
+    .get_string_array("detect_files")
+    .unwrap_or(d.detect_files),
+    detect_extensions: table
+    .get_string_array("detect_extensions")
+    .unwrap_or(d.detect_extensions),
   }
 }
 
 ///|
 pub fn DirenvModule::from_config(config : @config.Config) -> DirenvModule {
   match config.get_raw_module("direnv") {
-    Some(table) => DirenvModule::from_toml_table(table)
+    Some(table) => DirenvModule::from_table(table)
     None => DirenvModule::default()
   }
 }

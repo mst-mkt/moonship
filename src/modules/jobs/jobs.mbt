@@ -21,26 +21,24 @@ pub fn JobsModule::default() -> JobsModule {
 }
 
 ///|
-pub fn JobsModule::from_toml_table(table : @config.ModuleTable) -> JobsModule {
+pub fn JobsModule::from_table(table : @config.ModuleTable) -> JobsModule {
   let d = JobsModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    number_threshold: @config.get_toml_int(table, "number_threshold").unwrap_or(
-      d.number_threshold,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    number_threshold: table
+    .get_int("number_threshold")
+    .unwrap_or(d.number_threshold),
   }
 }
 
 ///|
 pub fn JobsModule::from_config(config : @config.Config) -> JobsModule {
   match config.get_raw_module("jobs") {
-    Some(table) => JobsModule::from_toml_table(table)
+    Some(table) => JobsModule::from_table(table)
     None => JobsModule::default()
   }
 }

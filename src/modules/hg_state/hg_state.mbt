@@ -33,34 +33,28 @@ pub fn HgStateModule::default() -> HgStateModule {
 }
 
 ///|
-pub fn HgStateModule::from_toml_table(
-  table : @config.ModuleTable,
-) -> HgStateModule {
+pub fn HgStateModule::from_table(table : @config.ModuleTable) -> HgStateModule {
   let d = HgStateModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    merge: @config.get_toml_string(table, "merge").unwrap_or(d.merge),
-    rebase: @config.get_toml_string(table, "rebase").unwrap_or(d.rebase),
-    update: @config.get_toml_string(table, "update").unwrap_or(d.update),
-    bisect: @config.get_toml_string(table, "bisect").unwrap_or(d.bisect),
-    shelve: @config.get_toml_string(table, "shelve").unwrap_or(d.shelve),
-    graft: @config.get_toml_string(table, "graft").unwrap_or(d.graft),
-    transplant: @config.get_toml_string(table, "transplant").unwrap_or(
-      d.transplant,
-    ),
-    histedit: @config.get_toml_string(table, "histedit").unwrap_or(d.histedit),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    merge: table.get_string("merge").unwrap_or(d.merge),
+    rebase: table.get_string("rebase").unwrap_or(d.rebase),
+    update: table.get_string("update").unwrap_or(d.update),
+    bisect: table.get_string("bisect").unwrap_or(d.bisect),
+    shelve: table.get_string("shelve").unwrap_or(d.shelve),
+    graft: table.get_string("graft").unwrap_or(d.graft),
+    transplant: table.get_string("transplant").unwrap_or(d.transplant),
+    histedit: table.get_string("histedit").unwrap_or(d.histedit),
   }
 }
 
 ///|
 pub fn HgStateModule::from_config(config : @config.Config) -> HgStateModule {
   match config.get_raw_module("hg_state") {
-    Some(table) => HgStateModule::from_toml_table(table)
+    Some(table) => HgStateModule::from_table(table)
     None => HgStateModule::default()
   }
 }

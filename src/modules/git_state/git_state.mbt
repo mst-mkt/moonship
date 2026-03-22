@@ -27,31 +27,27 @@ pub fn GitStateModule::default() -> GitStateModule {
 }
 
 ///|
-pub fn GitStateModule::from_toml_table(
+pub fn GitStateModule::from_table(
   table : @config.ModuleTable,
 ) -> GitStateModule {
   let d = GitStateModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    rebase: @config.get_toml_string(table, "rebase").unwrap_or(d.rebase),
-    merge: @config.get_toml_string(table, "merge").unwrap_or(d.merge),
-    revert: @config.get_toml_string(table, "revert").unwrap_or(d.revert),
-    cherry_pick: @config.get_toml_string(table, "cherry_pick").unwrap_or(
-      d.cherry_pick,
-    ),
-    bisect: @config.get_toml_string(table, "bisect").unwrap_or(d.bisect),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    rebase: table.get_string("rebase").unwrap_or(d.rebase),
+    merge: table.get_string("merge").unwrap_or(d.merge),
+    revert: table.get_string("revert").unwrap_or(d.revert),
+    cherry_pick: table.get_string("cherry_pick").unwrap_or(d.cherry_pick),
+    bisect: table.get_string("bisect").unwrap_or(d.bisect),
   }
 }
 
 ///|
 pub fn GitStateModule::from_config(config : @config.Config) -> GitStateModule {
   match config.get_raw_module("git_state") {
-    Some(table) => GitStateModule::from_toml_table(table)
+    Some(table) => GitStateModule::from_table(table)
     None => GitStateModule::default()
   }
 }

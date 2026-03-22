@@ -21,25 +21,19 @@ pub fn GitMetricsModule::default() -> GitMetricsModule {
 }
 
 ///|
-pub fn GitMetricsModule::from_toml_table(
+pub fn GitMetricsModule::from_table(
   table : @config.ModuleTable,
 ) -> GitMetricsModule {
   let d = GitMetricsModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    added_style: @config.get_toml_string(table, "added_style").unwrap_or(
-      d.added_style,
-    ),
-    deleted_style: @config.get_toml_string(table, "deleted_style").unwrap_or(
-      d.deleted_style,
-    ),
-    only_nonzero_diffs: @config.get_toml_bool(table, "only_nonzero_diffs").unwrap_or(
-      d.only_nonzero_diffs,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    added_style: table.get_string("added_style").unwrap_or(d.added_style),
+    deleted_style: table.get_string("deleted_style").unwrap_or(d.deleted_style),
+    only_nonzero_diffs: table
+    .get_bool("only_nonzero_diffs")
+    .unwrap_or(d.only_nonzero_diffs),
   }
 }
 
@@ -48,7 +42,7 @@ pub fn GitMetricsModule::from_config(
   config : @config.Config,
 ) -> GitMetricsModule {
   match config.get_raw_module("git_metrics") {
-    Some(table) => GitMetricsModule::from_toml_table(table)
+    Some(table) => GitMetricsModule::from_table(table)
     None => GitMetricsModule::default()
   }
 }

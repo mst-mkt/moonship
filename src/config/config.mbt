@@ -12,6 +12,60 @@ pub(all) enum ConfigValue {
 pub struct ModuleTable(Map[String, ConfigValue])
 
 ///|
+pub fn ModuleTable::get_string(self : ModuleTable, key : String) -> String? {
+  match self.0.get(key) {
+    Some(CString(s)) => Some(s)
+    _ => None
+  }
+}
+
+///|
+pub fn ModuleTable::get_int(self : ModuleTable, key : String) -> Int? {
+  match self.0.get(key) {
+    Some(CInt(n)) => Some(n)
+    _ => None
+  }
+}
+
+///|
+pub fn ModuleTable::get_bool(self : ModuleTable, key : String) -> Bool? {
+  match self.0.get(key) {
+    Some(CBool(b)) => Some(b)
+    _ => None
+  }
+}
+
+///|
+pub fn ModuleTable::get_float(self : ModuleTable, key : String) -> Double? {
+  match self.0.get(key) {
+    Some(CFloat(f)) => Some(f)
+    _ => None
+  }
+}
+
+///|
+pub fn ModuleTable::get_string_array(
+  self : ModuleTable,
+  key : String,
+) -> Array[String]? {
+  match self.0.get(key) {
+    Some(CArray(arr)) => {
+      let result : Array[String] = []
+
+      for item in arr {
+        match item {
+          CString(s) => result.push(s)
+          _ => return None
+        }
+      }
+
+      Some(result)
+    }
+    _ => None
+  }
+}
+
+///|
 pub struct Config {
   format : String
   scan_timeout : Int
@@ -39,32 +93,37 @@ pub fn Config::get_raw_module(self : Config, name : String) -> ModuleTable? {
 }
 
 ///|
-/// Parse a TOML string into a Config.
 pub fn Config::from_toml(toml_str : String) -> Config raise {
   let value = @toml.parse(toml_str)
   guard value is TomlTable(table) else {
     raise Failure::Failure("expected TOML table at root")
   }
 
-  let config_table = toml_table_to_config(table)
-  parse_config_table(config_table)
+  parse_config_table(toml_table_to_config(table))
+}
+
+///|
+pub fn Config::from_json(json_str : String) -> Config raise {
+  let value = @json5.parse(json_str)
+  guard value is Object(table) else {
+    raise Failure::Failure("expected JSON object at root")
+  }
+
+  parse_config_table(json_table_to_config(table))
 }
 
 ///|
 fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
-  let default = Config::default()
+  let d = Config::default()
+  let t = ModuleTable(table)
 
-  let format = get_cv_string(table, "format").unwrap_or(default.format)
-  let scan_timeout = get_cv_int(table, "scan_timeout").unwrap_or(
-    default.scan_timeout,
-  )
-  let command_timeout = get_cv_int(table, "command_timeout").unwrap_or(
-    default.command_timeout,
-  )
-  let cache_ttl = get_cv_int(table, "cache_ttl").unwrap_or(default.cache_ttl)
-  let add_newline = get_cv_bool(table, "add_newline").unwrap_or(
-    default.add_newline,
-  )
+  let format = t.get_string("format").unwrap_or(d.format)
+  let scan_timeout = t.get_int("scan_timeout").unwrap_or(d.scan_timeout)
+  let command_timeout = t
+    .get_int("command_timeout")
+    .unwrap_or(d.command_timeout)
+  let cache_ttl = t.get_int("cache_ttl").unwrap_or(d.cache_ttl)
+  let add_newline = t.get_bool("add_newline").unwrap_or(d.add_newline)
 
   let raw_modules : Map[String, ModuleTable] = {}
 
@@ -77,10 +136,9 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
 }
 
 ///|
-/// Convert a Config to a TOML string representation.
 pub fn Config::to_toml(self : Config) -> String {
   let header = [
-    "format = \{quote(self.format)}",
+    "format = \{escape_string(self.format)}",
     "scan_timeout = \{self.scan_timeout}",
     "command_timeout = \{self.command_timeout}",
     "cache_ttl = \{self.cache_ttl}",
@@ -93,9 +151,7 @@ pub fn Config::to_toml(self : Config) -> String {
   let sections = module_names
     .iter()
     .filter_map(fn(name) {
-      self.raw_modules
-      .get(name)
-      .map(fn(table) { raw_module_to_toml(name, table) })
+      self.raw_modules.get(name).map(fn(table) { module_to_toml(name, table) })
     })
     .collect()
     .join("")
@@ -104,7 +160,7 @@ pub fn Config::to_toml(self : Config) -> String {
 }
 
 ///|
-fn raw_module_to_toml(name : String, table : ModuleTable) -> String {
+fn module_to_toml(name : String, table : ModuleTable) -> String {
   let lines : Array[String] = ["\n[\{name}]"]
 
   let keys = table.0.keys().collect()
@@ -112,14 +168,14 @@ fn raw_module_to_toml(name : String, table : ModuleTable) -> String {
 
   for key in keys {
     match table.0.get(key) {
-      Some(CString(s)) => lines.push("\{key} = \{quote(s)}")
+      Some(CString(s)) => lines.push("\{key} = \{escape_string(s)}")
       Some(CInt(n)) => lines.push("\{key} = \{n}")
       Some(CBool(b)) => lines.push("\{key} = \{b}")
       Some(CFloat(f)) => lines.push("\{key} = \{f}")
       Some(CArray(arr)) => {
         let items = arr
           .iter()
-          .map(fn(v) { config_value_to_toml_literal(v) })
+          .map(fn(v) { config_value_to_literal(v) })
           .collect()
           .join(", ")
         lines.push("\{key} = [\{items}]")
@@ -132,7 +188,18 @@ fn raw_module_to_toml(name : String, table : ModuleTable) -> String {
 }
 
 ///|
-fn quote(s : String) -> String {
+fn config_value_to_literal(v : ConfigValue) -> String {
+  match v {
+    CString(s) => escape_string(s)
+    CInt(n) => n.to_string()
+    CBool(b) => b.to_string()
+    CFloat(f) => f.to_string()
+    CArray(_) | CTable(_) => "\"\""
+  }
+}
+
+///|
+pub fn escape_string(s : String) -> String {
   let buf = StringBuilder::new()
   buf.write_char('"')
 
@@ -141,6 +208,7 @@ fn quote(s : String) -> String {
       '"' => buf.write_string("\\\"")
       '\\' => buf.write_string("\\\\")
       '\n' => buf.write_string("\\n")
+      '\r' => buf.write_string("\\r")
       '\t' => buf.write_string("\\t")
       _ => buf.write_char(ch)
     }
@@ -148,77 +216,6 @@ fn quote(s : String) -> String {
 
   buf.write_char('"')
   buf.to_string()
-}
-
-///|
-fn config_value_to_toml_literal(v : ConfigValue) -> String {
-  match v {
-    CString(s) => quote(s)
-    CInt(n) => n.to_string()
-    CBool(b) => b.to_string()
-    CFloat(f) => f.to_string()
-    CArray(_) | CTable(_) => "\"\""
-  }
-}
-
-// --- Public helpers for modules ---
-
-///|
-pub fn get_toml_string(table : ModuleTable, key : String) -> String? {
-  match table.0.get(key) {
-    Some(CString(s)) => Some(s)
-    _ => None
-  }
-}
-
-///|
-pub fn get_toml_int(table : ModuleTable, key : String) -> Int? {
-  match table.0.get(key) {
-    Some(CInt(n)) => Some(n)
-    _ => None
-  }
-}
-
-///|
-pub fn get_toml_bool(table : ModuleTable, key : String) -> Bool? {
-  match table.0.get(key) {
-    Some(CBool(b)) => Some(b)
-    _ => None
-  }
-}
-
-///|
-pub fn get_toml_string_array(
-  table : ModuleTable,
-  key : String,
-) -> Array[String]? {
-  match table.0.get(key) {
-    Some(CArray(arr)) => {
-      let result : Array[String] = []
-
-      for item in arr {
-        match item {
-          CString(s) => result.push(s)
-          _ => ()
-        }
-      }
-
-      Some(result)
-    }
-    _ => None
-  }
-}
-
-///|
-/// Parse a JSON/JSONC/JSON5 string into a Config.
-pub fn Config::from_json(json_str : String) -> Config raise {
-  let value = @json5.parse(json_str)
-  guard value is Object(table) else {
-    raise Failure::Failure("expected JSON object at root")
-  }
-
-  let config_table = json_table_to_config(table)
-  parse_config_table(config_table)
 }
 
 // --- JSON conversion ---
@@ -235,7 +232,14 @@ fn json_to_config(v : Json) -> ConfigValue {
       }
     True => CBool(true)
     False => CBool(false)
-    Array(arr) => CArray(arr.map(json_to_config))
+    Array(arr) =>
+      CArray(
+        arr
+        .iter()
+        .filter(fn(v) { not(v is Null) })
+        .map(json_to_config)
+        .collect(),
+      )
     Object(obj) => CTable(json_table_to_config(obj))
     Null => CString("")
   }
@@ -278,30 +282,4 @@ fn toml_table_to_config(
   table.each(fn(key, value) { result[key] = toml_to_config(value) })
 
   result
-}
-
-// --- Private helpers for top-level config parsing ---
-
-///|
-fn get_cv_string(table : Map[String, ConfigValue], key : String) -> String? {
-  match table.get(key) {
-    Some(CString(s)) => Some(s)
-    _ => None
-  }
-}
-
-///|
-fn get_cv_int(table : Map[String, ConfigValue], key : String) -> Int? {
-  match table.get(key) {
-    Some(CInt(n)) => Some(n)
-    _ => None
-  }
-}
-
-///|
-fn get_cv_bool(table : Map[String, ConfigValue], key : String) -> Bool? {
-  match table.get(key) {
-    Some(CBool(b)) => Some(b)
-    _ => None
-  }
 }

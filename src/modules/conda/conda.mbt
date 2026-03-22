@@ -21,26 +21,22 @@ pub fn CondaModule::default() -> CondaModule {
 }
 
 ///|
-pub fn CondaModule::from_toml_table(table : @config.ModuleTable) -> CondaModule {
+pub fn CondaModule::from_table(table : @config.ModuleTable) -> CondaModule {
   let d = CondaModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
-    ignore_base: @config.get_toml_bool(table, "ignore_base").unwrap_or(
-      d.ignore_base,
-    ),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    ignore_base: table.get_bool("ignore_base").unwrap_or(d.ignore_base),
   }
 }
 
 ///|
 pub fn CondaModule::from_config(config : @config.Config) -> CondaModule {
   match config.get_raw_module("conda") {
-    Some(table) => CondaModule::from_toml_table(table)
+    Some(table) => CondaModule::from_table(table)
     None => CondaModule::default()
   }
 }

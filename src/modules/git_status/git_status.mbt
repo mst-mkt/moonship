@@ -25,30 +25,26 @@ pub fn GitStatusModule::default() -> GitStatusModule {
 }
 
 ///|
-pub fn GitStatusModule::from_toml_table(
+pub fn GitStatusModule::from_table(
   table : @config.ModuleTable,
 ) -> GitStatusModule {
   let d = GitStatusModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
-    staged: @config.get_toml_string(table, "staged").unwrap_or(d.staged),
-    modified: @config.get_toml_string(table, "modified").unwrap_or(d.modified),
-    untracked: @config.get_toml_string(table, "untracked").unwrap_or(
-      d.untracked,
-    ),
-    deleted: @config.get_toml_string(table, "deleted").unwrap_or(d.deleted),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    style: table.get_string("style").unwrap_or(d.style),
+    staged: table.get_string("staged").unwrap_or(d.staged),
+    modified: table.get_string("modified").unwrap_or(d.modified),
+    untracked: table.get_string("untracked").unwrap_or(d.untracked),
+    deleted: table.get_string("deleted").unwrap_or(d.deleted),
   }
 }
 
 ///|
 pub fn GitStatusModule::from_config(config : @config.Config) -> GitStatusModule {
   match config.get_raw_module("git_status") {
-    Some(table) => GitStatusModule::from_toml_table(table)
+    Some(table) => GitStatusModule::from_table(table)
     None => GitStatusModule::default()
   }
 }

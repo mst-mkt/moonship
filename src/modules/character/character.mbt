@@ -27,41 +27,35 @@ pub fn CharacterModule::default() -> CharacterModule {
 }
 
 ///|
-pub fn CharacterModule::from_toml_table(
+pub fn CharacterModule::from_table(
   table : @config.ModuleTable,
 ) -> CharacterModule {
   let d = CharacterModule::default()
   {
-    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
-    async_render: @config.get_toml_bool(table, "async").unwrap_or(
-      d.async_render,
-    ),
-    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
-    success_symbol: @config.get_toml_string(table, "success_symbol").unwrap_or(
-      d.success_symbol,
-    ),
-    error_symbol: @config.get_toml_string(table, "error_symbol").unwrap_or(
-      d.error_symbol,
-    ),
-    vimcmd_symbol: @config.get_toml_string(table, "vimcmd_symbol").unwrap_or(
-      d.vimcmd_symbol,
-    ),
-    vimcmd_visual_symbol: @config.get_toml_string(table, "vimcmd_visual_symbol").unwrap_or(
-      d.vimcmd_visual_symbol,
-    ),
-    vimcmd_replace_symbol: @config.get_toml_string(
-      table, "vimcmd_replace_symbol",
-    ).unwrap_or(d.vimcmd_replace_symbol),
-    vimcmd_replace_one_symbol: @config.get_toml_string(
-      table, "vimcmd_replace_one_symbol",
-    ).unwrap_or(d.vimcmd_replace_one_symbol),
+    disabled: table.get_bool("disabled").unwrap_or(d.disabled),
+    async_render: table.get_bool("async").unwrap_or(d.async_render),
+    format: table.get_string("format").unwrap_or(d.format),
+    success_symbol: table
+    .get_string("success_symbol")
+    .unwrap_or(d.success_symbol),
+    error_symbol: table.get_string("error_symbol").unwrap_or(d.error_symbol),
+    vimcmd_symbol: table.get_string("vimcmd_symbol").unwrap_or(d.vimcmd_symbol),
+    vimcmd_visual_symbol: table
+    .get_string("vimcmd_visual_symbol")
+    .unwrap_or(d.vimcmd_visual_symbol),
+    vimcmd_replace_symbol: table
+    .get_string("vimcmd_replace_symbol")
+    .unwrap_or(d.vimcmd_replace_symbol),
+    vimcmd_replace_one_symbol: table
+    .get_string("vimcmd_replace_one_symbol")
+    .unwrap_or(d.vimcmd_replace_one_symbol),
   }
 }
 
 ///|
 pub fn CharacterModule::from_config(config : @config.Config) -> CharacterModule {
   match config.get_raw_module("character") {
-    Some(table) => CharacterModule::from_toml_table(table)
+    Some(table) => CharacterModule::from_table(table)
     None => CharacterModule::default()
   }
 }

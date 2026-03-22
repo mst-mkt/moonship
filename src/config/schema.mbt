@@ -27,7 +27,6 @@ priv enum JVal {
   JStr(String)
   JNum(Double)
   JBool(Bool)
-  JNull
   JArr(Array[JVal])
   JObj(Array[(String, JVal)])
 }
@@ -40,7 +39,7 @@ fn JVal::stringify(self : JVal, indent? : Int = 0) -> String {
 ///|
 fn stringify_val(v : JVal, depth : Int, indent : Int) -> String {
   match v {
-    JStr(s) => json_escape(s)
+    JStr(s) => escape_string(s)
     JNum(n) =>
       if n == n.to_int().to_double() {
         n.to_int().to_string()
@@ -48,7 +47,6 @@ fn stringify_val(v : JVal, depth : Int, indent : Int) -> String {
         n.to_string()
       }
     JBool(b) => b.to_string()
-    JNull => "null"
     JArr(items) => {
       if items.is_empty() {
         return "[]"
@@ -74,7 +72,7 @@ fn stringify_val(v : JVal, depth : Int, indent : Int) -> String {
         .map(fn(pair) {
           let (key, val) = pair
           pad(depth + 1, indent) +
-          json_escape(key) +
+          escape_string(key) +
           ": " +
           stringify_val(val, depth + 1, indent)
         })
@@ -98,26 +96,6 @@ fn pad(depth : Int, indent : Int) -> String {
 }
 
 ///|
-fn json_escape(s : String) -> String {
-  let buf = StringBuilder::new()
-  buf.write_char('"')
-
-  for ch in s {
-    match ch {
-      '"' => buf.write_string("\\\"")
-      '\\' => buf.write_string("\\\\")
-      '\n' => buf.write_string("\\n")
-      '\r' => buf.write_string("\\r")
-      '\t' => buf.write_string("\\t")
-      _ => buf.write_char(ch)
-    }
-  }
-
-  buf.write_char('"')
-  buf.to_string()
-}
-
-///|
 pub fn generate_json_schema(modules : Array[ModuleSchema]) -> String {
   let top_entries : Array[(String, JVal)] = []
 
@@ -125,11 +103,11 @@ pub fn generate_json_schema(modules : Array[ModuleSchema]) -> String {
   top_entries.push(("type", JStr("object")))
 
   let prop_entries : Array[(String, JVal)] = []
-  prop_entries.push(("format", typed_prop("string", default_str="$all")))
-  prop_entries.push(("scan_timeout", typed_prop("integer", default_int=30)))
-  prop_entries.push(("command_timeout", typed_prop("integer", default_int=500)))
-  prop_entries.push(("cache_ttl", typed_prop("integer", default_int=5000)))
-  prop_entries.push(("add_newline", typed_prop("boolean", default_bool=true)))
+  prop_entries.push(("format", schema_prop("string", JStr("$all"))))
+  prop_entries.push(("scan_timeout", schema_prop("integer", JNum(30.0))))
+  prop_entries.push(("command_timeout", schema_prop("integer", JNum(500.0))))
+  prop_entries.push(("cache_ttl", schema_prop("integer", JNum(5000.0))))
+  prop_entries.push(("add_newline", schema_prop("boolean", JBool(true))))
 
   for mod_schema in modules {
     prop_entries.push((mod_schema.name, module_schema_to_jval(mod_schema)))
@@ -143,9 +121,13 @@ pub fn generate_json_schema(modules : Array[ModuleSchema]) -> String {
 fn module_schema_to_jval(mod_schema : ModuleSchema) -> JVal {
   let field_entries : Array[(String, JVal)] = []
 
-  field_entries.push(("async", typed_prop("boolean", default_bool=false)))
+  field_entries.push(("disabled", schema_prop("boolean", JBool(false))))
+  field_entries.push(("async", schema_prop("boolean", JBool(false))))
 
   for field in mod_schema.fields {
+    if field.name == "disabled" || field.name == "async" {
+      continue
+    }
     field_entries.push((field.name, field_to_jval(field)))
   }
 
@@ -155,15 +137,15 @@ fn module_schema_to_jval(mod_schema : ModuleSchema) -> JVal {
 ///|
 fn field_to_jval(field : FieldSchema) -> JVal {
   match field.field_type {
-    FString => typed_prop("string", default_str=field.default_value)
+    FString => schema_prop("string", JStr(field.default_value))
     FInt => {
       let n = @strconv.parse_int(field.default_value) catch { _ => 0 }
-      typed_prop("integer", default_int=n)
+      schema_prop("integer", JNum(n.to_double()))
     }
-    FBool => typed_prop("boolean", default_bool=field.default_value == "true")
+    FBool => schema_prop("boolean", JBool(field.default_value == "true"))
     FFloat => {
       let f = @strconv.parse_double(field.default_value) catch { _ => 0.0 }
-      typed_prop("number", default_float=f)
+      schema_prop("number", JNum(f))
     }
     FStringArray => {
       let items : Array[JVal] = if field.default_value.is_empty() {
@@ -185,20 +167,6 @@ fn field_to_jval(field : FieldSchema) -> JVal {
 }
 
 ///|
-fn typed_prop(
-  json_type : String,
-  default_str? : String = "",
-  default_int? : Int = 0,
-  default_bool? : Bool = false,
-  default_float? : Double = 0.0,
-) -> JVal {
-  let default_val : JVal = match json_type {
-    "string" => JStr(default_str)
-    "integer" => JNum(default_int.to_double())
-    "boolean" => JBool(default_bool)
-    "number" => JNum(default_float)
-    _ => JNull
-  }
-
+fn schema_prop(json_type : String, default_val : JVal) -> JVal {
   JObj([("type", JStr(json_type)), ("default", default_val)])
 }
