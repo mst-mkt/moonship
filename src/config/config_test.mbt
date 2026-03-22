@@ -197,6 +197,80 @@ test "get_toml_string_array: missing key returns None" {
 }
 
 ///|
+test "from_json: parses JSONC config" {
+  let json =
+    #|{
+    #|  // This is a comment
+    #|  "format": "$character",
+    #|  "scan_timeout": 100,
+    #|  "character": {
+    #|    "disabled": true,
+    #|    "symbol": "→"
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  assert_eq(config.format, "$character")
+  assert_eq(config.scan_timeout, 100)
+  guard config.get_raw_module("character") is Some(table)
+  assert_eq(@config.get_toml_bool(table, "disabled"), Some(true))
+  assert_eq(@config.get_toml_string(table, "symbol"), Some("→"))
+}
+
+///|
+test "from_json: integer and boolean types" {
+  let json =
+    #|{
+    #|  "directory": {
+    #|    "truncation_length": 5,
+    #|    "truncate_to_repo": true
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("directory") is Some(table)
+  assert_eq(@config.get_toml_int(table, "truncation_length"), Some(5))
+  assert_eq(@config.get_toml_bool(table, "truncate_to_repo"), Some(true))
+}
+
+///|
+test "from_json: string array" {
+  let json =
+    #|{
+    #|  "python": {
+    #|    "detect_files": ["requirements.txt", "setup.py"]
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("python") is Some(table)
+  guard @config.get_toml_string_array(table, "detect_files") is Some(files)
+  assert_eq(files.length(), 2)
+  assert_eq(files[0], "requirements.txt")
+  assert_eq(files[1], "setup.py")
+}
+
+///|
+test "from_json: defaults applied for missing fields" {
+  let config = @config.Config::from_json("{}")
+  assert_eq(config.format, "$all")
+  assert_eq(config.scan_timeout, 30)
+  assert_eq(config.command_timeout, 500)
+}
+
+///|
+test "from_json: null values are skipped" {
+  let json =
+    #|{
+    #|  "character": {
+    #|    "symbol": "→",
+    #|    "style": null
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("character") is Some(table)
+  assert_eq(@config.get_toml_string(table, "symbol"), Some("→"))
+  assert_true(@config.get_toml_string(table, "style") is None)
+}
+
+///|
 test "default config has no raw_modules" {
   let config = @config.Config::default()
   assert_true(config.get_raw_module("character") is None)

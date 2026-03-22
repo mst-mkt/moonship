@@ -31,21 +31,55 @@ fn build_context(pa : PromptArgs) -> @context.Context {
 
 ///|
 fn load_config() -> @config.Config {
-  let path = @sys.get_env_var("MOONSHIP_CONFIG").unwrap_or("")
-  let path = if not(path.is_empty()) {
-    path
+  let env_path = @sys.get_env_var("MOONSHIP_CONFIG").unwrap_or("")
+
+  let path = if not(env_path.is_empty()) {
+    env_path
   } else {
     let home = @sys.get_env_var("HOME").unwrap_or("")
     guard not(home.is_empty()) else { return @config.Config::default() }
-    "\{home}/.config/moonship/moonship.toml"
+    let config_dir = "\{home}/.config/moonship"
+    find_config_file(config_dir)
   }
+
+  guard not(path.is_empty()) else { return @config.Config::default() }
 
   let content = @fs.read_file_to_string(path) catch {
     _ => return @config.Config::default()
   }
 
-  @config.Config::from_toml(content) catch {
-    _ => @config.Config::default()
+  parse_config(path, content)
+}
+
+///|
+fn find_config_file(dir : String) -> String {
+  let candidates = [
+    "\{dir}/moonship.jsonc",
+    "\{dir}/moonship.json",
+    "\{dir}/moonship.toml",
+  ]
+
+  for path in candidates {
+    if @fs.path_exists(path) {
+      return path
+    }
+  }
+
+  ""
+}
+
+///|
+fn parse_config(path : String, content : String) -> @config.Config {
+  let is_json = path.has_suffix(".json") || path.has_suffix(".jsonc")
+
+  if is_json {
+    @config.Config::from_json(content) catch {
+      _ => @config.Config::default()
+    }
+  } else {
+    @config.Config::from_toml(content) catch {
+      _ => @config.Config::default()
+    }
   }
 }
 

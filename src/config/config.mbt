@@ -209,6 +209,51 @@ pub fn get_toml_string_array(
   }
 }
 
+///|
+/// Parse a JSON/JSONC/JSON5 string into a Config.
+pub fn Config::from_json(json_str : String) -> Config raise {
+  let value = @json5.parse(json_str)
+  guard value is Object(table) else {
+    raise Failure::Failure("expected JSON object at root")
+  }
+
+  let config_table = json_table_to_config(table)
+  parse_config_table(config_table)
+}
+
+// --- JSON conversion ---
+
+///|
+fn json_to_config(v : Json) -> ConfigValue {
+  match v {
+    String(s) => CString(s)
+    Number(n, ..) =>
+      if n == n.to_int().to_double() {
+        CInt(n.to_int())
+      } else {
+        CFloat(n)
+      }
+    True => CBool(true)
+    False => CBool(false)
+    Array(arr) => CArray(arr.map(json_to_config))
+    Object(obj) => CTable(json_table_to_config(obj))
+    Null => CString("")
+  }
+}
+
+///|
+fn json_table_to_config(table : Map[String, Json]) -> Map[String, ConfigValue] {
+  let result : Map[String, ConfigValue] = {}
+
+  table.each(fn(key, value) {
+    if not(value is Null) {
+      result[key] = json_to_config(value)
+    }
+  })
+
+  result
+}
+
 // --- TOML conversion ---
 
 ///|

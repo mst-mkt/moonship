@@ -1,6 +1,7 @@
 import {
   "moonbitlang/core/builtin",
   "bobzhang/toml" @toml,
+  "moonbitlang/x/json5" @json5,
 }
 
 options(
