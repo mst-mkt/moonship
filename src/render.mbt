@@ -19,15 +19,29 @@ let module_order : Array[String] = [
 async fn render_prompt(ctx : @context.Context) -> String {
   let modules = build_modules(ctx.config)
   let format = expand_all(ctx.config.format, modules)
+  let names = @ms.extract_module_names(format)
   let segment_vars : Map[String, Array[@ms.Segment]] = {}
 
-  for name in @ms.extract_module_names(format) {
-    guard modules.get(name) is Some(m) else { continue }
-    guard m.execute(ctx) is Output(output) else { continue }
-    segment_vars[name] = output.segments
-  }
+  // Pre-resolve git repo before spawning concurrent tasks
+  ignore(ctx.get_repo())
 
-  @ms.compose_segments(format, segment_vars).render()
+  @async.with_task_group(async fn(group) {
+    let tasks : Array[(String, @async.Task[@ms.ModuleResult])] = []
+
+    for name in names {
+      guard modules.get(name) is Some(m) else { continue }
+      let task = group.spawn(async fn() { m.execute(ctx) }, allow_failure=true)
+      tasks.push((name, task))
+    }
+
+    for pair in tasks {
+      let (name, task) = pair
+      guard task.wait() is Output(output) else { continue }
+      segment_vars[name] = output.segments
+    }
+
+    @ms.compose_segments(format, segment_vars).render()
+  })
 }
 
 ///|
