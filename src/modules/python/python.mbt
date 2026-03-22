@@ -214,3 +214,41 @@ fn last_slash(s : String) -> Int? {
     None
   }
 }
+
+///|
+pub fn PythonModule::schema() -> @config.ModuleSchema {
+  let d = PythonModule::default()
+  {
+    name: "python",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "pyenv_version_name",
+        field_type: @config.FBool,
+        default_value: d.pyenv_version_name.to_string(),
+      },
+      {
+        name: "pyenv_prefix",
+        field_type: @config.FString,
+        default_value: d.pyenv_prefix,
+      },
+      {
+        name: "detect_files",
+        field_type: @config.FStringArray,
+        default_value: d.detect_files.join(", "),
+      },
+      {
+        name: "detect_extensions",
+        field_type: @config.FStringArray,
+        default_value: d.detect_extensions.join(", "),
+      },
+    ],
+  }
+}

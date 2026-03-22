@@ -104,3 +104,36 @@ pub impl @ms.PromptModule for PixiModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn PixiModule::schema() -> @config.ModuleSchema {
+  let d = PixiModule::default()
+  {
+    name: "pixi",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "show_default_environment",
+        field_type: @config.FBool,
+        default_value: d.show_default_environment.to_string(),
+      },
+      {
+        name: "detect_files",
+        field_type: @config.FStringArray,
+        default_value: d.detect_files.join(", "),
+      },
+      {
+        name: "detect_extensions",
+        field_type: @config.FStringArray,
+        default_value: d.detect_extensions.join(", "),
+      },
+    ],
+  }
+}

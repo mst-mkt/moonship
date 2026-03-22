@@ -107,3 +107,21 @@ fn read_hg_file(path : String) -> String {
     ""
   }
 }
+
+///|
+pub fn HgBranchModule::schema() -> @config.ModuleSchema {
+  let d = HgBranchModule::default()
+  {
+    name: "hg_branch",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+    ],
+  }
+}

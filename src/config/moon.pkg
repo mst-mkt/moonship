@@ -1,5 +1,6 @@
 import {
   "moonbitlang/core/builtin",
+  "moonbitlang/core/strconv" @strconv,
   "bobzhang/toml" @toml,
   "moonbitlang/x/json5" @json5,
 }

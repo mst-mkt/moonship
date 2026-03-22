@@ -94,3 +94,25 @@ fn format_duration(ms : Int) -> String {
     "\{seconds}s"
   }
 }
+
+///|
+pub fn CmdDurationModule::schema() -> @config.ModuleSchema {
+  let d = CmdDurationModule::default()
+  {
+    name: "cmd_duration",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      {
+        name: "min_time",
+        field_type: @config.FInt,
+        default_value: d.min_time.to_string(),
+      },
+    ],
+  }
+}

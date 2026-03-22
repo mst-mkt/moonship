@@ -83,3 +83,21 @@ pub impl @ms.PromptModule for FossilBranchModule with execute(
 fn is_fossil_repo(cwd : String) -> Bool {
   @fs.path_exists(cwd + "/.fslckout") || @fs.path_exists(cwd + "/_FOSSIL_")
 }
+
+///|
+pub fn FossilBranchModule::schema() -> @config.ModuleSchema {
+  let d = FossilBranchModule::default()
+  {
+    name: "fossil_branch",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+    ],
+  }
+}

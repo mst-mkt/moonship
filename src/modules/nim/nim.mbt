@@ -117,3 +117,31 @@ fn is_digit_or_dot(s : String) -> Bool {
 
   true
 }
+
+///|
+pub fn NimModule::schema() -> @config.ModuleSchema {
+  let d = NimModule::default()
+  {
+    name: "nim",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "detect_files",
+        field_type: @config.FStringArray,
+        default_value: d.detect_files.join(", "),
+      },
+      {
+        name: "detect_extensions",
+        field_type: @config.FStringArray,
+        default_value: d.detect_extensions.join(", "),
+      },
+    ],
+  }
+}

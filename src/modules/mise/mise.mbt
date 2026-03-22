@@ -112,3 +112,46 @@ pub impl @ms.PromptModule for MiseModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn MiseModule::schema() -> @config.ModuleSchema {
+  let d = MiseModule::default()
+  {
+    name: "mise",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "healthy_symbol",
+        field_type: @config.FString,
+        default_value: d.healthy_symbol,
+      },
+      {
+        name: "unhealthy_symbol",
+        field_type: @config.FString,
+        default_value: d.unhealthy_symbol,
+      },
+      {
+        name: "detect_files",
+        field_type: @config.FStringArray,
+        default_value: d.detect_files.join(", "),
+      },
+      {
+        name: "detect_folders",
+        field_type: @config.FStringArray,
+        default_value: d.detect_folders.join(", "),
+      },
+      {
+        name: "detect_extensions",
+        field_type: @config.FStringArray,
+        default_value: d.detect_extensions.join(", "),
+      },
+    ],
+  }
+}

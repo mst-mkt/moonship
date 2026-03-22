@@ -152,3 +152,20 @@ fn get_os_symbol(name : String) -> String {
     _ => "🐧 "
   }
 }
+
+///|
+pub fn OsModule::schema() -> @config.ModuleSchema {
+  let d = OsModule::default()
+  {
+    name: "os",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+    ],
+  }
+}

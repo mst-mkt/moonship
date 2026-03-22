@@ -130,3 +130,21 @@ fn detect_version(cwd : String) -> String {
 
   ""
 }
+
+///|
+pub fn PackageModule::schema() -> @config.ModuleSchema {
+  let d = PackageModule::default()
+  {
+    name: "package",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+    ],
+  }
+}

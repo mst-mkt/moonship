@@ -109,3 +109,41 @@ pub impl @ms.PromptModule for StatusModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn StatusModule::schema() -> @config.ModuleSchema {
+  let d = StatusModule::default()
+  {
+    name: "status",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "success_symbol",
+        field_type: @config.FString,
+        default_value: d.success_symbol,
+      },
+      {
+        name: "not_executable_symbol",
+        field_type: @config.FString,
+        default_value: d.not_executable_symbol,
+      },
+      {
+        name: "not_found_symbol",
+        field_type: @config.FString,
+        default_value: d.not_found_symbol,
+      },
+      {
+        name: "map_symbol",
+        field_type: @config.FBool,
+        default_value: d.map_symbol.to_string(),
+      },
+    ],
+  }
+}

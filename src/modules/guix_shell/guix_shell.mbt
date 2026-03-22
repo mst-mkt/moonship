@@ -74,3 +74,21 @@ pub impl @ms.PromptModule for GuixShellModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn GuixShellModule::schema() -> @config.ModuleSchema {
+  let d = GuixShellModule::default()
+  {
+    name: "guix_shell",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+    ],
+  }
+}

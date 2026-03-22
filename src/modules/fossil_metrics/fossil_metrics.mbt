@@ -146,3 +146,34 @@ fn parse_num(s : String) -> Int {
 
   result
 }
+
+///|
+pub fn FossilMetricsModule::schema() -> @config.ModuleSchema {
+  let d = FossilMetricsModule::default()
+  {
+    name: "fossil_metrics",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      {
+        name: "added_style",
+        field_type: @config.FString,
+        default_value: d.added_style,
+      },
+      {
+        name: "deleted_style",
+        field_type: @config.FString,
+        default_value: d.deleted_style,
+      },
+      {
+        name: "only_nonzero_diffs",
+        field_type: @config.FBool,
+        default_value: d.only_nonzero_diffs.to_string(),
+      },
+    ],
+  }
+}

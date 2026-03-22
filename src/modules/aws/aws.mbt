@@ -110,3 +110,21 @@ fn get_aws_region() -> String {
 
   @sys.get_env_var("AWS_DEFAULT_REGION").unwrap_or("")
 }
+
+///|
+pub fn AwsModule::schema() -> @config.ModuleSchema {
+  let d = AwsModule::default()
+  {
+    name: "aws",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+    ],
+  }
+}

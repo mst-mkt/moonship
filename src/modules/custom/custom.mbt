@@ -83,3 +83,22 @@ pub impl @ms.PromptModule for CustomModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn CustomModule::schema() -> @config.ModuleSchema {
+  let d = CustomModule::default()
+  {
+    name: "custom",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      { name: "command", field_type: @config.FString, default_value: d.command },
+    ],
+  }
+}

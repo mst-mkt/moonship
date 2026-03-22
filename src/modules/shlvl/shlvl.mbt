@@ -97,3 +97,36 @@ pub impl @ms.PromptModule for ShlvlModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn ShlvlModule::schema() -> @config.ModuleSchema {
+  let d = ShlvlModule::default()
+  {
+    name: "shlvl",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "threshold",
+        field_type: @config.FInt,
+        default_value: d.threshold.to_string(),
+      },
+      {
+        name: "repeat",
+        field_type: @config.FBool,
+        default_value: d.repeat.to_string(),
+      },
+      {
+        name: "repeat_offset",
+        field_type: @config.FInt,
+        default_value: d.repeat_offset.to_string(),
+      },
+    ],
+  }
+}

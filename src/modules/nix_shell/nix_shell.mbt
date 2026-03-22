@@ -111,3 +111,41 @@ fn is_nix_in_path() -> Bool {
   let path = @sys.get_env_var("PATH").unwrap_or("")
   path.contains("/nix/store")
 }
+
+///|
+pub fn NixShellModule::schema() -> @config.ModuleSchema {
+  let d = NixShellModule::default()
+  {
+    name: "nix_shell",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "impure_msg",
+        field_type: @config.FString,
+        default_value: d.impure_msg,
+      },
+      {
+        name: "pure_msg",
+        field_type: @config.FString,
+        default_value: d.pure_msg,
+      },
+      {
+        name: "unknown_msg",
+        field_type: @config.FString,
+        default_value: d.unknown_msg,
+      },
+      {
+        name: "heuristic",
+        field_type: @config.FBool,
+        default_value: d.heuristic.to_string(),
+      },
+    ],
+  }
+}

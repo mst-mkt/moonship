@@ -151,3 +151,56 @@ fn parse_direnv_status(output : String) -> (Bool, String) {
 
   (loaded, allowed)
 }
+
+///|
+pub fn DirenvModule::schema() -> @config.ModuleSchema {
+  let d = DirenvModule::default()
+  {
+    name: "direnv",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "allowed_msg",
+        field_type: @config.FString,
+        default_value: d.allowed_msg,
+      },
+      {
+        name: "not_allowed_msg",
+        field_type: @config.FString,
+        default_value: d.not_allowed_msg,
+      },
+      {
+        name: "denied_msg",
+        field_type: @config.FString,
+        default_value: d.denied_msg,
+      },
+      {
+        name: "loaded_msg",
+        field_type: @config.FString,
+        default_value: d.loaded_msg,
+      },
+      {
+        name: "unloaded_msg",
+        field_type: @config.FString,
+        default_value: d.unloaded_msg,
+      },
+      {
+        name: "detect_files",
+        field_type: @config.FStringArray,
+        default_value: d.detect_files.join(", "),
+      },
+      {
+        name: "detect_extensions",
+        field_type: @config.FStringArray,
+        default_value: d.detect_extensions.join(", "),
+      },
+    ],
+  }
+}

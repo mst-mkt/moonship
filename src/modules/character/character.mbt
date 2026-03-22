@@ -100,3 +100,49 @@ pub impl @ms.PromptModule for CharacterModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn CharacterModule::schema() -> @config.ModuleSchema {
+  let d = CharacterModule::default()
+  {
+    name: "character",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      {
+        name: "success_symbol",
+        field_type: @config.FString,
+        default_value: d.success_symbol,
+      },
+      {
+        name: "error_symbol",
+        field_type: @config.FString,
+        default_value: d.error_symbol,
+      },
+      {
+        name: "vimcmd_symbol",
+        field_type: @config.FString,
+        default_value: d.vimcmd_symbol,
+      },
+      {
+        name: "vimcmd_visual_symbol",
+        field_type: @config.FString,
+        default_value: d.vimcmd_visual_symbol,
+      },
+      {
+        name: "vimcmd_replace_symbol",
+        field_type: @config.FString,
+        default_value: d.vimcmd_replace_symbol,
+      },
+      {
+        name: "vimcmd_replace_one_symbol",
+        field_type: @config.FString,
+        default_value: d.vimcmd_replace_one_symbol,
+      },
+    ],
+  }
+}

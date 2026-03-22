@@ -171,3 +171,40 @@ fn split_path(path : String) -> Array[String] {
   .filter(fn(s) { not(s.is_empty()) })
   .collect()
 }
+
+///|
+pub fn DirectoryModule::schema() -> @config.ModuleSchema {
+  let d = DirectoryModule::default()
+  {
+    name: "directory",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      {
+        name: "truncation_length",
+        field_type: @config.FInt,
+        default_value: d.truncation_length.to_string(),
+      },
+      {
+        name: "truncate_to_repo",
+        field_type: @config.FBool,
+        default_value: d.truncate_to_repo.to_string(),
+      },
+      {
+        name: "truncation_symbol",
+        field_type: @config.FString,
+        default_value: d.truncation_symbol,
+      },
+      {
+        name: "home_symbol",
+        field_type: @config.FString,
+        default_value: d.home_symbol,
+      },
+    ],
+  }
+}

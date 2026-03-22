@@ -142,6 +142,12 @@ fn run_init(shell_name : String) -> Unit {
 }
 
 ///|
+fn run_schema() -> Unit {
+  let schemas = collect_all_schemas()
+  println(@config.generate_json_schema(schemas))
+}
+
+///|
 fn run_help() -> Unit {
   let help =
     #|moonship - A fast async shell prompt
@@ -155,6 +161,7 @@ fn run_help() -> Unit {
     #|  moonship cache clear         Clear cached data
     #|  moonship time                Print current time in ms
     #|  moonship print-config        Print active configuration
+    #|  moonship schema              Print JSON Schema for config
     #|  moonship version             Print version
     #|  moonship help                Print this help
     #|

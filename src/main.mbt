@@ -18,6 +18,7 @@ async fn main {
       let config = load_config()
       println(config.to_toml())
     }
+    Schema => run_schema()
     Version => println("moonship 0.0.0")
     Help => run_help()
     UnknownCommand(name) => {

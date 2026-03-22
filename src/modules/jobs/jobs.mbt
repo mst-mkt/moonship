@@ -82,3 +82,26 @@ pub impl @ms.PromptModule for JobsModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn JobsModule::schema() -> @config.ModuleSchema {
+  let d = JobsModule::default()
+  {
+    name: "jobs",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "number_threshold",
+        field_type: @config.FInt,
+        default_value: d.number_threshold.to_string(),
+      },
+    ],
+  }
+}

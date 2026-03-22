@@ -80,3 +80,25 @@ pub impl @ms.PromptModule for GitCommitModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn GitCommitModule::schema() -> @config.ModuleSchema {
+  let d = GitCommitModule::default()
+  {
+    name: "git_commit",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      {
+        name: "only_detached",
+        field_type: @config.FBool,
+        default_value: d.only_detached.to_string(),
+      },
+    ],
+  }
+}

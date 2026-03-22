@@ -92,3 +92,31 @@ pub impl @ms.PromptModule for EnvVarModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn EnvVarModule::schema() -> @config.ModuleSchema {
+  let d = EnvVarModule::default()
+  {
+    name: "env_var",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "variable",
+        field_type: @config.FString,
+        default_value: d.variable,
+      },
+      {
+        name: "default_value",
+        field_type: @config.FString,
+        default_value: d.default_value,
+      },
+    ],
+  }
+}

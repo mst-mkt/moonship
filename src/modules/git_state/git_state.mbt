@@ -111,3 +111,29 @@ fn detect_state(git_dir : String, config : GitStateModule) -> String {
 
   ""
 }
+
+///|
+pub fn GitStateModule::schema() -> @config.ModuleSchema {
+  let d = GitStateModule::default()
+  {
+    name: "git_state",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "rebase", field_type: @config.FString, default_value: d.rebase },
+      { name: "merge", field_type: @config.FString, default_value: d.merge },
+      { name: "revert", field_type: @config.FString, default_value: d.revert },
+      {
+        name: "cherry_pick",
+        field_type: @config.FString,
+        default_value: d.cherry_pick,
+      },
+      { name: "bisect", field_type: @config.FString, default_value: d.bisect },
+    ],
+  }
+}

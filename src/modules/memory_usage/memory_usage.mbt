@@ -149,3 +149,26 @@ fn format_bytes(bytes : Int64) -> String {
     whole.to_string() + "MiB"
   }
 }
+
+///|
+pub fn MemoryUsageModule::schema() -> @config.ModuleSchema {
+  let d = MemoryUsageModule::default()
+  {
+    name: "memory_usage",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "threshold",
+        field_type: @config.FInt,
+        default_value: d.threshold.to_string(),
+      },
+    ],
+  }
+}

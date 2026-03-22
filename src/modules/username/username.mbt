@@ -101,3 +101,34 @@ fn is_ssh_session() -> Bool {
 
   false
 }
+
+///|
+pub fn UsernameModule::schema() -> @config.ModuleSchema {
+  let d = UsernameModule::default()
+  {
+    name: "username",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      {
+        name: "style_root",
+        field_type: @config.FString,
+        default_value: d.style_root,
+      },
+      {
+        name: "style_user",
+        field_type: @config.FString,
+        default_value: d.style_user,
+      },
+      {
+        name: "show_always",
+        field_type: @config.FBool,
+        default_value: d.show_always.to_string(),
+      },
+    ],
+  }
+}

@@ -208,3 +208,21 @@ fn trim_whitespace(s : String) -> String {
 
   s[start:end].to_string()
 }
+
+///|
+pub fn GcloudModule::schema() -> @config.ModuleSchema {
+  let d = GcloudModule::default()
+  {
+    name: "gcloud",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+    ],
+  }
+}

@@ -198,3 +198,21 @@ fn is_json_true(s : String) -> Bool {
 
   false
 }
+
+///|
+pub fn AzureModule::schema() -> @config.ModuleSchema {
+  let d = AzureModule::default()
+  {
+    name: "azure",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+    ],
+  }
+}

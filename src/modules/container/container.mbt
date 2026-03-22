@@ -172,3 +172,21 @@ fn strip_registry_path(image : String) -> String {
     image
   }
 }
+
+///|
+pub fn ContainerModule::schema() -> @config.ModuleSchema {
+  let d = ContainerModule::default()
+  {
+    name: "container",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+    ],
+  }
+}

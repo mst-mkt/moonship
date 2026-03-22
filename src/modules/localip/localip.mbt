@@ -95,3 +95,25 @@ fn get_local_ip() -> String {
     None => s
   }
 }
+
+///|
+pub fn LocalipModule::schema() -> @config.ModuleSchema {
+  let d = LocalipModule::default()
+  {
+    name: "localip",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      {
+        name: "ssh_only",
+        field_type: @config.FBool,
+        default_value: d.ssh_only.to_string(),
+      },
+    ],
+  }
+}

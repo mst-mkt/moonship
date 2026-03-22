@@ -96,3 +96,40 @@ pub impl @ms.PromptModule for ShellModule with execute(
 
   Output(@ms.ModuleOutput::new(segments))
 }
+
+///|
+pub fn ShellModule::schema() -> @config.ModuleSchema {
+  let d = ShellModule::default()
+  {
+    name: "shell",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      {
+        name: "bash_indicator",
+        field_type: @config.FString,
+        default_value: d.bash_indicator,
+      },
+      {
+        name: "fish_indicator",
+        field_type: @config.FString,
+        default_value: d.fish_indicator,
+      },
+      {
+        name: "zsh_indicator",
+        field_type: @config.FString,
+        default_value: d.zsh_indicator,
+      },
+      {
+        name: "unknown_indicator",
+        field_type: @config.FString,
+        default_value: d.unknown_indicator,
+      },
+    ],
+  }
+}

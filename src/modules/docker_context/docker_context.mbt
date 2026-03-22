@@ -179,3 +179,36 @@ fn is_default_context(context : String) -> Bool {
   context == "desktop-linux" ||
   context.has_prefix("unix://")
 }
+
+///|
+pub fn DockerContextModule::schema() -> @config.ModuleSchema {
+  let d = DockerContextModule::default()
+  {
+    name: "docker_context",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "only_with_files",
+        field_type: @config.FBool,
+        default_value: d.only_with_files.to_string(),
+      },
+      {
+        name: "detect_files",
+        field_type: @config.FStringArray,
+        default_value: d.detect_files.join(", "),
+      },
+      {
+        name: "detect_extensions",
+        field_type: @config.FStringArray,
+        default_value: d.detect_extensions.join(", "),
+      },
+    ],
+  }
+}

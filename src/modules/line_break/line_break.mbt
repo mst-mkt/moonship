@@ -49,3 +49,18 @@ pub impl @ms.PromptModule for LineBreakModule with execute(
 
   Output(@ms.ModuleOutput::new([@ms.Segment::new("\n")]))
 }
+
+///|
+pub fn LineBreakModule::schema() -> @config.ModuleSchema {
+  let d = LineBreakModule::default()
+  {
+    name: "line_break",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+    ],
+  }
+}

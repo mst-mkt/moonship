@@ -107,3 +107,31 @@ fn trim_hostname(raw : String, trim_at : String) -> String {
     _ => raw
   }
 }
+
+///|
+pub fn HostnameModule::schema() -> @config.ModuleSchema {
+  let d = HostnameModule::default()
+  {
+    name: "hostname",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      {
+        name: "ssh_only",
+        field_type: @config.FBool,
+        default_value: d.ssh_only.to_string(),
+      },
+      { name: "trim_at", field_type: @config.FString, default_value: d.trim_at },
+      {
+        name: "ssh_symbol",
+        field_type: @config.FString,
+        default_value: d.ssh_symbol,
+      },
+    ],
+  }
+}

@@ -140,3 +140,46 @@ fn parse_opam_switch(
     (global_indicator, switch)
   }
 }
+
+///|
+pub fn OCamlModule::schema() -> @config.ModuleSchema {
+  let d = OCamlModule::default()
+  {
+    name: "ocaml",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "global_switch_indicator",
+        field_type: @config.FString,
+        default_value: d.global_switch_indicator,
+      },
+      {
+        name: "local_switch_indicator",
+        field_type: @config.FString,
+        default_value: d.local_switch_indicator,
+      },
+      {
+        name: "detect_files",
+        field_type: @config.FStringArray,
+        default_value: d.detect_files.join(", "),
+      },
+      {
+        name: "detect_folders",
+        field_type: @config.FStringArray,
+        default_value: d.detect_folders.join(", "),
+      },
+      {
+        name: "detect_extensions",
+        field_type: @config.FStringArray,
+        default_value: d.detect_extensions.join(", "),
+      },
+    ],
+  }
+}

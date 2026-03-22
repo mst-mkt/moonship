@@ -171,3 +171,54 @@ fn parse_battery_int(s : String) -> Int {
 
   result
 }
+
+///|
+pub fn BatteryModule::schema() -> @config.ModuleSchema {
+  let d = BatteryModule::default()
+  {
+    name: "battery",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      {
+        name: "full_symbol",
+        field_type: @config.FString,
+        default_value: d.full_symbol,
+      },
+      {
+        name: "charging_symbol",
+        field_type: @config.FString,
+        default_value: d.charging_symbol,
+      },
+      {
+        name: "discharging_symbol",
+        field_type: @config.FString,
+        default_value: d.discharging_symbol,
+      },
+      {
+        name: "unknown_symbol",
+        field_type: @config.FString,
+        default_value: d.unknown_symbol,
+      },
+      {
+        name: "empty_symbol",
+        field_type: @config.FString,
+        default_value: d.empty_symbol,
+      },
+      {
+        name: "display_threshold",
+        field_type: @config.FInt,
+        default_value: d.display_threshold.to_string(),
+      },
+      {
+        name: "display_style",
+        field_type: @config.FString,
+        default_value: d.display_style,
+      },
+    ],
+  }
+}

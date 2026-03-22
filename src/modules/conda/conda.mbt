@@ -99,3 +99,26 @@ fn basename(path : String) -> String {
     path
   }
 }
+
+///|
+pub fn CondaModule::schema() -> @config.ModuleSchema {
+  let d = CondaModule::default()
+  {
+    name: "conda",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "ignore_base",
+        field_type: @config.FBool,
+        default_value: d.ignore_base.to_string(),
+      },
+    ],
+  }
+}

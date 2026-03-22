@@ -8,6 +8,7 @@ enum Command {
   CacheClear
   Time
   PrintConfig
+  Schema
   Version
   Help
   UnknownCommand(String)
@@ -43,6 +44,7 @@ fn parse_args(args : Array[String]) -> Command {
       }
     "time" => Time
     "print-config" => PrintConfig
+    "schema" => Schema
     "version" | "--version" | "-V" => Version
     "help" | "--help" | "-h" => Help
     _ => UnknownCommand(args[0])

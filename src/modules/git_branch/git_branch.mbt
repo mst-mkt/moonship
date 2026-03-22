@@ -140,3 +140,41 @@ fn parse_string_list(s : String) -> Array[String] {
   .filter(fn(s) { not(s.is_empty()) })
   .collect()
 }
+
+///|
+pub fn GitBranchModule::schema() -> @config.ModuleSchema {
+  let d = GitBranchModule::default()
+  {
+    name: "git_branch",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      {
+        name: "truncation_length",
+        field_type: @config.FInt,
+        default_value: d.truncation_length.to_string(),
+      },
+      {
+        name: "truncation_symbol",
+        field_type: @config.FString,
+        default_value: d.truncation_symbol,
+      },
+      { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "only_attached",
+        field_type: @config.FBool,
+        default_value: d.only_attached.to_string(),
+      },
+      {
+        name: "ignore_branches",
+        field_type: @config.FStringArray,
+        default_value: d.ignore_branches.join(", "),
+      },
+    ],
+  }
+}

@@ -103,3 +103,35 @@ fn make_posix_tz(offset : String) -> String {
     "UTC-" + offset
   }
 }
+
+///|
+pub fn TimeModule::schema() -> @config.ModuleSchema {
+  let d = TimeModule::default()
+  {
+    name: "time",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      {
+        name: "use_12hr",
+        field_type: @config.FBool,
+        default_value: d.use_12hr.to_string(),
+      },
+      {
+        name: "time_format",
+        field_type: @config.FString,
+        default_value: d.time_format,
+      },
+      {
+        name: "utc_time_offset",
+        field_type: @config.FString,
+        default_value: d.utc_time_offset,
+      },
+    ],
+  }
+}

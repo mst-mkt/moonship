@@ -151,3 +151,36 @@ fn is_merge_state(hg_dir : String) -> Bool {
 
   false
 }
+
+///|
+pub fn HgStateModule::schema() -> @config.ModuleSchema {
+  let d = HgStateModule::default()
+  {
+    name: "hg_state",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "merge", field_type: @config.FString, default_value: d.merge },
+      { name: "rebase", field_type: @config.FString, default_value: d.rebase },
+      { name: "update", field_type: @config.FString, default_value: d.update },
+      { name: "bisect", field_type: @config.FString, default_value: d.bisect },
+      { name: "shelve", field_type: @config.FString, default_value: d.shelve },
+      { name: "graft", field_type: @config.FString, default_value: d.graft },
+      {
+        name: "transplant",
+        field_type: @config.FString,
+        default_value: d.transplant,
+      },
+      {
+        name: "histedit",
+        field_type: @config.FString,
+        default_value: d.histedit,
+      },
+    ],
+  }
+}

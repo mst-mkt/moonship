@@ -128,3 +128,32 @@ fn build_status_string(counts : Array[(Int, String)]) -> String {
   .collect()
   .join("")
 }
+
+///|
+pub fn GitStatusModule::schema() -> @config.ModuleSchema {
+  let d = GitStatusModule::default()
+  {
+    name: "git_status",
+    fields: [
+      {
+        name: "disabled",
+        field_type: @config.FBool,
+        default_value: d.disabled.to_string(),
+      },
+      { name: "format", field_type: @config.FString, default_value: d.format },
+      { name: "style", field_type: @config.FString, default_value: d.style },
+      { name: "staged", field_type: @config.FString, default_value: d.staged },
+      {
+        name: "modified",
+        field_type: @config.FString,
+        default_value: d.modified,
+      },
+      {
+        name: "untracked",
+        field_type: @config.FString,
+        default_value: d.untracked,
+      },
+      { name: "deleted", field_type: @config.FString, default_value: d.deleted },
+    ],
+  }
+}
