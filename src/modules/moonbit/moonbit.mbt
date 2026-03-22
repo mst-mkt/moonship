@@ -1,6 +1,7 @@
 ///|
 pub struct MoonbitModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,24 +10,46 @@ pub struct MoonbitModule {
 }
 
 ///|
-pub fn MoonbitModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "moonbit",
-  ),
-) -> MoonbitModule {
+pub fn MoonbitModule::default() -> MoonbitModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🐰 "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold 125",
+    symbol: "🐰 ",
     detect_files: ["moon.mod.json", "moon.pkg.json"],
     detect_extensions: [".mbt"],
   }
 }
 
 ///|
+pub fn MoonbitModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> MoonbitModule {
+  let d = MoonbitModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn MoonbitModule::from_config(config : @config.Config) -> MoonbitModule {
-  MoonbitModule::new(config=config.get_module("moonbit"))
+  match config.get_raw_module("moonbit") {
+    Some(table) => MoonbitModule::from_toml_table(table)
+    None => MoonbitModule::default()
+  }
 }
 
 ///|
@@ -35,8 +58,8 @@ pub impl @ms.PromptModule for MoonbitModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for MoonbitModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for MoonbitModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

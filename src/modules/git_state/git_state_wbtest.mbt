@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GitStateModule::new()
+  let m : &@ms.PromptModule = GitStateModule::default()
   assert_eq(m.name(), "git_state")
 }
 
@@ -11,7 +11,7 @@ async test "detect_state: no state files returns empty" {
   let path = "/tmp/moonship-test-git-state-clean"
   setup_git_dir(path)
 
-  assert_eq(detect_state(path + "/.git", GitStateModule::new()), "")
+  assert_eq(detect_state(path + "/.git", GitStateModule::default()), "")
 
   remove_dir_recursive(path)
 }
@@ -22,7 +22,7 @@ async test "detect_state: rebase-merge" {
   setup_git_dir(path)
   @fs.create_dir(path + "/.git/rebase-merge") |> ignore
 
-  assert_eq(detect_state(path + "/.git", GitStateModule::new()), "REBASING")
+  assert_eq(detect_state(path + "/.git", GitStateModule::default()), "REBASING")
 
   remove_dir_recursive(path)
 }
@@ -33,7 +33,7 @@ async test "detect_state: rebase-apply" {
   setup_git_dir(path)
   @fs.create_dir(path + "/.git/rebase-apply") |> ignore
 
-  assert_eq(detect_state(path + "/.git", GitStateModule::new()), "REBASING")
+  assert_eq(detect_state(path + "/.git", GitStateModule::default()), "REBASING")
 
   remove_dir_recursive(path)
 }
@@ -44,7 +44,7 @@ async test "detect_state: MERGE_HEAD" {
   setup_git_dir(path)
   @fs.write_string_to_file(path + "/.git/MERGE_HEAD", "")
 
-  assert_eq(detect_state(path + "/.git", GitStateModule::new()), "MERGING")
+  assert_eq(detect_state(path + "/.git", GitStateModule::default()), "MERGING")
 
   remove_dir_recursive(path)
 }
@@ -56,7 +56,7 @@ async test "detect_state: CHERRY_PICK_HEAD" {
   @fs.write_string_to_file(path + "/.git/CHERRY_PICK_HEAD", "")
 
   assert_eq(
-    detect_state(path + "/.git", GitStateModule::new()),
+    detect_state(path + "/.git", GitStateModule::default()),
     "CHERRY-PICKING",
   )
 
@@ -69,7 +69,10 @@ async test "detect_state: REVERT_HEAD" {
   setup_git_dir(path)
   @fs.write_string_to_file(path + "/.git/REVERT_HEAD", "")
 
-  assert_eq(detect_state(path + "/.git", GitStateModule::new()), "REVERTING")
+  assert_eq(
+    detect_state(path + "/.git", GitStateModule::default()),
+    "REVERTING",
+  )
 
   remove_dir_recursive(path)
 }
@@ -80,7 +83,10 @@ async test "detect_state: BISECT_LOG" {
   setup_git_dir(path)
   @fs.write_string_to_file(path + "/.git/BISECT_LOG", "")
 
-  assert_eq(detect_state(path + "/.git", GitStateModule::new()), "BISECTING")
+  assert_eq(
+    detect_state(path + "/.git", GitStateModule::default()),
+    "BISECTING",
+  )
 
   remove_dir_recursive(path)
 }
@@ -122,7 +128,7 @@ async test "execute: disabled returns Disabled" {
 ///|
 async test "execute: not in git repo returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
-  let m = GitStateModule::new()
+  let m = GitStateModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 

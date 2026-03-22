@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = HaskellModule::new()
+  let m : &@ms.PromptModule = HaskellModule::default()
   assert_eq(m.name(), "haskell")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-haskell-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = HaskellModule::new()
+  let m = HaskellModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects stack.yaml" {
   let path = "/tmp/moonship-test-haskell-stack"
   setup_dir(path)
   @fs.write_string_to_file(path + "/stack.yaml", "")
-  let m = HaskellModule::new()
+  let m = HaskellModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Haskell project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects cabal.project" {
   let path = "/tmp/moonship-test-haskell-cabal"
   setup_dir(path)
   @fs.write_string_to_file(path + "/cabal.project", "")
-  let m = HaskellModule::new()
+  let m = HaskellModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Haskell project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects .hs extension" {
   let path = "/tmp/moonship-test-haskell-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Main.hs", "")
-  let m = HaskellModule::new()
+  let m = HaskellModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Haskell project detected"))
@@ -69,7 +69,7 @@ async test "execute: detects .cabal extension" {
   let path = "/tmp/moonship-test-haskell-cabal-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/app.cabal", "")
-  let m = HaskellModule::new()
+  let m = HaskellModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Haskell project detected"))

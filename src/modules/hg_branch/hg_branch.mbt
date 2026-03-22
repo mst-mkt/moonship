@@ -1,28 +1,45 @@
 ///|
 pub struct HgBranchModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn HgBranchModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "hg_branch",
-  ),
-) -> HgBranchModule {
+pub fn HgBranchModule::default() -> HgBranchModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default=" "),
+    disabled: true,
+    async_render: false,
+    format: "on [$symbol$branch(:$topic)]($style) ",
+    style: "bold purple",
+    symbol: " ",
+  }
+}
+
+///|
+pub fn HgBranchModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> HgBranchModule {
+  let d = HgBranchModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn HgBranchModule::from_config(config : @config.Config) -> HgBranchModule {
-  HgBranchModule::new(config=config.get_module("hg_branch"))
+  match config.get_raw_module("hg_branch") {
+    Some(table) => HgBranchModule::from_toml_table(table)
+    None => HgBranchModule::default()
+  }
 }
 
 ///|
@@ -31,8 +48,8 @@ pub impl @ms.PromptModule for HgBranchModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for HgBranchModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for HgBranchModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

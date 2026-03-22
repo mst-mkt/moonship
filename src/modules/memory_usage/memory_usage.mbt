@@ -1,6 +1,7 @@
 ///|
 pub struct MemoryUsageModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -8,17 +9,31 @@ pub struct MemoryUsageModule {
 }
 
 ///|
-pub fn MemoryUsageModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "memory_usage",
-  ),
-) -> MemoryUsageModule {
+pub fn MemoryUsageModule::default() -> MemoryUsageModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🐏 "),
-    threshold: config.get_int_prop("threshold", default=75),
+    disabled: true,
+    async_render: false,
+    format: "via $symbol[$ram( | $swap)]($style) ",
+    style: "white bold dimmed",
+    symbol: "🐏 ",
+    threshold: 75,
+  }
+}
+
+///|
+pub fn MemoryUsageModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> MemoryUsageModule {
+  let d = MemoryUsageModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    threshold: @config.get_toml_int(table, "threshold").unwrap_or(d.threshold),
   }
 }
 
@@ -26,7 +41,10 @@ pub fn MemoryUsageModule::new(
 pub fn MemoryUsageModule::from_config(
   config : @config.Config,
 ) -> MemoryUsageModule {
-  MemoryUsageModule::new(config=config.get_module("memory_usage"))
+  match config.get_raw_module("memory_usage") {
+    Some(table) => MemoryUsageModule::from_toml_table(table)
+    None => MemoryUsageModule::default()
+  }
 }
 
 ///|
@@ -35,8 +53,8 @@ pub impl @ms.PromptModule for MemoryUsageModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for MemoryUsageModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for MemoryUsageModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

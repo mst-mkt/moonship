@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GolangModule::new()
+  let m : &@ms.PromptModule = GolangModule::default()
   assert_eq(m.name(), "golang")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-golang-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = GolangModule::new()
+  let m = GolangModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
 }
@@ -32,7 +32,7 @@ async test "execute: detects go.mod" {
   let path = "/tmp/moonship-test-golang-gomod"
   setup_dir(path)
   @fs.write_string_to_file(path + "/go.mod", "")
-  let m = GolangModule::new()
+  let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -43,7 +43,7 @@ async test "execute: detects go.sum" {
   let path = "/tmp/moonship-test-golang-gosum"
   setup_dir(path)
   @fs.write_string_to_file(path + "/go.sum", "")
-  let m = GolangModule::new()
+  let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -54,7 +54,7 @@ async test "execute: detects go.work" {
   let path = "/tmp/moonship-test-golang-gowork"
   setup_dir(path)
   @fs.write_string_to_file(path + "/go.work", "")
-  let m = GolangModule::new()
+  let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -65,7 +65,7 @@ async test "execute: detects .go extension" {
   let path = "/tmp/moonship-test-golang-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.go", "")
-  let m = GolangModule::new()
+  let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -76,7 +76,7 @@ async test "execute: detects Gopkg.yml" {
   let path = "/tmp/moonship-test-golang-gopkg"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Gopkg.yml", "")
-  let m = GolangModule::new()
+  let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -87,7 +87,7 @@ async test "execute: detects .go-version" {
   let path = "/tmp/moonship-test-golang-version"
   setup_dir(path)
   @fs.write_string_to_file(path + "/.go-version", "")
-  let m = GolangModule::new()
+  let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)

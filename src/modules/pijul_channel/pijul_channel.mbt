@@ -1,22 +1,36 @@
 ///|
 pub struct PijulChannelModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn PijulChannelModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "pijul_channel",
-  ),
-) -> PijulChannelModule {
+pub fn PijulChannelModule::default() -> PijulChannelModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default=" "),
+    disabled: true,
+    async_render: false,
+    format: "on [$symbol$channel]($style) ",
+    style: "bold purple",
+    symbol: " ",
+  }
+}
+
+///|
+pub fn PijulChannelModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> PijulChannelModule {
+  let d = PijulChannelModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
@@ -24,7 +38,10 @@ pub fn PijulChannelModule::new(
 pub fn PijulChannelModule::from_config(
   config : @config.Config,
 ) -> PijulChannelModule {
-  PijulChannelModule::new(config=config.get_module("pijul_channel"))
+  match config.get_raw_module("pijul_channel") {
+    Some(table) => PijulChannelModule::from_toml_table(table)
+    None => PijulChannelModule::default()
+  }
 }
 
 ///|
@@ -33,8 +50,8 @@ pub impl @ms.PromptModule for PijulChannelModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for PijulChannelModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for PijulChannelModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

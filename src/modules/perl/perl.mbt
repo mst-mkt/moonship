@@ -1,6 +1,7 @@
 ///|
 pub struct PerlModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,14 +10,13 @@ pub struct PerlModule {
 }
 
 ///|
-pub fn PerlModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("perl"),
-) -> PerlModule {
+pub fn PerlModule::default() -> PerlModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🐪 "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "149 bold",
+    symbol: "🐪 ",
     detect_files: [
       "Makefile.PL", "Build.PL", "cpanfile", "cpanfile.snapshot", "META.json", "META.yml",
       ".perl-version",
@@ -26,8 +26,31 @@ pub fn PerlModule::new(
 }
 
 ///|
+pub fn PerlModule::from_toml_table(table : @config.ModuleTable) -> PerlModule {
+  let d = PerlModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn PerlModule::from_config(config : @config.Config) -> PerlModule {
-  PerlModule::new(config=config.get_module("perl"))
+  match config.get_raw_module("perl") {
+    Some(table) => PerlModule::from_toml_table(table)
+    None => PerlModule::default()
+  }
 }
 
 ///|
@@ -36,8 +59,8 @@ pub impl @ms.PromptModule for PerlModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for PerlModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for PerlModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

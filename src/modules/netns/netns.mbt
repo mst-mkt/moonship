@@ -1,26 +1,43 @@
 ///|
 pub struct NetnsModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn NetnsModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("netns"),
-) -> NetnsModule {
+pub fn NetnsModule::default() -> NetnsModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🛜"),
+    disabled: false,
+    async_render: false,
+    format: "[$symbol \\[$name\\]]($style) ",
+    style: "blue bold dimmed",
+    symbol: "🛜",
+  }
+}
+
+///|
+pub fn NetnsModule::from_toml_table(table : @config.ModuleTable) -> NetnsModule {
+  let d = NetnsModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn NetnsModule::from_config(config : @config.Config) -> NetnsModule {
-  NetnsModule::new(config=config.get_module("netns"))
+  match config.get_raw_module("netns") {
+    Some(table) => NetnsModule::from_toml_table(table)
+    None => NetnsModule::default()
+  }
 }
 
 ///|
@@ -29,8 +46,8 @@ pub impl @ms.PromptModule for NetnsModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for NetnsModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for NetnsModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

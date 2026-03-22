@@ -1,6 +1,7 @@
 ///|
 pub struct MiseModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -12,16 +13,15 @@ pub struct MiseModule {
 }
 
 ///|
-pub fn MiseModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("mise"),
-) -> MiseModule {
+pub fn MiseModule::default() -> MiseModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="mise "),
-    healthy_symbol: config.get_prop("healthy_symbol", default="healthy"),
-    unhealthy_symbol: config.get_prop("unhealthy_symbol", default="unhealthy"),
+    disabled: true,
+    async_render: false,
+    format: "on [$symbol$health]($style) ",
+    style: "bold purple",
+    symbol: "mise ",
+    healthy_symbol: "healthy",
+    unhealthy_symbol: "unhealthy",
     detect_files: [
       "mise.toml", "mise.local.toml", ".mise.toml", ".mise.local.toml",
     ],
@@ -31,8 +31,40 @@ pub fn MiseModule::new(
 }
 
 ///|
+pub fn MiseModule::from_toml_table(table : @config.ModuleTable) -> MiseModule {
+  let d = MiseModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    healthy_symbol: @config.get_toml_string(table, "healthy_symbol").unwrap_or(
+      d.healthy_symbol,
+    ),
+    unhealthy_symbol: @config.get_toml_string(table, "unhealthy_symbol").unwrap_or(
+      d.unhealthy_symbol,
+    ),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
+      d.detect_folders,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn MiseModule::from_config(config : @config.Config) -> MiseModule {
-  MiseModule::new(config=config.get_module("mise"))
+  match config.get_raw_module("mise") {
+    Some(table) => MiseModule::from_toml_table(table)
+    None => MiseModule::default()
+  }
 }
 
 ///|
@@ -41,8 +73,8 @@ pub impl @ms.PromptModule for MiseModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for MiseModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for MiseModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

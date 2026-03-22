@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GitBranchModule::new()
+  let m : &@ms.PromptModule = GitBranchModule::default()
   assert_eq(m.name(), "git_branch")
 }
 
@@ -8,7 +8,7 @@ async test "name" {
 
 ///|
 async test "render_branch: normal branch" {
-  let m = GitBranchModule::new()
+  let m = GitBranchModule::default()
   guard m.render_branch("main", false, "abc1234") is Output(out) else {
     fail("expected Output")
   }
@@ -20,7 +20,7 @@ async test "render_branch: normal branch" {
 
 ///|
 async test "render_branch: detached HEAD shows commit hash" {
-  let m = GitBranchModule::new()
+  let m = GitBranchModule::default()
   guard m.render_branch("", true, "abc1234") is Output(out) else {
     fail("expected Output")
   }
@@ -30,7 +30,7 @@ async test "render_branch: detached HEAD shows commit hash" {
 
 ///|
 async test "render_branch: detached HEAD with empty hash returns Skipped" {
-  let m = GitBranchModule::new()
+  let m = GitBranchModule::default()
   assert_true(m.render_branch("", true, "") is Skipped(_))
 }
 
@@ -164,7 +164,7 @@ async test "execute: disabled returns Disabled" {
 ///|
 async test "execute: not in git repo returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
-  let m = GitBranchModule::new()
+  let m = GitBranchModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
@@ -174,7 +174,7 @@ async test "execute: real repo returns Output with branch" {
   let repo = create_test_repo(path)
 
   let ctx = @context.Context::new(cwd=path)
-  let m = GitBranchModule::new()
+  let m = GitBranchModule::default()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
 
   let rendered = out.render()

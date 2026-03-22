@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = MojoModule::new()
+  let m : &@ms.PromptModule = MojoModule::default()
   assert_eq(m.name(), "mojo")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-mojo-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = MojoModule::new()
+  let m = MojoModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .mojo extension" {
   let path = "/tmp/moonship-test-mojo-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.mojo", "")
-  let m = MojoModule::new()
+  let m = MojoModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Mojo project detected"))

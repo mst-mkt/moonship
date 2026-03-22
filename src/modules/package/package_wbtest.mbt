@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = PackageModule::new()
+  let m : &@ms.PromptModule = PackageModule::default()
   assert_eq(m.name(), "package")
 }
 
@@ -20,7 +20,7 @@ async test "execute: disabled returns Disabled" {
 ///|
 async test "execute: no package file returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
-  let m = PackageModule::new()
+  let m = PackageModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 

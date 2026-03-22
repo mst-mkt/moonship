@@ -1,6 +1,7 @@
 ///|
 pub struct HaskellModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,24 +10,46 @@ pub struct HaskellModule {
 }
 
 ///|
-pub fn HaskellModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "haskell",
-  ),
-) -> HaskellModule {
+pub fn HaskellModule::default() -> HaskellModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="λ "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold purple",
+    symbol: "λ ",
     detect_files: ["stack.yaml", "cabal.project"],
     detect_extensions: [".hs", ".cabal", ".hs-boot"],
   }
 }
 
 ///|
+pub fn HaskellModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> HaskellModule {
+  let d = HaskellModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn HaskellModule::from_config(config : @config.Config) -> HaskellModule {
-  HaskellModule::new(config=config.get_module("haskell"))
+  match config.get_raw_module("haskell") {
+    Some(table) => HaskellModule::from_toml_table(table)
+    None => HaskellModule::default()
+  }
 }
 
 ///|
@@ -35,8 +58,8 @@ pub impl @ms.PromptModule for HaskellModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for HaskellModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for HaskellModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

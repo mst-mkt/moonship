@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = PerlModule::new()
+  let m : &@ms.PromptModule = PerlModule::default()
   assert_eq(m.name(), "perl")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-perl-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = PerlModule::new()
+  let m = PerlModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects Makefile.PL" {
   let path = "/tmp/moonship-test-perl-makefile"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Makefile.PL", "")
-  let m = PerlModule::new()
+  let m = PerlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Perl project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects cpanfile" {
   let path = "/tmp/moonship-test-perl-cpanfile"
   setup_dir(path)
   @fs.write_string_to_file(path + "/cpanfile", "")
-  let m = PerlModule::new()
+  let m = PerlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Perl project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects .pl extension" {
   let path = "/tmp/moonship-test-perl-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/script.pl", "")
-  let m = PerlModule::new()
+  let m = PerlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Perl project detected"))
@@ -69,7 +69,7 @@ async test "execute: detects .pm extension" {
   let path = "/tmp/moonship-test-perl-pm"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Module.pm", "")
-  let m = PerlModule::new()
+  let m = PerlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Perl project detected"))
@@ -81,7 +81,7 @@ async test "execute: detects Build.PL" {
   let path = "/tmp/moonship-test-perl-buildpl"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Build.PL", "")
-  let m = PerlModule::new()
+  let m = PerlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Perl project detected"))
@@ -93,7 +93,7 @@ async test "execute: detects META.json" {
   let path = "/tmp/moonship-test-perl-metajson"
   setup_dir(path)
   @fs.write_string_to_file(path + "/META.json", "")
-  let m = PerlModule::new()
+  let m = PerlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Perl project detected"))
@@ -105,7 +105,7 @@ async test "execute: detects .pod extension" {
   let path = "/tmp/moonship-test-perl-pod"
   setup_dir(path)
   @fs.write_string_to_file(path + "/doc.pod", "")
-  let m = PerlModule::new()
+  let m = PerlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Perl project detected"))
@@ -117,7 +117,7 @@ async test "execute: detects .perl-version" {
   let path = "/tmp/moonship-test-perl-version"
   setup_dir(path)
   @fs.write_string_to_file(path + "/.perl-version", "")
-  let m = PerlModule::new()
+  let m = PerlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Perl project detected"))

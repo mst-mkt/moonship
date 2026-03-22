@@ -1,28 +1,47 @@
 ///|
 pub struct GitCommitModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   only_detached : Bool
 }
 
 ///|
-pub fn GitCommitModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "git_commit",
-  ),
-) -> GitCommitModule {
+pub fn GitCommitModule::default() -> GitCommitModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    only_detached: config.get_prop("only_detached", default="true") == "true",
+    disabled: false,
+    async_render: false,
+    format: "[\\($hash$tag\\)]($style) ",
+    style: "green bold",
+    only_detached: true,
+  }
+}
+
+///|
+pub fn GitCommitModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> GitCommitModule {
+  let d = GitCommitModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    only_detached: @config.get_toml_bool(table, "only_detached").unwrap_or(
+      d.only_detached,
+    ),
   }
 }
 
 ///|
 pub fn GitCommitModule::from_config(config : @config.Config) -> GitCommitModule {
-  GitCommitModule::new(config=config.get_module("git_commit"))
+  match config.get_raw_module("git_commit") {
+    Some(table) => GitCommitModule::from_toml_table(table)
+    None => GitCommitModule::default()
+  }
 }
 
 ///|
@@ -31,8 +50,8 @@ pub impl @ms.PromptModule for GitCommitModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for GitCommitModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for GitCommitModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

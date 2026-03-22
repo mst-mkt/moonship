@@ -1,6 +1,7 @@
 ///|
 pub struct OpaModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,22 +10,44 @@ pub struct OpaModule {
 }
 
 ///|
-pub fn OpaModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("opa"),
-) -> OpaModule {
+pub fn OpaModule::default() -> OpaModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🪖 "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold blue",
+    symbol: "🪖 ",
     detect_files: [],
     detect_extensions: [".rego"],
   }
 }
 
 ///|
+pub fn OpaModule::from_toml_table(table : @config.ModuleTable) -> OpaModule {
+  let d = OpaModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn OpaModule::from_config(config : @config.Config) -> OpaModule {
-  OpaModule::new(config=config.get_module("opa"))
+  match config.get_raw_module("opa") {
+    Some(table) => OpaModule::from_toml_table(table)
+    None => OpaModule::default()
+  }
 }
 
 ///|
@@ -33,8 +56,8 @@ pub impl @ms.PromptModule for OpaModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for OpaModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for OpaModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

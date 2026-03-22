@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = JobsModule::new()
+  let m : &@ms.PromptModule = JobsModule::default()
   assert_eq(m.name(), "jobs")
 }
 
@@ -9,14 +9,14 @@ async test "name" {
 ///|
 async test "execute: no jobs returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp", jobs=0)
-  let m = JobsModule::new()
+  let m = JobsModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
 ///|
 async test "execute: one job shows symbol without number" {
   let ctx = @context.Context::new(cwd="/tmp", jobs=1)
-  let m = JobsModule::new()
+  let m = JobsModule::default()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
 
   let texts = out.segments.map(fn(s) { s.text }).join("")
@@ -27,7 +27,7 @@ async test "execute: one job shows symbol without number" {
 ///|
 async test "execute: jobs at threshold shows number" {
   let ctx = @context.Context::new(cwd="/tmp", jobs=2)
-  let m = JobsModule::new()
+  let m = JobsModule::default()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
 
   let rendered = out.render()

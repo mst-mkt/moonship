@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = KotlinModule::new()
+  let m : &@ms.PromptModule = KotlinModule::default()
   assert_eq(m.name(), "kotlin")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-kotlin-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = KotlinModule::new()
+  let m = KotlinModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .kt extension" {
   let path = "/tmp/moonship-test-kotlin-kt"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Main.kt", "")
-  let m = KotlinModule::new()
+  let m = KotlinModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Kotlin project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .kts extension" {
   let path = "/tmp/moonship-test-kotlin-kts"
   setup_dir(path)
   @fs.write_string_to_file(path + "/build.gradle.kts", "")
-  let m = KotlinModule::new()
+  let m = KotlinModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Kotlin project detected"))

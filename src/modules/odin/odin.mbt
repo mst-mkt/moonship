@@ -1,6 +1,7 @@
 ///|
 pub struct OdinModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -9,22 +10,44 @@ pub struct OdinModule {
 }
 
 ///|
-pub fn OdinModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("odin"),
-) -> OdinModule {
+pub fn OdinModule::default() -> OdinModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="Ø "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold bright-blue",
+    symbol: "Ø ",
     detect_files: [],
     detect_extensions: [".odin"],
   }
 }
 
 ///|
+pub fn OdinModule::from_toml_table(table : @config.ModuleTable) -> OdinModule {
+  let d = OdinModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn OdinModule::from_config(config : @config.Config) -> OdinModule {
-  OdinModule::new(config=config.get_module("odin"))
+  match config.get_raw_module("odin") {
+    Some(table) => OdinModule::from_toml_table(table)
+    None => OdinModule::default()
+  }
 }
 
 ///|
@@ -33,8 +56,8 @@ pub impl @ms.PromptModule for OdinModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for OdinModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for OdinModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

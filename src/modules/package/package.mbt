@@ -1,28 +1,45 @@
 ///|
 pub struct PackageModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn PackageModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "package",
-  ),
-) -> PackageModule {
+pub fn PackageModule::default() -> PackageModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="📦 "),
+    disabled: false,
+    async_render: false,
+    format: "is [$symbol$version]($style) ",
+    style: "208 bold",
+    symbol: "📦 ",
+  }
+}
+
+///|
+pub fn PackageModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> PackageModule {
+  let d = PackageModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn PackageModule::from_config(config : @config.Config) -> PackageModule {
-  PackageModule::new(config=config.get_module("package"))
+  match config.get_raw_module("package") {
+    Some(table) => PackageModule::from_toml_table(table)
+    None => PackageModule::default()
+  }
 }
 
 ///|
@@ -31,8 +48,8 @@ pub impl @ms.PromptModule for PackageModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for PackageModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for PackageModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

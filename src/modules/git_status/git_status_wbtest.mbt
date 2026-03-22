@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GitStatusModule::new()
+  let m : &@ms.PromptModule = GitStatusModule::default()
   assert_eq(m.name(), "git_status")
 }
 
@@ -44,7 +44,7 @@ async test "build_status_string: count>1 symbol only" {
 
 ///|
 async test "render_status: staged only" {
-  let m = GitStatusModule::new()
+  let m = GitStatusModule::default()
   guard m.render_status(1, 0, 0, 0) is Output(out) else {
     fail("expected Output")
   }
@@ -57,7 +57,7 @@ async test "render_status: staged only" {
 
 ///|
 async test "render_status: modified only" {
-  let m = GitStatusModule::new()
+  let m = GitStatusModule::default()
   guard m.render_status(0, 1, 0, 0) is Output(out) else {
     fail("expected Output")
   }
@@ -69,7 +69,7 @@ async test "render_status: modified only" {
 
 ///|
 async test "render_status: all types present" {
-  let m = GitStatusModule::new()
+  let m = GitStatusModule::default()
   guard m.render_status(2, 3, 1, 0) is Output(out) else {
     fail("expected Output")
   }
@@ -82,7 +82,7 @@ async test "render_status: all types present" {
 
 ///|
 async test "render_status: deleted only" {
-  let m = GitStatusModule::new()
+  let m = GitStatusModule::default()
   guard m.render_status(0, 0, 0, 1) is Output(out) else {
     fail("expected Output")
   }
@@ -94,7 +94,7 @@ async test "render_status: deleted only" {
 
 ///|
 async test "render_status: all zero returns Skipped" {
-  let m = GitStatusModule::new()
+  let m = GitStatusModule::default()
   assert_true(m.render_status(0, 0, 0, 0) is Skipped("no changes"))
 }
 
@@ -139,7 +139,7 @@ async test "execute: disabled returns Disabled" {
 ///|
 async test "execute: not in git repo returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
-  let m = GitStatusModule::new()
+  let m = GitStatusModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
@@ -149,7 +149,7 @@ async test "execute: clean repo returns Skipped no changes" {
   let repo = create_test_repo(path)
 
   let ctx = @context.Context::new(cwd=path)
-  let m = GitStatusModule::new()
+  let m = GitStatusModule::default()
   assert_true(m.execute(ctx) is Skipped("no changes"))
 
   ctx.close_repo()
@@ -164,7 +164,7 @@ async test "execute: modified file returns Output with modified symbol" {
   @fs.write_string_to_file(path + "/README.md", "modified content")
 
   let ctx = @context.Context::new(cwd=path)
-  let m = GitStatusModule::new()
+  let m = GitStatusModule::default()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
   assert_true(out.render().contains("!"))
 
@@ -180,7 +180,7 @@ async test "execute: untracked file returns Output with untracked symbol" {
   @fs.write_string_to_file(path + "/newfile.txt", "new")
 
   let ctx = @context.Context::new(cwd=path)
-  let m = GitStatusModule::new()
+  let m = GitStatusModule::default()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
   assert_true(out.render().contains("?"))
 

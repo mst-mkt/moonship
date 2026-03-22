@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = JuliaModule::new()
+  let m : &@ms.PromptModule = JuliaModule::default()
   assert_eq(m.name(), "julia")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-julia-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = JuliaModule::new()
+  let m = JuliaModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects Project.toml" {
   let path = "/tmp/moonship-test-julia-project"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Project.toml", "")
-  let m = JuliaModule::new()
+  let m = JuliaModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Julia project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects Manifest.toml" {
   let path = "/tmp/moonship-test-julia-manifest"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Manifest.toml", "")
-  let m = JuliaModule::new()
+  let m = JuliaModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Julia project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects .jl extension" {
   let path = "/tmp/moonship-test-julia-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.jl", "")
-  let m = JuliaModule::new()
+  let m = JuliaModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Julia project detected"))

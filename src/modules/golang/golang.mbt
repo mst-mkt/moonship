@@ -1,6 +1,7 @@
 ///|
 pub struct GolangModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   not_capable_style : String
@@ -11,17 +12,14 @@ pub struct GolangModule {
 }
 
 ///|
-pub fn GolangModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "golang",
-  ),
-) -> GolangModule {
+pub fn GolangModule::default() -> GolangModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    not_capable_style: config.get_prop("not_capable_style", default="bold red"),
-    symbol: config.get_prop("symbol", default="🐹 "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold cyan",
+    not_capable_style: "bold red",
+    symbol: "🐹 ",
     detect_files: [
       "go.mod", "go.sum", "go.work", "glide.yaml", "Gopkg.yml", "Gopkg.lock", ".go-version",
     ],
@@ -31,8 +29,39 @@ pub fn GolangModule::new(
 }
 
 ///|
+pub fn GolangModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> GolangModule {
+  let d = GolangModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    not_capable_style: @config.get_toml_string(table, "not_capable_style").unwrap_or(
+      d.not_capable_style,
+    ),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
+      d.detect_folders,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn GolangModule::from_config(config : @config.Config) -> GolangModule {
-  GolangModule::new(config=config.get_module("golang"))
+  match config.get_raw_module("golang") {
+    Some(table) => GolangModule::from_toml_table(table)
+    None => GolangModule::default()
+  }
 }
 
 ///|
@@ -41,8 +70,8 @@ pub impl @ms.PromptModule for GolangModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for GolangModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for GolangModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

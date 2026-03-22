@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = MoonbitModule::new()
+  let m : &@ms.PromptModule = MoonbitModule::default()
   assert_eq(m.name(), "moonbit")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-moonbit-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = MoonbitModule::new()
+  let m = MoonbitModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects moon.mod.json" {
   let path = "/tmp/moonship-test-moonbit-mod"
   setup_dir(path)
   @fs.write_string_to_file(path + "/moon.mod.json", "")
-  let m = MoonbitModule::new()
+  let m = MoonbitModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no MoonBit project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects moon.pkg.json" {
   let path = "/tmp/moonship-test-moonbit-pkg"
   setup_dir(path)
   @fs.write_string_to_file(path + "/moon.pkg.json", "")
-  let m = MoonbitModule::new()
+  let m = MoonbitModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no MoonBit project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects .mbt extension" {
   let path = "/tmp/moonship-test-moonbit-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.mbt", "")
-  let m = MoonbitModule::new()
+  let m = MoonbitModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no MoonBit project detected"))
@@ -69,7 +69,7 @@ async test "execute: outputs version in moonbit project" {
   let path = "/tmp/moonship-test-moonbit-version"
   setup_dir(path)
   @fs.write_string_to_file(path + "/moon.mod.json", "")
-  let m = MoonbitModule::new()
+  let m = MoonbitModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_true(result is Output(_))

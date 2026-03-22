@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = LuaModule::new()
+  let m : &@ms.PromptModule = LuaModule::default()
   assert_eq(m.name(), "lua")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-lua-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = LuaModule::new()
+  let m = LuaModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .lua-version" {
   let path = "/tmp/moonship-test-lua-version"
   setup_dir(path)
   @fs.write_string_to_file(path + "/.lua-version", "")
-  let m = LuaModule::new()
+  let m = LuaModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Lua project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .lua extension" {
   let path = "/tmp/moonship-test-lua-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.lua", "")
-  let m = LuaModule::new()
+  let m = LuaModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Lua project detected"))

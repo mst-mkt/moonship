@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = JavaModule::new()
+  let m : &@ms.PromptModule = JavaModule::default()
   assert_eq(m.name(), "java")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-java-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = JavaModule::new()
+  let m = JavaModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
 }
@@ -32,7 +32,7 @@ async test "execute: detects pom.xml" {
   let path = "/tmp/moonship-test-java-pom"
   setup_dir(path)
   @fs.write_string_to_file(path + "/pom.xml", "")
-  let m = JavaModule::new()
+  let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -43,7 +43,7 @@ async test "execute: detects build.gradle.kts" {
   let path = "/tmp/moonship-test-java-gradle"
   setup_dir(path)
   @fs.write_string_to_file(path + "/build.gradle.kts", "")
-  let m = JavaModule::new()
+  let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -54,7 +54,7 @@ async test "execute: detects .java extension" {
   let path = "/tmp/moonship-test-java-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Main.java", "")
-  let m = JavaModule::new()
+  let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -65,7 +65,7 @@ async test "execute: detects build.sbt" {
   let path = "/tmp/moonship-test-java-sbt"
   setup_dir(path)
   @fs.write_string_to_file(path + "/build.sbt", "")
-  let m = JavaModule::new()
+  let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -76,7 +76,7 @@ async test "execute: detects .sdkmanrc" {
   let path = "/tmp/moonship-test-java-sdkman"
   setup_dir(path)
   @fs.write_string_to_file(path + "/.sdkmanrc", "")
-  let m = JavaModule::new()
+  let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -87,7 +87,7 @@ async test "execute: detects .java-version" {
   let path = "/tmp/moonship-test-java-version"
   setup_dir(path)
   @fs.write_string_to_file(path + "/.java-version", "")
-  let m = JavaModule::new()
+  let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)
@@ -98,7 +98,7 @@ async test "execute: detects .jar extension" {
   let path = "/tmp/moonship-test-java-jar"
   setup_dir(path)
   @fs.write_string_to_file(path + "/app.jar", "")
-  let m = JavaModule::new()
+  let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
   remove_dir_recursive(path)

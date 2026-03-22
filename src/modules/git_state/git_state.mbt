@@ -1,6 +1,7 @@
 ///|
 pub struct GitStateModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   rebase : String
@@ -11,26 +12,48 @@ pub struct GitStateModule {
 }
 
 ///|
-pub fn GitStateModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "git_state",
-  ),
-) -> GitStateModule {
+pub fn GitStateModule::default() -> GitStateModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    rebase: config.get_prop("rebase", default="REBASING"),
-    merge: config.get_prop("merge", default="MERGING"),
-    revert: config.get_prop("revert", default="REVERTING"),
-    cherry_pick: config.get_prop("cherry_pick", default="CHERRY-PICKING"),
-    bisect: config.get_prop("bisect", default="BISECTING"),
+    disabled: false,
+    async_render: false,
+    format: "\\([$state( $progress_current/$progress_total)]($style)\\) ",
+    style: "bold yellow",
+    rebase: "REBASING",
+    merge: "MERGING",
+    revert: "REVERTING",
+    cherry_pick: "CHERRY-PICKING",
+    bisect: "BISECTING",
+  }
+}
+
+///|
+pub fn GitStateModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> GitStateModule {
+  let d = GitStateModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    rebase: @config.get_toml_string(table, "rebase").unwrap_or(d.rebase),
+    merge: @config.get_toml_string(table, "merge").unwrap_or(d.merge),
+    revert: @config.get_toml_string(table, "revert").unwrap_or(d.revert),
+    cherry_pick: @config.get_toml_string(table, "cherry_pick").unwrap_or(
+      d.cherry_pick,
+    ),
+    bisect: @config.get_toml_string(table, "bisect").unwrap_or(d.bisect),
   }
 }
 
 ///|
 pub fn GitStateModule::from_config(config : @config.Config) -> GitStateModule {
-  GitStateModule::new(config=config.get_module("git_state"))
+  match config.get_raw_module("git_state") {
+    Some(table) => GitStateModule::from_toml_table(table)
+    None => GitStateModule::default()
+  }
 }
 
 ///|
@@ -39,8 +62,8 @@ pub impl @ms.PromptModule for GitStateModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for GitStateModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for GitStateModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

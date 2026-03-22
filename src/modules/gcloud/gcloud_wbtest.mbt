@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GcloudModule::new()
+  let m : &@ms.PromptModule = GcloudModule::default()
   assert_eq(m.name(), "gcloud")
 }
 
 ///|
 async test "execute: no gcloud config returns Skipped or Output" {
-  let m = GcloudModule::new()
+  let m = GcloudModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
   assert_true(result is Skipped(_) || result is Output(_))

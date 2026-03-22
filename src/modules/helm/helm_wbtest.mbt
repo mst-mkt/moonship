@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = HelmModule::new()
+  let m : &@ms.PromptModule = HelmModule::default()
   assert_eq(m.name(), "helm")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-helm-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = HelmModule::new()
+  let m = HelmModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects Chart.yaml" {
   let path = "/tmp/moonship-test-helm-chart"
   setup_dir(path)
   @fs.write_string_to_file(path + "/Chart.yaml", "")
-  let m = HelmModule::new()
+  let m = HelmModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Helm project detected"))

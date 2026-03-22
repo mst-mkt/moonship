@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = MesonModule::new()
+  let m : &@ms.PromptModule = MesonModule::default()
   assert_eq(m.name(), "meson")
 }
 
@@ -19,7 +19,7 @@ async test "execute: disabled returns Disabled" {
 
 ///|
 async test "execute: not in devenv returns Skipped" {
-  let m = MesonModule::new()
+  let m = MesonModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))

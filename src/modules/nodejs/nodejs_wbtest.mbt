@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = NodejsModule::new()
+  let m : &@ms.PromptModule = NodejsModule::default()
   assert_eq(m.name(), "nodejs")
 }
 
@@ -20,6 +20,6 @@ async test "execute: disabled returns Disabled" {
 ///|
 async test "execute: no project returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
-  let m = NodejsModule::new()
+  let m = NodejsModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
 }

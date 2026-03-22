@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = OdinModule::new()
+  let m : &@ms.PromptModule = OdinModule::default()
   assert_eq(m.name(), "odin")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-odin-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = OdinModule::new()
+  let m = OdinModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .odin extension" {
   let path = "/tmp/moonship-test-odin-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.odin", "")
-  let m = OdinModule::new()
+  let m = OdinModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Odin project detected"))

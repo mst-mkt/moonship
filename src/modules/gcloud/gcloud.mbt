@@ -1,28 +1,45 @@
 ///|
 pub struct GcloudModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn GcloudModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "gcloud",
-  ),
-) -> GcloudModule {
+pub fn GcloudModule::default() -> GcloudModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="☁️  "),
+    disabled: false,
+    async_render: false,
+    format: "on [$symbol$account(@$domain)(\\($region\\))]($style) ",
+    style: "bold blue",
+    symbol: "☁️  ",
+  }
+}
+
+///|
+pub fn GcloudModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> GcloudModule {
+  let d = GcloudModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn GcloudModule::from_config(config : @config.Config) -> GcloudModule {
-  GcloudModule::new(config=config.get_module("gcloud"))
+  match config.get_raw_module("gcloud") {
+    Some(table) => GcloudModule::from_toml_table(table)
+    None => GcloudModule::default()
+  }
 }
 
 ///|
@@ -31,8 +48,8 @@ pub impl @ms.PromptModule for GcloudModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for GcloudModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for GcloudModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

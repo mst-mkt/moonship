@@ -1,6 +1,7 @@
 ///|
 pub struct GitBranchModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   truncation_length : Int
@@ -11,26 +12,55 @@ pub struct GitBranchModule {
 }
 
 ///|
-pub fn GitBranchModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "git_branch",
-  ),
-) -> GitBranchModule {
+pub fn GitBranchModule::default() -> GitBranchModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    truncation_length: config.get_int_prop("truncation_length", default=20),
-    truncation_symbol: config.get_prop("truncation_symbol", default="…"),
-    symbol: config.get_prop("symbol", default=" "),
-    only_attached: config.get_prop("only_attached") == "true",
-    ignore_branches: parse_string_list(config.get_prop("ignore_branches")),
+    disabled: false,
+    async_render: false,
+    format: "on [$symbol$branch(:$remote_branch)]($style) ",
+    style: "bold purple",
+    truncation_length: 20,
+    truncation_symbol: "…",
+    symbol: " ",
+    only_attached: false,
+    ignore_branches: [],
+  }
+}
+
+///|
+pub fn GitBranchModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> GitBranchModule {
+  let d = GitBranchModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    truncation_length: @config.get_toml_int(table, "truncation_length").unwrap_or(
+      d.truncation_length,
+    ),
+    truncation_symbol: @config.get_toml_string(table, "truncation_symbol").unwrap_or(
+      d.truncation_symbol,
+    ),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    only_attached: @config.get_toml_bool(table, "only_attached").unwrap_or(
+      d.only_attached,
+    ),
+    ignore_branches: match @config.get_toml_string(table, "ignore_branches") {
+      Some(s) => parse_string_list(s)
+      None => d.ignore_branches
+    },
   }
 }
 
 ///|
 pub fn GitBranchModule::from_config(config : @config.Config) -> GitBranchModule {
-  GitBranchModule::new(config=config.get_module("git_branch"))
+  match config.get_raw_module("git_branch") {
+    Some(table) => GitBranchModule::from_toml_table(table)
+    None => GitBranchModule::default()
+  }
 }
 
 ///|
@@ -39,8 +69,8 @@ pub impl @ms.PromptModule for GitBranchModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for GitBranchModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for GitBranchModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

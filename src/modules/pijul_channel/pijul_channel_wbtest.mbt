@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = PijulChannelModule::new()
+  let m : &@ms.PromptModule = PijulChannelModule::default()
   assert_eq(m.name(), "pijul_channel")
 }
 
 ///|
 async test "execute: disabled by default" {
-  let m = PijulChannelModule::new()
+  let m = PijulChannelModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   assert_true(m.execute(ctx) is Disabled)
 }

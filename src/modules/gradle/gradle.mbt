@@ -1,6 +1,7 @@
 ///|
 pub struct GradleModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -10,16 +11,13 @@ pub struct GradleModule {
 }
 
 ///|
-pub fn GradleModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "gradle",
-  ),
-) -> GradleModule {
+pub fn GradleModule::default() -> GradleModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🅶 "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold bright-cyan",
+    symbol: "🅶 ",
     detect_files: [],
     detect_folders: ["gradle"],
     detect_extensions: [".gradle", ".gradle.kts"],
@@ -27,8 +25,36 @@ pub fn GradleModule::new(
 }
 
 ///|
+pub fn GradleModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> GradleModule {
+  let d = GradleModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
+      d.detect_folders,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn GradleModule::from_config(config : @config.Config) -> GradleModule {
-  GradleModule::new(config=config.get_module("gradle"))
+  match config.get_raw_module("gradle") {
+    Some(table) => GradleModule::from_toml_table(table)
+    None => GradleModule::default()
+  }
 }
 
 ///|
@@ -37,8 +63,8 @@ pub impl @ms.PromptModule for GradleModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for GradleModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for GradleModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

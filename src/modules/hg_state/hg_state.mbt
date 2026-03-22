@@ -1,6 +1,7 @@
 ///|
 pub struct HgStateModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   merge : String
@@ -14,29 +15,54 @@ pub struct HgStateModule {
 }
 
 ///|
-pub fn HgStateModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "hg_state",
-  ),
-) -> HgStateModule {
+pub fn HgStateModule::default() -> HgStateModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    merge: config.get_prop("merge", default="MERGING"),
-    rebase: config.get_prop("rebase", default="REBASING"),
-    update: config.get_prop("update", default="UPDATING"),
-    bisect: config.get_prop("bisect", default="BISECTING"),
-    shelve: config.get_prop("shelve", default="SHELVING"),
-    graft: config.get_prop("graft", default="GRAFTING"),
-    transplant: config.get_prop("transplant", default="TRANSPLANTING"),
-    histedit: config.get_prop("histedit", default="HISTEDITING"),
+    disabled: true,
+    async_render: false,
+    format: "\\([$state]($style)\\) ",
+    style: "bold yellow",
+    merge: "MERGING",
+    rebase: "REBASING",
+    update: "UPDATING",
+    bisect: "BISECTING",
+    shelve: "SHELVING",
+    graft: "GRAFTING",
+    transplant: "TRANSPLANTING",
+    histedit: "HISTEDITING",
+  }
+}
+
+///|
+pub fn HgStateModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> HgStateModule {
+  let d = HgStateModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    merge: @config.get_toml_string(table, "merge").unwrap_or(d.merge),
+    rebase: @config.get_toml_string(table, "rebase").unwrap_or(d.rebase),
+    update: @config.get_toml_string(table, "update").unwrap_or(d.update),
+    bisect: @config.get_toml_string(table, "bisect").unwrap_or(d.bisect),
+    shelve: @config.get_toml_string(table, "shelve").unwrap_or(d.shelve),
+    graft: @config.get_toml_string(table, "graft").unwrap_or(d.graft),
+    transplant: @config.get_toml_string(table, "transplant").unwrap_or(
+      d.transplant,
+    ),
+    histedit: @config.get_toml_string(table, "histedit").unwrap_or(d.histedit),
   }
 }
 
 ///|
 pub fn HgStateModule::from_config(config : @config.Config) -> HgStateModule {
-  HgStateModule::new(config=config.get_module("hg_state"))
+  match config.get_raw_module("hg_state") {
+    Some(table) => HgStateModule::from_toml_table(table)
+    None => HgStateModule::default()
+  }
 }
 
 ///|
@@ -45,8 +71,8 @@ pub impl @ms.PromptModule for HgStateModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for HgStateModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for HgStateModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

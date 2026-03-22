@@ -1,6 +1,7 @@
 ///|
 pub struct KotlinModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -10,25 +11,50 @@ pub struct KotlinModule {
 }
 
 ///|
-pub fn KotlinModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "kotlin",
-  ),
-) -> KotlinModule {
+pub fn KotlinModule::default() -> KotlinModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🅺 "),
-    kotlin_binary: config.get_prop("kotlin_binary", default="kotlin"),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold blue",
+    symbol: "🅺 ",
+    kotlin_binary: "kotlin",
     detect_files: [],
     detect_extensions: [".kt", ".kts"],
   }
 }
 
 ///|
+pub fn KotlinModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> KotlinModule {
+  let d = KotlinModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    kotlin_binary: @config.get_toml_string(table, "kotlin_binary").unwrap_or(
+      d.kotlin_binary,
+    ),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn KotlinModule::from_config(config : @config.Config) -> KotlinModule {
-  KotlinModule::new(config=config.get_module("kotlin"))
+  match config.get_raw_module("kotlin") {
+    Some(table) => KotlinModule::from_toml_table(table)
+    None => KotlinModule::default()
+  }
 }
 
 ///|
@@ -37,8 +63,8 @@ pub impl @ms.PromptModule for KotlinModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for KotlinModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for KotlinModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

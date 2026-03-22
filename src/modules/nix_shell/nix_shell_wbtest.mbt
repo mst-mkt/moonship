@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = NixShellModule::new()
+  let m : &@ms.PromptModule = NixShellModule::default()
   assert_eq(m.name(), "nix_shell")
 }
 
 ///|
 async test "execute: not in nix shell returns Skipped" {
-  let m = NixShellModule::new()
+  let m = NixShellModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
   // IN_NIX_SHELL is typically not set outside nix

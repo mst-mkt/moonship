@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = OpaModule::new()
+  let m : &@ms.PromptModule = OpaModule::default()
   assert_eq(m.name(), "opa")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-opa-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = OpaModule::new()
+  let m = OpaModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .rego extension" {
   let path = "/tmp/moonship-test-opa-rego"
   setup_dir(path)
   @fs.write_string_to_file(path + "/policy.rego", "")
-  let m = OpaModule::new()
+  let m = OpaModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no OPA project detected"))

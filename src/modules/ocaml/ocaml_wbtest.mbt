@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = OCamlModule::new()
+  let m : &@ms.PromptModule = OCamlModule::default()
   assert_eq(m.name(), "ocaml")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-ocaml-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = OCamlModule::new()
+  let m = OCamlModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects dune" {
   let path = "/tmp/moonship-test-ocaml-dune"
   setup_dir(path)
   @fs.write_string_to_file(path + "/dune", "")
-  let m = OCamlModule::new()
+  let m = OCamlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no OCaml project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .ml extension" {
   let path = "/tmp/moonship-test-ocaml-ml"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.ml", "")
-  let m = OCamlModule::new()
+  let m = OCamlModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no OCaml project detected"))

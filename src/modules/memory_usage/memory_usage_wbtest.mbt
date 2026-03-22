@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = MemoryUsageModule::new()
+  let m : &@ms.PromptModule = MemoryUsageModule::default()
   assert_eq(m.name(), "memory_usage")
 }
 
 ///|
 async test "execute: disabled by default" {
-  let m = MemoryUsageModule::new()
+  let m = MemoryUsageModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   assert_true(m.execute(ctx) is Disabled)
 }

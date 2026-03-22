@@ -1,26 +1,43 @@
 ///|
 pub struct MesonModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn MesonModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("meson"),
-) -> MesonModule {
+pub fn MesonModule::default() -> MesonModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="⬢ "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol$project]($style) ",
+    style: "blue bold",
+    symbol: "⬢ ",
+  }
+}
+
+///|
+pub fn MesonModule::from_toml_table(table : @config.ModuleTable) -> MesonModule {
+  let d = MesonModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn MesonModule::from_config(config : @config.Config) -> MesonModule {
-  MesonModule::new(config=config.get_module("meson"))
+  match config.get_raw_module("meson") {
+    Some(table) => MesonModule::from_toml_table(table)
+    None => MesonModule::default()
+  }
 }
 
 ///|
@@ -29,8 +46,8 @@ pub impl @ms.PromptModule for MesonModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for MesonModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for MesonModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

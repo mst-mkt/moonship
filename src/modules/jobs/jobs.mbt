@@ -1,6 +1,7 @@
 ///|
 pub struct JobsModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -8,21 +9,40 @@ pub struct JobsModule {
 }
 
 ///|
-pub fn JobsModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("jobs"),
-) -> JobsModule {
+pub fn JobsModule::default() -> JobsModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="✦"),
-    number_threshold: config.get_int_prop("number_threshold", default=2),
+    disabled: false,
+    async_render: false,
+    format: "[$symbol$number]($style) ",
+    style: "bold blue",
+    symbol: "✦",
+    number_threshold: 2,
+  }
+}
+
+///|
+pub fn JobsModule::from_toml_table(table : @config.ModuleTable) -> JobsModule {
+  let d = JobsModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    number_threshold: @config.get_toml_int(table, "number_threshold").unwrap_or(
+      d.number_threshold,
+    ),
   }
 }
 
 ///|
 pub fn JobsModule::from_config(config : @config.Config) -> JobsModule {
-  JobsModule::new(config=config.get_module("jobs"))
+  match config.get_raw_module("jobs") {
+    Some(table) => JobsModule::from_toml_table(table)
+    None => JobsModule::default()
+  }
 }
 
 ///|
@@ -31,8 +51,8 @@ pub impl @ms.PromptModule for JobsModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for JobsModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for JobsModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

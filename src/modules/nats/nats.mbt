@@ -1,26 +1,43 @@
 ///|
 pub struct NatsModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
 }
 
 ///|
-pub fn NatsModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("nats"),
-) -> NatsModule {
+pub fn NatsModule::default() -> NatsModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="✉️ "),
+    disabled: true,
+    async_render: false,
+    format: "[$symbol($name )]($style)",
+    style: "bold purple",
+    symbol: "✉️ ",
+  }
+}
+
+///|
+pub fn NatsModule::from_toml_table(table : @config.ModuleTable) -> NatsModule {
+  let d = NatsModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
   }
 }
 
 ///|
 pub fn NatsModule::from_config(config : @config.Config) -> NatsModule {
-  NatsModule::new(config=config.get_module("nats"))
+  match config.get_raw_module("nats") {
+    Some(table) => NatsModule::from_toml_table(table)
+    None => NatsModule::default()
+  }
 }
 
 ///|
@@ -29,8 +46,8 @@ pub impl @ms.PromptModule for NatsModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for NatsModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for NatsModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

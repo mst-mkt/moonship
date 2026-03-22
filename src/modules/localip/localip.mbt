@@ -1,28 +1,45 @@
 ///|
 pub struct LocalipModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   ssh_only : Bool
 }
 
 ///|
-pub fn LocalipModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "localip",
-  ),
-) -> LocalipModule {
+pub fn LocalipModule::default() -> LocalipModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    ssh_only: config.get_prop("ssh_only", default="true") == "true",
+    disabled: true,
+    async_render: false,
+    format: "[$localipv4]($style) ",
+    style: "yellow bold",
+    ssh_only: true,
+  }
+}
+
+///|
+pub fn LocalipModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> LocalipModule {
+  let d = LocalipModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    ssh_only: @config.get_toml_bool(table, "ssh_only").unwrap_or(d.ssh_only),
   }
 }
 
 ///|
 pub fn LocalipModule::from_config(config : @config.Config) -> LocalipModule {
-  LocalipModule::new(config=config.get_module("localip"))
+  match config.get_raw_module("localip") {
+    Some(table) => LocalipModule::from_toml_table(table)
+    None => LocalipModule::default()
+  }
 }
 
 ///|
@@ -31,8 +48,8 @@ pub impl @ms.PromptModule for LocalipModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for LocalipModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for LocalipModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

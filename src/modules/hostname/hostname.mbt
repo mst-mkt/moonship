@@ -1,6 +1,7 @@
 ///|
 pub struct HostnameModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   ssh_only : Bool
@@ -9,24 +10,44 @@ pub struct HostnameModule {
 }
 
 ///|
-pub fn HostnameModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "hostname",
-  ),
-) -> HostnameModule {
+pub fn HostnameModule::default() -> HostnameModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    ssh_only: config.get_prop("ssh_only", default="true") == "true",
-    trim_at: config.get_prop("trim_at", default="."),
-    ssh_symbol: config.get_prop("ssh_symbol", default="🌐 "),
+    disabled: false,
+    async_render: false,
+    format: "[$ssh_symbol$hostname]($style) in ",
+    style: "green dimmed bold",
+    ssh_only: true,
+    trim_at: ".",
+    ssh_symbol: "🌐 ",
+  }
+}
+
+///|
+pub fn HostnameModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> HostnameModule {
+  let d = HostnameModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    ssh_only: @config.get_toml_bool(table, "ssh_only").unwrap_or(d.ssh_only),
+    trim_at: @config.get_toml_string(table, "trim_at").unwrap_or(d.trim_at),
+    ssh_symbol: @config.get_toml_string(table, "ssh_symbol").unwrap_or(
+      d.ssh_symbol,
+    ),
   }
 }
 
 ///|
 pub fn HostnameModule::from_config(config : @config.Config) -> HostnameModule {
-  HostnameModule::new(config=config.get_module("hostname"))
+  match config.get_raw_module("hostname") {
+    Some(table) => HostnameModule::from_toml_table(table)
+    None => HostnameModule::default()
+  }
 }
 
 ///|
@@ -35,8 +56,8 @@ pub impl @ms.PromptModule for HostnameModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for HostnameModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for HostnameModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

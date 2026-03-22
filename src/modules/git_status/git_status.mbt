@@ -1,6 +1,7 @@
 ///|
 pub struct GitStatusModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   staged : String
@@ -10,25 +11,46 @@ pub struct GitStatusModule {
 }
 
 ///|
-pub fn GitStatusModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "git_status",
-  ),
-) -> GitStatusModule {
+pub fn GitStatusModule::default() -> GitStatusModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    staged: config.get_prop("staged", default="+"),
-    modified: config.get_prop("modified", default="!"),
-    untracked: config.get_prop("untracked", default="?"),
-    deleted: config.get_prop("deleted", default="✘"),
+    disabled: false,
+    async_render: false,
+    format: "([\\[$all_status$ahead_behind\\]]($style) )",
+    style: "red bold",
+    staged: "+",
+    modified: "!",
+    untracked: "?",
+    deleted: "✘",
+  }
+}
+
+///|
+pub fn GitStatusModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> GitStatusModule {
+  let d = GitStatusModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    staged: @config.get_toml_string(table, "staged").unwrap_or(d.staged),
+    modified: @config.get_toml_string(table, "modified").unwrap_or(d.modified),
+    untracked: @config.get_toml_string(table, "untracked").unwrap_or(
+      d.untracked,
+    ),
+    deleted: @config.get_toml_string(table, "deleted").unwrap_or(d.deleted),
   }
 }
 
 ///|
 pub fn GitStatusModule::from_config(config : @config.Config) -> GitStatusModule {
-  GitStatusModule::new(config=config.get_module("git_status"))
+  match config.get_raw_module("git_status") {
+    Some(table) => GitStatusModule::from_toml_table(table)
+    None => GitStatusModule::default()
+  }
 }
 
 ///|
@@ -37,8 +59,8 @@ pub impl @ms.PromptModule for GitStatusModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for GitStatusModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for GitStatusModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

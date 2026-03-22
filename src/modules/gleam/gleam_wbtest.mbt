@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GleamModule::new()
+  let m : &@ms.PromptModule = GleamModule::default()
   assert_eq(m.name(), "gleam")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-gleam-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = GleamModule::new()
+  let m = GleamModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects gleam.toml" {
   let path = "/tmp/moonship-test-gleam-toml"
   setup_dir(path)
   @fs.write_string_to_file(path + "/gleam.toml", "")
-  let m = GleamModule::new()
+  let m = GleamModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Gleam project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .gleam extension" {
   let path = "/tmp/moonship-test-gleam-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.gleam", "")
-  let m = GleamModule::new()
+  let m = GleamModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Gleam project detected"))

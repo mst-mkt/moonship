@@ -1,12 +1,12 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GitMetricsModule::new()
+  let m : &@ms.PromptModule = GitMetricsModule::default()
   assert_eq(m.name(), "git_metrics")
 }
 
 ///|
 async test "execute: disabled by default" {
-  let m = GitMetricsModule::new()
+  let m = GitMetricsModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   assert_true(m.execute(ctx) is Disabled)
 }

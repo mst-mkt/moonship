@@ -1,6 +1,7 @@
 ///|
 pub struct NixShellModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -11,26 +12,50 @@ pub struct NixShellModule {
 }
 
 ///|
-pub fn NixShellModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "nix_shell",
-  ),
-) -> NixShellModule {
+pub fn NixShellModule::default() -> NixShellModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="❄️  "),
-    impure_msg: config.get_prop("impure_msg", default="impure"),
-    pure_msg: config.get_prop("pure_msg", default="pure"),
-    unknown_msg: config.get_prop("unknown_msg", default=""),
-    heuristic: config.get_prop("heuristic") == "true",
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol$state( \\($name\\))]($style) ",
+    style: "bold blue",
+    symbol: "❄️  ",
+    impure_msg: "impure",
+    pure_msg: "pure",
+    unknown_msg: "",
+    heuristic: false,
+  }
+}
+
+///|
+pub fn NixShellModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> NixShellModule {
+  let d = NixShellModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    impure_msg: @config.get_toml_string(table, "impure_msg").unwrap_or(
+      d.impure_msg,
+    ),
+    pure_msg: @config.get_toml_string(table, "pure_msg").unwrap_or(d.pure_msg),
+    unknown_msg: @config.get_toml_string(table, "unknown_msg").unwrap_or(
+      d.unknown_msg,
+    ),
+    heuristic: @config.get_toml_bool(table, "heuristic").unwrap_or(d.heuristic),
   }
 }
 
 ///|
 pub fn NixShellModule::from_config(config : @config.Config) -> NixShellModule {
-  NixShellModule::new(config=config.get_module("nix_shell"))
+  match config.get_raw_module("nix_shell") {
+    Some(table) => NixShellModule::from_toml_table(table)
+    None => NixShellModule::default()
+  }
 }
 
 ///|
@@ -39,8 +64,8 @@ pub impl @ms.PromptModule for NixShellModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for NixShellModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for NixShellModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

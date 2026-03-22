@@ -1,6 +1,7 @@
 ///|
 pub struct PixiModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -10,27 +11,48 @@ pub struct PixiModule {
 }
 
 ///|
-pub fn PixiModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("pixi"),
-) -> PixiModule {
+pub fn PixiModule::default() -> PixiModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🧚 "),
-    show_default_environment: config.get_prop(
-      "show_default_environment",
-      default="true",
-    ) !=
-    "false",
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )(\\($environment\\) )]($style)",
+    style: "yellow bold",
+    symbol: "🧚 ",
+    show_default_environment: true,
     detect_files: ["pixi.toml", "pixi.lock"],
     detect_extensions: [],
   }
 }
 
 ///|
+pub fn PixiModule::from_toml_table(table : @config.ModuleTable) -> PixiModule {
+  let d = PixiModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    show_default_environment: @config.get_toml_bool(
+      table, "show_default_environment",
+    ).unwrap_or(d.show_default_environment),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn PixiModule::from_config(config : @config.Config) -> PixiModule {
-  PixiModule::new(config=config.get_module("pixi"))
+  match config.get_raw_module("pixi") {
+    Some(table) => PixiModule::from_toml_table(table)
+    None => PixiModule::default()
+  }
 }
 
 ///|
@@ -39,8 +61,8 @@ pub impl @ms.PromptModule for PixiModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for PixiModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for PixiModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

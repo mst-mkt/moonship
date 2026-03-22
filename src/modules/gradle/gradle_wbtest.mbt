@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GradleModule::new()
+  let m : &@ms.PromptModule = GradleModule::default()
   assert_eq(m.name(), "gradle")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-gradle-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = GradleModule::new()
+  let m = GradleModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .gradle extension" {
   let path = "/tmp/moonship-test-gradle-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/build.gradle", "")
-  let m = GradleModule::new()
+  let m = GradleModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Gradle project detected"))

@@ -1,6 +1,7 @@
 ///|
 pub struct LuaModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -11,15 +12,14 @@ pub struct LuaModule {
 }
 
 ///|
-pub fn LuaModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("lua"),
-) -> LuaModule {
+pub fn LuaModule::default() -> LuaModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🌙 "),
-    lua_binary: config.get_prop("lua_binary", default="lua"),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold blue",
+    symbol: "🌙 ",
+    lua_binary: "lua",
     detect_files: [".lua-version"],
     detect_folders: ["lua"],
     detect_extensions: [".lua"],
@@ -27,8 +27,37 @@ pub fn LuaModule::new(
 }
 
 ///|
+pub fn LuaModule::from_toml_table(table : @config.ModuleTable) -> LuaModule {
+  let d = LuaModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    lua_binary: @config.get_toml_string(table, "lua_binary").unwrap_or(
+      d.lua_binary,
+    ),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
+      d.detect_folders,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn LuaModule::from_config(config : @config.Config) -> LuaModule {
-  LuaModule::new(config=config.get_module("lua"))
+  match config.get_raw_module("lua") {
+    Some(table) => LuaModule::from_toml_table(table)
+    None => LuaModule::default()
+  }
 }
 
 ///|
@@ -37,8 +66,8 @@ pub impl @ms.PromptModule for LuaModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for LuaModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for LuaModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

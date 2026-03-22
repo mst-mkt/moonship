@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = NimModule::new()
+  let m : &@ms.PromptModule = NimModule::default()
   assert_eq(m.name(), "nim")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-nim-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = NimModule::new()
+  let m = NimModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects nim.cfg" {
   let path = "/tmp/moonship-test-nim-cfg"
   setup_dir(path)
   @fs.write_string_to_file(path + "/nim.cfg", "")
-  let m = NimModule::new()
+  let m = NimModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Nim project detected"))
@@ -45,7 +45,7 @@ async test "execute: detects .nim extension" {
   let path = "/tmp/moonship-test-nim-ext"
   setup_dir(path)
   @fs.write_string_to_file(path + "/main.nim", "")
-  let m = NimModule::new()
+  let m = NimModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Nim project detected"))
@@ -57,7 +57,7 @@ async test "execute: detects .nims extension" {
   let path = "/tmp/moonship-test-nim-nims"
   setup_dir(path)
   @fs.write_string_to_file(path + "/config.nims", "")
-  let m = NimModule::new()
+  let m = NimModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Nim project detected"))
@@ -69,7 +69,7 @@ async test "execute: detects .nimble extension" {
   let path = "/tmp/moonship-test-nim-nimble"
   setup_dir(path)
   @fs.write_string_to_file(path + "/app.nimble", "")
-  let m = NimModule::new()
+  let m = NimModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Nim project detected"))

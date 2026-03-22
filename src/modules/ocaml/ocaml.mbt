@@ -1,6 +1,7 @@
 ///|
 pub struct OCamlModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -12,22 +13,15 @@ pub struct OCamlModule {
 }
 
 ///|
-pub fn OCamlModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("ocaml"),
-) -> OCamlModule {
+pub fn OCamlModule::default() -> OCamlModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="🐫 "),
-    global_switch_indicator: config.get_prop(
-      "global_switch_indicator",
-      default="",
-    ),
-    local_switch_indicator: config.get_prop(
-      "local_switch_indicator",
-      default="*",
-    ),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )(\\($switch_indicator$switch_name\\) )]($style)",
+    style: "bold yellow",
+    symbol: "🐫 ",
+    global_switch_indicator: "",
+    local_switch_indicator: "*",
     detect_files: ["dune", "dune-project", "jbuild", "jbuild-ignore", ".merlin"],
     detect_folders: ["_opam", "esy.lock"],
     detect_extensions: [".opam", ".ml", ".mli", ".re", ".rei"],
@@ -35,8 +29,40 @@ pub fn OCamlModule::new(
 }
 
 ///|
+pub fn OCamlModule::from_toml_table(table : @config.ModuleTable) -> OCamlModule {
+  let d = OCamlModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    global_switch_indicator: @config.get_toml_string(
+      table, "global_switch_indicator",
+    ).unwrap_or(d.global_switch_indicator),
+    local_switch_indicator: @config.get_toml_string(
+      table, "local_switch_indicator",
+    ).unwrap_or(d.local_switch_indicator),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
+      d.detect_folders,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn OCamlModule::from_config(config : @config.Config) -> OCamlModule {
-  OCamlModule::new(config=config.get_module("ocaml"))
+  match config.get_raw_module("ocaml") {
+    Some(table) => OCamlModule::from_toml_table(table)
+    None => OCamlModule::default()
+  }
 }
 
 ///|
@@ -45,8 +71,8 @@ pub impl @ms.PromptModule for OCamlModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for OCamlModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for OCamlModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

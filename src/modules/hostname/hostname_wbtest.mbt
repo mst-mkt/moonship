@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = HostnameModule::new()
+  let m : &@ms.PromptModule = HostnameModule::default()
   assert_eq(m.name(), "hostname")
 }
 
@@ -22,7 +22,7 @@ async test "execute: disabled returns Disabled" {
 ///|
 async test "execute: ssh_only skips without SSH" {
   let ctx = @context.Context::new(cwd="/tmp")
-  let m = HostnameModule::new()
+  let m = HostnameModule::default()
 
   // Default ssh_only=true, not in SSH → Skipped
   assert_true(m.execute(ctx) is Skipped(_))

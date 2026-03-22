@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = PixiModule::new()
+  let m : &@ms.PromptModule = PixiModule::default()
   assert_eq(m.name(), "pixi")
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-pixi-empty"
   setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = PixiModule::new()
+  let m = PixiModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects pixi.toml" {
   let path = "/tmp/moonship-test-pixi-toml"
   setup_dir(path)
   @fs.write_string_to_file(path + "/pixi.toml", "")
-  let m = PixiModule::new()
+  let m = PixiModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Pixi project detected"))

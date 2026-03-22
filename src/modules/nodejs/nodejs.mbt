@@ -1,6 +1,7 @@
 ///|
 pub struct NodejsModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   not_capable_style : String
@@ -11,17 +12,14 @@ pub struct NodejsModule {
 }
 
 ///|
-pub fn NodejsModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module(
-    "nodejs",
-  ),
-) -> NodejsModule {
+pub fn NodejsModule::default() -> NodejsModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    not_capable_style: config.get_prop("not_capable_style", default="bold red"),
-    symbol: config.get_prop("symbol", default=" "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold green",
+    not_capable_style: "bold red",
+    symbol: " ",
     detect_files: ["package.json", ".node-version", ".nvmrc"],
     detect_folders: ["node_modules"],
     detect_extensions: [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts"],
@@ -29,8 +27,39 @@ pub fn NodejsModule::new(
 }
 
 ///|
+pub fn NodejsModule::from_toml_table(
+  table : @config.ModuleTable,
+) -> NodejsModule {
+  let d = NodejsModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    not_capable_style: @config.get_toml_string(table, "not_capable_style").unwrap_or(
+      d.not_capable_style,
+    ),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
+      d.detect_folders,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn NodejsModule::from_config(config : @config.Config) -> NodejsModule {
-  NodejsModule::new(config=config.get_module("nodejs"))
+  match config.get_raw_module("nodejs") {
+    Some(table) => NodejsModule::from_toml_table(table)
+    None => NodejsModule::default()
+  }
 }
 
 ///|
@@ -39,8 +68,8 @@ pub impl @ms.PromptModule for NodejsModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for NodejsModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for NodejsModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

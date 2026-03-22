@@ -1,6 +1,7 @@
 ///|
 pub struct HaxeModule {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   symbol : String
@@ -10,14 +11,13 @@ pub struct HaxeModule {
 }
 
 ///|
-pub fn HaxeModule::new(
-  config? : @config.ModuleConfig = @config.Config::default().get_module("haxe"),
-) -> HaxeModule {
+pub fn HaxeModule::default() -> HaxeModule {
   {
-    disabled: config.disabled,
-    format: config.format,
-    style: config.style,
-    symbol: config.get_prop("symbol", default="⌘ "),
+    disabled: false,
+    async_render: false,
+    format: "via [$symbol($version )]($style)",
+    style: "bold fg:202",
+    symbol: "⌘ ",
     detect_files: ["haxelib.json", "hxformat.json", ".haxerc"],
     detect_folders: [".haxelib", "haxe_libraries"],
     detect_extensions: [".hx", ".hxml"],
@@ -25,8 +25,34 @@ pub fn HaxeModule::new(
 }
 
 ///|
+pub fn HaxeModule::from_toml_table(table : @config.ModuleTable) -> HaxeModule {
+  let d = HaxeModule::default()
+  {
+    disabled: @config.get_toml_bool(table, "disabled").unwrap_or(d.disabled),
+    async_render: @config.get_toml_bool(table, "async").unwrap_or(
+      d.async_render,
+    ),
+    format: @config.get_toml_string(table, "format").unwrap_or(d.format),
+    style: @config.get_toml_string(table, "style").unwrap_or(d.style),
+    symbol: @config.get_toml_string(table, "symbol").unwrap_or(d.symbol),
+    detect_files: @config.get_toml_string_array(table, "detect_files").unwrap_or(
+      d.detect_files,
+    ),
+    detect_folders: @config.get_toml_string_array(table, "detect_folders").unwrap_or(
+      d.detect_folders,
+    ),
+    detect_extensions: @config.get_toml_string_array(table, "detect_extensions").unwrap_or(
+      d.detect_extensions,
+    ),
+  }
+}
+
+///|
 pub fn HaxeModule::from_config(config : @config.Config) -> HaxeModule {
-  HaxeModule::new(config=config.get_module("haxe"))
+  match config.get_raw_module("haxe") {
+    Some(table) => HaxeModule::from_toml_table(table)
+    None => HaxeModule::default()
+  }
 }
 
 ///|
@@ -35,8 +61,8 @@ pub impl @ms.PromptModule for HaxeModule with name(_self) -> String {
 }
 
 ///|
-pub impl @ms.PromptModule for HaxeModule with is_async(_self) -> Bool {
-  false
+pub impl @ms.PromptModule for HaxeModule with is_async(self) -> Bool {
+  self.async_render
 }
 
 ///|

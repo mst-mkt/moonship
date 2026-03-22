@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GitCommitModule::new()
+  let m : &@ms.PromptModule = GitCommitModule::default()
   assert_eq(m.name(), "git_commit")
 }
 
@@ -22,7 +22,7 @@ async test "execute: disabled returns Disabled" {
 ///|
 async test "execute: not in git repo returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
-  let m = GitCommitModule::new()
+  let m = GitCommitModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
 }
 
@@ -32,7 +32,7 @@ async test "execute: only_detached skips attached branch" {
   let repo = create_test_repo(path)
 
   let ctx = @context.Context::new(cwd=path)
-  let m = GitCommitModule::new()
+  let m = GitCommitModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
 
   ctx.close_repo()
