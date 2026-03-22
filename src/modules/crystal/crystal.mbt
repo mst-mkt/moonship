@@ -35,6 +35,11 @@ pub impl @ms.PromptModule for CrystalModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for CrystalModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for CrystalModule with execute(
   self,
   ctx : @context.Context,

@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for OpaModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for OpaModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for OpaModule with execute(
   self,
   ctx : @context.Context,

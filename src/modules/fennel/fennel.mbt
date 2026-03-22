@@ -35,6 +35,11 @@ pub impl @ms.PromptModule for FennelModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for FennelModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for FennelModule with execute(
   self,
   ctx : @context.Context,

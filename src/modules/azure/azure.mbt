@@ -29,6 +29,11 @@ pub impl @ms.PromptModule for AzureModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for AzureModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for AzureModule with execute(
   self,
   ctx : @context.Context,

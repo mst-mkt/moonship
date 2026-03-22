@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for TimeModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for TimeModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for TimeModule with execute(
   self,
   _ctx : @context.Context,

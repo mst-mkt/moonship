@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for RedModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for RedModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for RedModule with execute(
   self,
   ctx : @context.Context,

@@ -31,6 +31,11 @@ pub impl @ms.PromptModule for OpenstackModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for OpenstackModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for OpenstackModule with execute(
   self,
   _ctx : @context.Context,

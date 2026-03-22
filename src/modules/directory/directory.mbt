@@ -37,6 +37,11 @@ pub impl @ms.PromptModule for DirectoryModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for DirectoryModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for DirectoryModule with execute(
   self,
   ctx : @context.Context,

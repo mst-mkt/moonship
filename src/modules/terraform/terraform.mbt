@@ -37,6 +37,11 @@ pub impl @ms.PromptModule for TerraformModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for TerraformModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for TerraformModule with execute(
   self,
   ctx : @context.Context,

@@ -35,6 +35,11 @@ pub impl @ms.PromptModule for ErlangModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for ErlangModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for ErlangModule with execute(
   self,
   ctx : @context.Context,

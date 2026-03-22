@@ -37,6 +37,11 @@ pub impl @ms.PromptModule for LuaModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for LuaModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for LuaModule with execute(
   self,
   ctx : @context.Context,

@@ -39,6 +39,11 @@ pub impl @ms.PromptModule for GitBranchModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for GitBranchModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for GitBranchModule with execute(
   self,
   ctx : @context.Context,

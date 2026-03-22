@@ -35,6 +35,11 @@ pub impl @ms.PromptModule for SolidityModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for SolidityModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for SolidityModule with execute(
   self,
   ctx : @context.Context,

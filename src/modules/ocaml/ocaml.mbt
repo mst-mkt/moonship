@@ -45,6 +45,11 @@ pub impl @ms.PromptModule for OCamlModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for OCamlModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for OCamlModule with execute(
   self,
   ctx : @context.Context,

@@ -36,6 +36,11 @@ pub impl @ms.PromptModule for JavaModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for JavaModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for JavaModule with execute(
   self,
   ctx : @context.Context,

@@ -48,6 +48,11 @@ pub impl @ms.PromptModule for CharacterModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for CharacterModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for CharacterModule with execute(
   self,
   ctx : @context.Context,

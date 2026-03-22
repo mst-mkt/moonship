@@ -42,6 +42,11 @@ pub impl @ms.PromptModule for StatusModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for StatusModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for StatusModule with execute(
   self,
   ctx : @context.Context,

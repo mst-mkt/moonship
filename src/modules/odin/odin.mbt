@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for OdinModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for OdinModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for OdinModule with execute(
   self,
   ctx : @context.Context,

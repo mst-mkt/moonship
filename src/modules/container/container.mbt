@@ -31,6 +31,11 @@ pub impl @ms.PromptModule for ContainerModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for ContainerModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for ContainerModule with execute(
   self,
   _ctx : @context.Context,

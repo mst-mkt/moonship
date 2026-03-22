@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for FossilBranchModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for FossilBranchModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for FossilBranchModule with execute(
   self,
   ctx : @context.Context,

@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for HelmModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for HelmModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for HelmModule with execute(
   self,
   ctx : @context.Context,

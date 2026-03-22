@@ -29,6 +29,11 @@ pub impl @ms.PromptModule for NatsModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for NatsModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for NatsModule with execute(
   self,
   _ctx : @context.Context,

@@ -41,6 +41,11 @@ pub impl @ms.PromptModule for MiseModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for MiseModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for MiseModule with execute(
   self,
   ctx : @context.Context,

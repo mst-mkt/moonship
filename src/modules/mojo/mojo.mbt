@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for MojoModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for MojoModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for MojoModule with execute(
   self,
   ctx : @context.Context,

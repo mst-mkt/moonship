@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for SingularityModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for SingularityModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for SingularityModule with execute(
   self,
   _ctx : @context.Context,

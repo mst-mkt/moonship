@@ -35,6 +35,11 @@ pub impl @ms.PromptModule for DartModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for DartModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for DartModule with execute(
   self,
   ctx : @context.Context,

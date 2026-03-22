@@ -39,6 +39,11 @@ pub impl @ms.PromptModule for CModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for CModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for CModule with execute(self, ctx : @context.Context) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
   guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {

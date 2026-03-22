@@ -29,6 +29,11 @@ pub impl @ms.PromptModule for AwsModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for AwsModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for AwsModule with execute(
   self,
   _ctx : @context.Context,

@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for RubyModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for RubyModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for RubyModule with execute(
   self,
   ctx : @context.Context,

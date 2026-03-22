@@ -35,6 +35,11 @@ pub impl @ms.PromptModule for HostnameModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for HostnameModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for HostnameModule with execute(
   self,
   _ctx : @context.Context,

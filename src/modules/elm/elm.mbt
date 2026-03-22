@@ -35,6 +35,11 @@ pub impl @ms.PromptModule for ElmModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for ElmModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for ElmModule with execute(
   self,
   ctx : @context.Context,

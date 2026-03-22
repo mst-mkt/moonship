@@ -29,6 +29,11 @@ pub impl @ms.PromptModule for SudoModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for SudoModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for SudoModule with execute(
   self,
   _ctx : @context.Context,

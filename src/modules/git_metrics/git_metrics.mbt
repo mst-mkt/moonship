@@ -36,6 +36,11 @@ pub impl @ms.PromptModule for GitMetricsModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for GitMetricsModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for GitMetricsModule with execute(
   self,
   ctx : @context.Context,

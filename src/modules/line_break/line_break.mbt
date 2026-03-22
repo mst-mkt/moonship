@@ -23,6 +23,11 @@ pub impl @ms.PromptModule for LineBreakModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for LineBreakModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for LineBreakModule with execute(
   self,
   _ctx : @context.Context,

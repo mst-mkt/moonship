@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for BufModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for BufModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for BufModule with execute(
   self,
   ctx : @context.Context,

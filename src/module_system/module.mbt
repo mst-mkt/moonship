@@ -49,5 +49,6 @@ pub fn ModuleResult::output(self : ModuleResult) -> ModuleOutput? {
 ///|
 pub(open) trait PromptModule {
   name(Self) -> String
+  is_async(Self) -> Bool
   async execute(Self, @context.Context) -> ModuleResult
 }

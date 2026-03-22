@@ -31,6 +31,11 @@ pub impl @ms.PromptModule for GuixShellModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for GuixShellModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for GuixShellModule with execute(
   self,
   _ctx : @context.Context,

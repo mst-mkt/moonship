@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for PijulChannelModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for PijulChannelModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for PijulChannelModule with execute(
   self,
   ctx : @context.Context,

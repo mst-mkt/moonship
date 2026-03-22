@@ -33,6 +33,11 @@ pub impl @ms.PromptModule for RustModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for RustModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for RustModule with execute(
   self,
   ctx : @context.Context,

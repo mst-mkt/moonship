@@ -31,6 +31,11 @@ pub impl @ms.PromptModule for GitCommitModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for GitCommitModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for GitCommitModule with execute(
   self,
   ctx : @context.Context,

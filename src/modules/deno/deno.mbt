@@ -35,6 +35,11 @@ pub impl @ms.PromptModule for DenoModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for DenoModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for DenoModule with execute(
   self,
   ctx : @context.Context,

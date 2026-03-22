@@ -43,6 +43,11 @@ pub impl @ms.PromptModule for DockerContextModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for DockerContextModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for DockerContextModule with execute(
   self,
   ctx : @context.Context,

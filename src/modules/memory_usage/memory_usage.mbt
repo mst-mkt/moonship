@@ -35,6 +35,11 @@ pub impl @ms.PromptModule for MemoryUsageModule with name(_self) -> String {
 }
 
 ///|
+pub impl @ms.PromptModule for MemoryUsageModule with is_async(_self) -> Bool {
+  false
+}
+
+///|
 pub impl @ms.PromptModule for MemoryUsageModule with execute(
   self,
   _ctx : @context.Context,

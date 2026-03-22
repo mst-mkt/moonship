@@ -1,4 +1,9 @@
 ///|
+
+///|
+pub struct ModuleTable(Map[String, @toml.TomlValue])
+
+///|
 pub struct Config {
   format : String
   scan_timeout : Int
@@ -6,6 +11,7 @@ pub struct Config {
   cache_ttl : Int
   add_newline : Bool
   modules : Map[String, ModuleConfig]
+  raw_modules : Map[String, ModuleTable]
 }
 
 ///|
@@ -832,6 +838,7 @@ pub fn Config::default() -> Config {
     cache_ttl: 5000,
     add_newline: true,
     modules,
+    raw_modules: {},
   }
 }
 
@@ -888,13 +895,24 @@ pub fn Config::from_toml(toml_str : String) -> Config raise {
   )
 
   let modules = default.modules
+  let raw_modules : Map[String, ModuleTable] = {}
+
   table.each(fn(name, mod_value) {
     guard mod_value is TomlTable(mod_table) else { return }
+    raw_modules[name] = ModuleTable(mod_table)
     let base = modules.get(name).unwrap_or(ModuleConfig::empty())
     modules[name] = parse_module_config(mod_table, base)
   })
 
-  { format, scan_timeout, command_timeout, cache_ttl, add_newline, modules }
+  {
+    format,
+    scan_timeout,
+    command_timeout,
+    cache_ttl,
+    add_newline,
+    modules,
+    raw_modules,
+  }
 }
 
 ///|
@@ -1001,6 +1019,57 @@ fn quote(s : String) -> String {
   }
   buf.write_char('"')
   buf.to_string()
+}
+
+///|
+pub fn Config::get_raw_module(self : Config, name : String) -> ModuleTable? {
+  self.raw_modules.get(name)
+}
+
+///|
+pub fn get_toml_string(table : ModuleTable, key : String) -> String? {
+  match table.0.get(key) {
+    Some(TomlString(s)) => Some(s)
+    _ => None
+  }
+}
+
+///|
+pub fn get_toml_int(table : ModuleTable, key : String) -> Int? {
+  match table.0.get(key) {
+    Some(TomlInteger(n)) => Some(n.to_int())
+    _ => None
+  }
+}
+
+///|
+pub fn get_toml_bool(table : ModuleTable, key : String) -> Bool? {
+  match table.0.get(key) {
+    Some(TomlBoolean(b)) => Some(b)
+    _ => None
+  }
+}
+
+///|
+pub fn get_toml_string_array(
+  table : ModuleTable,
+  key : String,
+) -> Array[String]? {
+  match table.0.get(key) {
+    Some(TomlArray(arr)) => {
+      let result : Array[String] = []
+
+      for item in arr {
+        match item {
+          TomlString(s) => result.push(s)
+          _ => ()
+        }
+      }
+
+      Some(result)
+    }
+    _ => None
+  }
 }
 
 ///|
