@@ -16,9 +16,11 @@ test "module config from TOML" {
     #|success_symbol = "[→](bold blue)"
     #|
   let config = @config.Config::from_toml(toml)
-  let ch = config.get_module("character")
-  assert_eq(ch.get_prop("success_symbol"), "[→](bold blue)")
-  assert_eq(ch.get_prop("error_symbol"), "[❯](bold red)")
+  guard config.get_raw_module("character") is Some(table)
+  assert_eq(
+    @config.get_toml_string(table, "success_symbol"),
+    Some("[→](bold blue)"),
+  )
 }
 
 ///|
@@ -34,15 +36,14 @@ test "top-level override" {
 }
 
 ///|
-test "module disabled" {
+test "module disabled from TOML" {
   let toml =
     #|[git_branch]
     #|disabled = true
     #|
   let config = @config.Config::from_toml(toml)
-  let gb = config.get_module("git_branch")
-  assert_true(gb.disabled)
-  assert_eq(gb.format, "on [$symbol$branch(:$remote_branch)]($style) ")
+  guard config.get_raw_module("git_branch") is Some(table)
+  assert_eq(@config.get_toml_bool(table, "disabled"), Some(true))
 }
 
 ///|
@@ -54,10 +55,10 @@ test "unknown module added" {
     #|key = "value"
     #|
   let config = @config.Config::from_toml(toml)
-  let m = config.get_module("custom_module")
-  assert_eq(m.format, "$text")
-  assert_eq(m.style, "bold")
-  assert_eq(m.get_prop("key"), "value")
+  guard config.get_raw_module("custom_module") is Some(table)
+  assert_eq(@config.get_toml_string(table, "format"), Some("$text"))
+  assert_eq(@config.get_toml_string(table, "style"), Some("bold"))
+  assert_eq(@config.get_toml_string(table, "key"), Some("value"))
 }
 
 ///|
@@ -69,82 +70,61 @@ test "empty TOML is default" {
 }
 
 ///|
-test "numeric property" {
+test "numeric property from TOML" {
   let toml =
     #|[directory]
     #|truncation_length = 5
     #|
   let config = @config.Config::from_toml(toml)
-  let dir = config.get_module("directory")
-  assert_eq(dir.get_prop("truncation_length"), "5")
+  guard config.get_raw_module("directory") is Some(table)
+  assert_eq(@config.get_toml_int(table, "truncation_length"), Some(5))
 }
 
 ///|
-test "get_int_prop: valid" {
-  let config = @config.Config::default()
-  let dir = config.get_module("directory")
-  assert_eq(dir.get_int_prop("truncation_length"), 3)
+test "get_toml_int: missing key returns None" {
+  let toml =
+    #|[directory]
+    #|style = "bold"
+    #|
+  let config = @config.Config::from_toml(toml)
+  guard config.get_raw_module("directory") is Some(table)
+  assert_true(@config.get_toml_int(table, "nonexistent") is None)
 }
 
 ///|
-test "get_int_prop: missing key uses default" {
-  let config = @config.Config::default()
-  let dir = config.get_module("directory")
-  assert_eq(dir.get_int_prop("nonexistent", default=42), 42)
-}
-
-///|
-test "async_render: defaults to false" {
-  let config = @config.Config::default()
-  assert_false(config.get_module("git_status").async_render)
-  assert_false(config.get_module("directory").async_render)
-  assert_false(config.get_module("character").async_render)
-}
-
-///|
-test "async_render: parsed from TOML" {
+test "async: parsed from TOML" {
   let toml =
     #|[git_status]
     #|async = true
     #|
   let config = @config.Config::from_toml(toml)
-  assert_true(config.get_module("git_status").async_render)
+  guard config.get_raw_module("git_status") is Some(table)
+  assert_eq(@config.get_toml_bool(table, "async"), Some(true))
 }
 
 ///|
-test "async_render: false when explicitly set" {
+test "async: false when explicitly set" {
   let toml =
     #|[git_status]
     #|async = false
     #|
   let config = @config.Config::from_toml(toml)
-  assert_false(config.get_module("git_status").async_render)
+  guard config.get_raw_module("git_status") is Some(table)
+  assert_eq(@config.get_toml_bool(table, "async"), Some(false))
 }
 
 ///|
-test "async_render: unaffected modules remain false" {
+test "async: unset module has no raw entry" {
   let toml =
     #|[git_status]
     #|async = true
     #|
   let config = @config.Config::from_toml(toml)
-  assert_false(config.get_module("git_branch").async_render)
-  assert_false(config.get_module("directory").async_render)
+  assert_true(config.get_raw_module("git_branch") is None)
 }
 
 ///|
-test "async_render: not stored in props" {
-  let toml =
-    #|[git_status]
-    #|async = true
-    #|
-  let config = @config.Config::from_toml(toml)
-  let gs = config.get_module("git_status")
-  assert_eq(gs.get_prop("async"), "")
-}
-
-///|
-test "async_render: serialized to TOML when true" {
+test "async: serialized to TOML when true" {
   let toml =
     #|[git_status]
     #|async = true
@@ -155,14 +135,14 @@ test "async_render: serialized to TOML when true" {
 }
 
 ///|
-test "async_render: not serialized when false" {
+test "async: not serialized in default config" {
   let config = @config.Config::default()
   let output = config.to_toml()
   assert_false(output.contains("async"))
 }
 
 ///|
-test "async_render: roundtrip TOML" {
+test "async: roundtrip TOML" {
   let toml =
     #|[git_status]
     #|async = true
@@ -172,29 +152,53 @@ test "async_render: roundtrip TOML" {
   let config = @config.Config::from_toml(toml)
   let output = config.to_toml()
   let reparsed = @config.Config::from_toml(output)
-  assert_true(reparsed.get_module("git_status").async_render)
-  assert_false(reparsed.get_module("git_branch").async_render)
+  guard reparsed.get_raw_module("git_status") is Some(gs)
+  guard reparsed.get_raw_module("git_branch") is Some(gb)
+  assert_eq(@config.get_toml_bool(gs, "async"), Some(true))
+  assert_eq(@config.get_toml_bool(gb, "async"), Some(false))
 }
 
 ///|
-test "async_render: unknown module with async" {
+test "unknown module with async" {
   let toml =
     #|[my_custom]
     #|async = true
     #|format = "$text"
     #|
   let config = @config.Config::from_toml(toml)
-  assert_true(config.get_module("my_custom").async_render)
-  assert_eq(config.get_module("my_custom").format, "$text")
+  guard config.get_raw_module("my_custom") is Some(table)
+  assert_eq(@config.get_toml_bool(table, "async"), Some(true))
+  assert_eq(@config.get_toml_string(table, "format"), Some("$text"))
 }
 
 ///|
-test "get_int_prop: invalid value uses default" {
+test "get_toml_string_array: parses array" {
   let toml =
-    #|[directory]
-    #|truncation_length = "abc"
+    #|[python]
+    #|detect_files = ["requirements.txt", "setup.py"]
     #|
   let config = @config.Config::from_toml(toml)
-  let dir = config.get_module("directory")
-  assert_eq(dir.get_int_prop("truncation_length", default=3), 3)
+  guard config.get_raw_module("python") is Some(table)
+  guard @config.get_toml_string_array(table, "detect_files") is Some(files)
+  assert_eq(files.length(), 2)
+  assert_eq(files[0], "requirements.txt")
+  assert_eq(files[1], "setup.py")
+}
+
+///|
+test "get_toml_string_array: missing key returns None" {
+  let toml =
+    #|[python]
+    #|symbol = "🐍 "
+    #|
+  let config = @config.Config::from_toml(toml)
+  guard config.get_raw_module("python") is Some(table)
+  assert_true(@config.get_toml_string_array(table, "detect_files") is None)
+}
+
+///|
+test "default config has no raw_modules" {
+  let config = @config.Config::default()
+  assert_true(config.get_raw_module("character") is None)
+  assert_true(config.get_raw_module("directory") is None)
 }
