@@ -98,7 +98,7 @@ pub impl @ms.PromptModule for BatteryModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "percentage": percentage.to_string() + "%",
+    "percentage": "\{percentage}%",
     "symbol": symbol,
     "style": self.display_style,
   }

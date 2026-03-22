@@ -123,12 +123,12 @@ fn read_gcloud_config(home_dir : String) -> String {
   let base = if not(config_dir.is_empty()) {
     config_dir
   } else if not(home_dir.is_empty()) {
-    home_dir + "/.config/gcloud"
+    "\{home_dir}/.config/gcloud"
   } else {
     return ""
   }
 
-  let active_name = @fs.read_file_to_string(base + "/active_config") catch {
+  let active_name = @fs.read_file_to_string("\{base}/active_config") catch {
     _ => "default"
   }
 
@@ -143,7 +143,7 @@ fn read_gcloud_config(home_dir : String) -> String {
   }
 
   @fs.read_file_to_string(
-    base + "/configurations/config_" + config_name_trimmed,
+    "\{base}/configurations/config_\{config_name_trimmed}",
   ) catch {
     _ => ""
   }
@@ -151,7 +151,7 @@ fn read_gcloud_config(home_dir : String) -> String {
 
 ///|
 fn get_ini_value(content : String, section : String, key : String) -> String {
-  let section_header = "[" + section + "]"
+  let section_header = "[\{section}]"
 
   content
   .split("\n")

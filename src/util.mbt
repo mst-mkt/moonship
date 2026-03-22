@@ -100,7 +100,7 @@ fn self_exe() -> String {
   .split(":")
   .map(fn(dir) { dir.to_string() })
   .filter(fn(dir) { not(dir.is_empty()) })
-  .map(fn(dir) { dir + "/" + arg0 })
+  .map(fn(dir) { "\{dir}/\{arg0}" })
   .find_first(fn(candidate) { @fs.path_exists(candidate) })
   .unwrap_or(arg0)
 }

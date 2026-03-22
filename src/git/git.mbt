@@ -54,7 +54,7 @@ fn find_repo_root(cwd : String) -> String? {
     (dir, i) =>
       if i >= 50 {
         break None
-      } else if @fs.path_exists(dir + "/.git") {
+      } else if @fs.path_exists("\{dir}/.git") {
         break Some(dir)
       } else {
         match last_slash(dir) {

@@ -14,17 +14,18 @@ pub fn cache_dir() -> String {
   let xdg = @sys.get_env_var("XDG_RUNTIME_DIR").unwrap_or("")
 
   let base = if not(xdg.is_empty()) {
-    xdg + "/moonship"
+    "\{xdg}/moonship"
   } else {
     let tmpdir = @sys.get_env_var("TMPDIR").unwrap_or("")
     if not(tmpdir.is_empty()) {
-      tmpdir.trim_end(chars="/").to_string() + "/moonship"
+      let trimmed = tmpdir.trim_end(chars="/").to_string()
+      "\{trimmed}/moonship"
     } else {
       "/tmp/moonship"
     }
   }
 
-  base + "/cache"
+  "\{base}/cache"
 }
 
 ///|
@@ -66,12 +67,12 @@ pub fn clear_cache() -> Unit {
   let dir = cache_dir()
   let files = @fs.read_dir(dir) catch { _ => return }
 
-  files.each(fn(file) { @fs.remove_file(dir + "/" + file) catch { _ => () } })
+  files.each(fn(file) { @fs.remove_file("\{dir}/\{file}") catch { _ => () } })
 }
 
 ///|
 fn cache_file_path(dir : String, cwd : String) -> String {
-  dir + "/" + hash_path(cwd) + ".json"
+  "\{dir}/\{hash_path(cwd)}.json"
 }
 
 ///|

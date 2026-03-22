@@ -105,7 +105,7 @@ fn detect_version(cwd : String) -> String {
 
   for pair in candidates {
     let (filename, parser) = pair
-    let path = cwd + "/" + filename
+    let path = "\{cwd}/\{filename}"
     if @fs.path_exists(path) {
       let content = @fs.read_file_to_string(path) catch { _ => continue }
       let version = parser(content)

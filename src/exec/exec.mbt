@@ -46,7 +46,7 @@ pub fn add_v_prefix(s : String) -> String {
   if s.is_empty() || s.has_prefix("v") || s.has_prefix("V") {
     s
   } else {
-    "v" + s
+    "v\{s}"
   }
 }
 
@@ -143,11 +143,11 @@ pub fn detect_project(
   extensions : Array[String],
   folders? : Array[String] = [],
 ) -> Bool {
-  if files.iter().any(fn(file) { @fs.path_exists(cwd + "/" + file) }) {
+  if files.iter().any(fn(file) { @fs.path_exists("\{cwd}/\{file}") }) {
     return true
   }
 
-  if folders.iter().any(fn(folder) { @fs.path_exists(cwd + "/" + folder) }) {
+  if folders.iter().any(fn(folder) { @fs.path_exists("\{cwd}/\{folder}") }) {
     return true
   }
 

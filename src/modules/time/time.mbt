@@ -92,11 +92,11 @@ pub impl @ms.PromptModule for TimeModule with execute(
 ///|
 fn make_posix_tz(offset : String) -> String {
   if offset.has_prefix("+") {
-    "UTC-" + offset[1:].to_string()
+    "UTC-\{offset[1:].to_string()}"
   } else if offset.has_prefix("-") {
-    "UTC+" + offset[1:].to_string()
+    "UTC+\{offset[1:].to_string()}"
   } else {
-    "UTC-" + offset
+    "UTC-\{offset}"
   }
 }
 

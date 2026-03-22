@@ -82,7 +82,7 @@ fn expand_all(
   let expansion = module_order
     .iter()
     .filter(fn(name) { modules.contains(name) && not(explicit.contains(name)) })
-    .map(fn(name) { "$" + name })
+    .map(fn(name) { "$\{name}" })
     .collect()
     .join("")
 
@@ -91,7 +91,7 @@ fn expand_all(
 
 ///|
 fn replace_var(s : String, var_name : String, replacement : String) -> String {
-  let target = "$" + var_name
+  let target = "$\{var_name}"
   let buf = StringBuilder::new()
   let len = s.length()
   let target_len = target.length()

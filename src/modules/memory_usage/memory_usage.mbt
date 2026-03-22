@@ -75,8 +75,8 @@ pub impl @ms.PromptModule for MemoryUsageModule with execute(
     return Skipped("memory usage below threshold")
   }
 
-  let ram_str = format_bytes(used) + "/" + format_bytes(total)
-  let ram_pct = pct.to_string() + "%"
+  let ram_str = "\{format_bytes(used)}/\{format_bytes(total)}"
+  let ram_pct = "\{pct}%"
   let vars : Map[String, String] = {
     "ram": ram_str,
     "ram_pct": ram_pct,
@@ -143,10 +143,10 @@ fn format_bytes(bytes : Int64) -> String {
   if bytes >= gib {
     let whole = bytes / gib
     let frac = (bytes % gib * 10L / gib).to_int()
-    whole.to_string() + "." + frac.to_string() + "GiB"
+    "\{whole}.\{frac}GiB"
   } else {
     let whole = bytes / mib
-    whole.to_string() + "MiB"
+    "\{whole}MiB"
   }
 }
 

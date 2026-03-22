@@ -55,12 +55,12 @@ fn stringify_val(v : JVal, depth : Int, indent : Int) -> String {
       let parts = items
         .iter()
         .map(fn(item) {
-          pad(depth + 1, indent) + stringify_val(item, depth + 1, indent)
+          "\{pad(depth + 1, indent)}\{stringify_val(item, depth + 1, indent)}"
         })
         .collect()
         .join(",\n")
 
-      "[\n" + parts + "\n" + pad(depth, indent) + "]"
+      "[\n\{parts}\n\{pad(depth, indent)}]"
     }
     JObj(entries) => {
       if entries.is_empty() {
@@ -71,15 +71,12 @@ fn stringify_val(v : JVal, depth : Int, indent : Int) -> String {
         .iter()
         .map(fn(pair) {
           let (key, val) = pair
-          pad(depth + 1, indent) +
-          escape_string(key) +
-          ": " +
-          stringify_val(val, depth + 1, indent)
+          "\{pad(depth + 1, indent)}\{escape_string(key)}: \{stringify_val(val, depth + 1, indent)}"
         })
         .collect()
         .join(",\n")
 
-      "{\n" + parts + "\n" + pad(depth, indent) + "}"
+      "{\n\{parts}\n\{pad(depth, indent)}}"
     }
   }
 }

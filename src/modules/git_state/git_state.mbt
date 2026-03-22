@@ -72,7 +72,7 @@ pub impl @ms.PromptModule for GitStateModule with execute(
     return Skipped("not in git repository")
   }
 
-  let git_dir = repo.repo_root() + "/.git"
+  let git_dir = "\{repo.repo_root()}/.git"
   let state = detect_state(git_dir, self)
   guard not(state.is_empty()) else { return Skipped("clean state") }
 
@@ -88,20 +88,20 @@ pub impl @ms.PromptModule for GitStateModule with execute(
 
 ///|
 fn detect_state(git_dir : String, config : GitStateModule) -> String {
-  if @fs.path_exists(git_dir + "/rebase-merge") ||
-    @fs.path_exists(git_dir + "/rebase-apply") {
+  if @fs.path_exists("\{git_dir}/rebase-merge") ||
+    @fs.path_exists("\{git_dir}/rebase-apply") {
     return config.rebase
   }
-  if @fs.path_exists(git_dir + "/MERGE_HEAD") {
+  if @fs.path_exists("\{git_dir}/MERGE_HEAD") {
     return config.merge
   }
-  if @fs.path_exists(git_dir + "/CHERRY_PICK_HEAD") {
+  if @fs.path_exists("\{git_dir}/CHERRY_PICK_HEAD") {
     return config.cherry_pick
   }
-  if @fs.path_exists(git_dir + "/REVERT_HEAD") {
+  if @fs.path_exists("\{git_dir}/REVERT_HEAD") {
     return config.revert
   }
-  if @fs.path_exists(git_dir + "/BISECT_LOG") {
+  if @fs.path_exists("\{git_dir}/BISECT_LOG") {
     return config.bisect
   }
 

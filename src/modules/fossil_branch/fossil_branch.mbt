@@ -79,7 +79,7 @@ pub impl @ms.PromptModule for FossilBranchModule with execute(
 
 ///|
 fn is_fossil_repo(cwd : String) -> Bool {
-  @fs.path_exists(cwd + "/.fslckout") || @fs.path_exists(cwd + "/_FOSSIL_")
+  @fs.path_exists("\{cwd}/.fslckout") || @fs.path_exists("\{cwd}/_FOSSIL_")
 }
 
 ///|

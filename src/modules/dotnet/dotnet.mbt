@@ -102,12 +102,12 @@ fn find_tfm(cwd : String, extensions : Array[String]) -> String {
   .iter()
   .filter(fn(entry) { extensions.iter().any(fn(ext) { entry.has_suffix(ext) }) })
   .find_first(fn(entry) {
-    let path = cwd + "/" + entry
+    let path = "\{cwd}/\{entry}"
     let content = @fs.read_file_to_string(path) catch { _ => return false }
     not(extract_tfm(content).is_empty())
   })
   .map(fn(entry) {
-    let path = cwd + "/" + entry
+    let path = "\{cwd}/\{entry}"
     let content = @fs.read_file_to_string(path) catch { _ => return "" }
     extract_tfm(content)
   })

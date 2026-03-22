@@ -163,7 +163,7 @@ pub fn Config::to_toml(self : Config) -> String {
     .collect()
     .join("")
 
-  header + "\n" + sections
+  "\{header}\n\{sections}"
 }
 
 ///|

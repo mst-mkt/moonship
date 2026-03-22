@@ -5,7 +5,7 @@ fn parse_json_version(content : String) -> String {
 
 ///|
 fn extract_json_string_field(content : String, field : String) -> String {
-  let key = "\"" + field + "\""
+  let key = "\"\{field}\""
   guard content.find(key) is Some(idx) else { return "" }
 
   let after_key = idx + key.length()
@@ -144,7 +144,7 @@ fn find_file_with_extension(dir : String, ext : String) -> String {
   entries
   .iter()
   .find_first(fn(entry) { entry.has_suffix(ext) })
-  .map(fn(entry) { dir + "/" + entry })
+  .map(fn(entry) { "\{dir}/\{entry}" })
   .unwrap_or("")
 }
 

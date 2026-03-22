@@ -75,11 +75,11 @@ pub impl @ms.PromptModule for HgStateModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @fs.path_exists(ctx.cwd + "/.hg") else {
+  guard @fs.path_exists("\{ctx.cwd}/.hg") else {
     return Skipped("not in hg repo")
   }
 
-  let hg_dir = ctx.cwd + "/.hg"
+  let hg_dir = "\{ctx.cwd}/.hg"
   let state = self.detect_hg_state(hg_dir)
   guard not(state.is_empty()) else { return Skipped("no hg state") }
 
@@ -98,27 +98,27 @@ fn HgStateModule::detect_hg_state(
   self : HgStateModule,
   hg_dir : String,
 ) -> String {
-  if @fs.path_exists(hg_dir + "/rebasestate") {
+  if @fs.path_exists("\{hg_dir}/rebasestate") {
     return self.rebase
   }
 
-  if @fs.path_exists(hg_dir + "/updatestate") {
+  if @fs.path_exists("\{hg_dir}/updatestate") {
     return self.update
   }
 
-  if @fs.path_exists(hg_dir + "/bisect.state") {
+  if @fs.path_exists("\{hg_dir}/bisect.state") {
     return self.bisect
   }
 
-  if @fs.path_exists(hg_dir + "/graftstate") {
+  if @fs.path_exists("\{hg_dir}/graftstate") {
     return self.graft
   }
 
-  if @fs.path_exists(hg_dir + "/transplant/journal") {
+  if @fs.path_exists("\{hg_dir}/transplant/journal") {
     return self.transplant
   }
 
-  if @fs.path_exists(hg_dir + "/histedit-state") {
+  if @fs.path_exists("\{hg_dir}/histedit-state") {
     return self.histedit
   }
 
@@ -131,7 +131,7 @@ fn HgStateModule::detect_hg_state(
 
 ///|
 fn is_merge_state(hg_dir : String) -> Bool {
-  let dirstate_path = hg_dir + "/dirstate"
+  let dirstate_path = "\{hg_dir}/dirstate"
 
   let bytes = @fs.read_file_to_bytes(dirstate_path) catch { _ => return false }
 
