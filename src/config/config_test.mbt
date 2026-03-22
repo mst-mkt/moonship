@@ -94,6 +94,101 @@ test "get_int_prop: missing key uses default" {
 }
 
 ///|
+test "async_render: defaults to false" {
+  let config = @config.Config::default()
+  assert_false(config.get_module("git_status").async_render)
+  assert_false(config.get_module("directory").async_render)
+  assert_false(config.get_module("character").async_render)
+}
+
+///|
+test "async_render: parsed from TOML" {
+  let toml =
+    #|[git_status]
+    #|async = true
+    #|
+  let config = @config.Config::from_toml(toml)
+  assert_true(config.get_module("git_status").async_render)
+}
+
+///|
+test "async_render: false when explicitly set" {
+  let toml =
+    #|[git_status]
+    #|async = false
+    #|
+  let config = @config.Config::from_toml(toml)
+  assert_false(config.get_module("git_status").async_render)
+}
+
+///|
+test "async_render: unaffected modules remain false" {
+  let toml =
+    #|[git_status]
+    #|async = true
+    #|
+  let config = @config.Config::from_toml(toml)
+  assert_false(config.get_module("git_branch").async_render)
+  assert_false(config.get_module("directory").async_render)
+}
+
+///|
+test "async_render: not stored in props" {
+  let toml =
+    #|[git_status]
+    #|async = true
+    #|
+  let config = @config.Config::from_toml(toml)
+  let gs = config.get_module("git_status")
+  assert_eq(gs.get_prop("async"), "")
+}
+
+///|
+test "async_render: serialized to TOML when true" {
+  let toml =
+    #|[git_status]
+    #|async = true
+    #|
+  let config = @config.Config::from_toml(toml)
+  let output = config.to_toml()
+  assert_true(output.contains("async = true"))
+}
+
+///|
+test "async_render: not serialized when false" {
+  let config = @config.Config::default()
+  let output = config.to_toml()
+  assert_false(output.contains("async"))
+}
+
+///|
+test "async_render: roundtrip TOML" {
+  let toml =
+    #|[git_status]
+    #|async = true
+    #|[git_branch]
+    #|async = false
+    #|
+  let config = @config.Config::from_toml(toml)
+  let output = config.to_toml()
+  let reparsed = @config.Config::from_toml(output)
+  assert_true(reparsed.get_module("git_status").async_render)
+  assert_false(reparsed.get_module("git_branch").async_render)
+}
+
+///|
+test "async_render: unknown module with async" {
+  let toml =
+    #|[my_custom]
+    #|async = true
+    #|format = "$text"
+    #|
+  let config = @config.Config::from_toml(toml)
+  assert_true(config.get_module("my_custom").async_render)
+  assert_eq(config.get_module("my_custom").format, "$text")
+}
+
+///|
 test "get_int_prop: invalid value uses default" {
   let toml =
     #|[directory]

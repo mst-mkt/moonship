@@ -17,6 +17,21 @@ let module_order : Array[String] = [
 
 ///|
 async fn render_prompt(ctx : @context.Context) -> String {
+  render_prompt_filtered(ctx, fn(_name) { true })
+}
+
+///|
+async fn render_prompt_sync(ctx : @context.Context) -> String {
+  render_prompt_filtered(ctx, fn(name) {
+    not(ctx.config.get_module(name).async_render)
+  })
+}
+
+///|
+async fn render_prompt_filtered(
+  ctx : @context.Context,
+  should_run : (String) -> Bool,
+) -> String {
   let modules = build_modules(ctx.config)
   let format = expand_all(ctx.config.format, modules)
   let names = @ms.extract_module_names(format)
@@ -30,6 +45,7 @@ async fn render_prompt(ctx : @context.Context) -> String {
 
     for name in names {
       guard modules.get(name) is Some(m) else { continue }
+      guard should_run(name) else { continue }
       let task = group.spawn(async fn() { m.execute(ctx) }, allow_failure=true)
       tasks.push((name, task))
     }

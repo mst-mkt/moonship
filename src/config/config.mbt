@@ -11,19 +11,21 @@ pub struct Config {
 ///|
 pub struct ModuleConfig {
   disabled : Bool
+  async_render : Bool
   format : String
   style : String
   props : Map[String, String]
 }
 
 ///|
-let reserved_keys : Array[String] = ["disabled", "format", "style"]
+let reserved_keys : Array[String] = ["disabled", "async", "format", "style"]
 
 ///|
 pub fn Config::default() -> Config {
   let modules : Map[String, ModuleConfig] = {}
   modules["character"] = {
     disabled: false,
+    async_render: false,
     format: "$symbol ",
     style: "",
     props: {
@@ -37,18 +39,21 @@ pub fn Config::default() -> Config {
   }
   modules["directory"] = {
     disabled: false,
+    async_render: false,
     format: "[$path]($style)[$read_only]($read_only_style) ",
     style: "cyan bold",
     props: { "truncation_length": "3", "truncate_to_repo": "true" },
   }
   modules["git_branch"] = {
     disabled: false,
+    async_render: false,
     format: "on [$symbol$branch(:$remote_branch)]($style) ",
     style: "bold purple",
     props: { "truncation_length": "9999", "symbol": " " },
   }
   modules["git_status"] = {
     disabled: false,
+    async_render: false,
     format: "([\\[$all_status$ahead_behind\\]]($style) )",
     style: "red bold",
     props: {
@@ -60,25 +65,35 @@ pub fn Config::default() -> Config {
   }
   modules["cmd_duration"] = {
     disabled: false,
+    async_render: false,
     format: "took [$duration]($style) ",
     style: "yellow bold",
     props: { "min_time": "2000" },
   }
   modules["jobs"] = {
     disabled: false,
+    async_render: false,
     format: "[$symbol$number]($style) ",
     style: "bold blue",
     props: { "symbol": "✦", "number_threshold": "2" },
   }
-  modules["line_break"] = { disabled: false, format: "", style: "", props: {} }
+  modules["line_break"] = {
+    disabled: false,
+    async_render: false,
+    format: "",
+    style: "",
+    props: {},
+  }
   modules["git_commit"] = {
     disabled: false,
+    async_render: false,
     format: "[\\($hash$tag\\)]($style) ",
     style: "green bold",
     props: { "only_detached": "true" },
   }
   modules["git_state"] = {
     disabled: false,
+    async_render: false,
     format: "\\([$state( $progress_current/$progress_total)]($style)\\) ",
     style: "bold yellow",
     props: {
@@ -91,6 +106,7 @@ pub fn Config::default() -> Config {
   }
   modules["git_metrics"] = {
     disabled: true,
+    async_render: false,
     format: "([+$added]($added_style) )([-$deleted]($deleted_style) )",
     style: "",
     props: {
@@ -101,24 +117,28 @@ pub fn Config::default() -> Config {
   }
   modules["package"] = {
     disabled: false,
+    async_render: false,
     format: "is [$symbol$version]($style) ",
     style: "208 bold",
     props: { "symbol": "📦 " },
   }
   modules["bun"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold red",
     props: { "symbol": "🥟 " },
   }
   modules["nodejs"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold green",
     props: { "symbol": " " },
   }
   modules["python"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol$pyenv_prefix($version )(\\($virtualenv\\) )]($style)",
     style: "yellow bold",
     props: {
@@ -129,180 +149,210 @@ pub fn Config::default() -> Config {
   }
   modules["rust"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold red",
     props: { "symbol": "🦀 " },
   }
   modules["golang"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold cyan",
     props: { "symbol": "🐹 " },
   }
   modules["java"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "red dimmed",
     props: { "symbol": "☕ " },
   }
   modules["ruby"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold red",
     props: { "symbol": "💎 " },
   }
   modules["deno"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "green bold",
     props: { "symbol": "🦕 " },
   }
   modules["dart"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold blue",
     props: { "symbol": "🎯 " },
   }
   modules["elixir"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version \\(OTP $otp_version\\) )]($style)",
     style: "bold purple",
     props: { "symbol": "💧 " },
   }
   modules["lua"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold blue",
     props: { "symbol": "🌙 ", "lua_binary": "lua" },
   }
   modules["php"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "147 bold",
     props: { "symbol": "🐘 " },
   }
   modules["perl"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "149 bold",
     props: { "symbol": "🐪 " },
   }
   modules["kotlin"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold blue",
     props: { "symbol": "🅺 ", "kotlin_binary": "kotlin" },
   }
   modules["swift"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold 202",
     props: { "symbol": "🐦 " },
   }
   modules["scala"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "red bold",
     props: { "symbol": "🆂 " },
   }
   modules["zig"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold yellow",
     props: { "symbol": "↯ " },
   }
   modules["dotnet"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )(🎯 $tfm )]($style)",
     style: "blue bold",
     props: { "symbol": ".NET " },
   }
   modules["moonbit"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold 125",
     props: { "symbol": "🐰 " },
   }
   modules["julia"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold purple",
     props: { "symbol": "ஃ " },
   }
   modules["nim"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "yellow bold",
     props: { "symbol": "👑 " },
   }
   modules["gleam"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold #FFAFF3",
     props: { "symbol": "⭐ " },
   }
   modules["erlang"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold red",
     props: { "symbol": " " },
   }
   modules["elm"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "cyan bold",
     props: { "symbol": "🌳 " },
   }
   modules["haskell"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold purple",
     props: { "symbol": "λ " },
   }
   modules["crystal"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold red",
     props: { "symbol": "🔮 " },
   }
   modules["c"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version(-$name) )]($style)",
     style: "149 bold",
     props: { "symbol": "C " },
   }
   modules["cpp"] = {
     disabled: true,
+    async_render: false,
     format: "via [$symbol($version(-$name) )]($style)",
     style: "149 bold",
     props: { "symbol": "C++ " },
   }
   modules["cmake"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold blue",
     props: { "symbol": "△ " },
   }
   modules["terraform"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol$workspace]($style) ",
     style: "bold 105",
     props: { "symbol": "💠 " },
   }
   modules["gradle"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold bright-cyan",
     props: { "symbol": "🅶 " },
   }
   modules["maven"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold bright-cyan",
     props: { "symbol": "🅼 " },
   }
   modules["ocaml"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )(\\($switch_indicator$switch_name\\) )]($style)",
     style: "bold yellow",
     props: {
@@ -313,126 +363,147 @@ pub fn Config::default() -> Config {
   }
   modules["haxe"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold fg:202",
     props: { "symbol": "⌘ " },
   }
   modules["fortran"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version(-$name) )]($style)",
     style: "bold purple",
     props: { "symbol": "🅵  " },
   }
   modules["purescript"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold white",
     props: { "symbol": "<=> " },
   }
   modules["buf"] = {
     disabled: false,
+    async_render: false,
     format: "with [$symbol($version )]($style)",
     style: "bold blue",
     props: { "symbol": "🐃 " },
   }
   modules["cobol"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold blue",
     props: { "symbol": "⚙️ " },
   }
   modules["fennel"] = {
     disabled: true,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold green",
     props: { "symbol": "🧅 " },
   }
   modules["helm"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold white",
     props: { "symbol": "⎈ " },
   }
   modules["mojo"] = {
     disabled: false,
+    async_render: false,
     format: "with [$symbol($version )]($style)",
     style: "bold 208",
     props: { "symbol": "🔥 " },
   }
   modules["odin"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold bright-blue",
     props: { "symbol": "Ø " },
   }
   modules["opa"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold blue",
     props: { "symbol": "🪖 " },
   }
   modules["quarto"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold #75AADB",
     props: { "symbol": "⨁ " },
   }
   modules["red"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "red bold",
     props: { "symbol": "🔺 " },
   }
   modules["daml"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold cyan",
     props: { "symbol": "Λ " },
   }
   modules["raku"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version-$vm_version )]($style)",
     style: "149 bold",
     props: { "symbol": "🦋 " },
   }
   modules["rlang"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "blue bold",
     props: { "symbol": "📐 " },
   }
   modules["solidity"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version)]($style)",
     style: "bold blue",
     props: { "symbol": "S " },
   }
   modules["typst"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold #0093A7",
     props: { "symbol": "t " },
   }
   modules["vlang"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "blue bold",
     props: { "symbol": "V " },
   }
   modules["vagrant"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "cyan bold",
     props: { "symbol": "⍱ " },
   }
   modules["xmake"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold green",
     props: { "symbol": "△ " },
   }
   modules["shlvl"] = {
     disabled: true,
+    async_render: false,
     format: "[$symbol$shlvl]($style) ",
     style: "bold yellow",
     props: {
@@ -444,12 +515,14 @@ pub fn Config::default() -> Config {
   }
   modules["os"] = {
     disabled: true,
+    async_render: false,
     format: "[$symbol]($style)",
     style: "bold white",
     props: {},
   }
   modules["shell"] = {
     disabled: true,
+    async_render: false,
     format: "[$indicator]($style) ",
     style: "white bold",
     props: {
@@ -461,18 +534,21 @@ pub fn Config::default() -> Config {
   }
   modules["container"] = {
     disabled: false,
+    async_render: false,
     format: "[$symbol \\[$name\\]]($style) ",
     style: "red bold dimmed",
     props: { "symbol": "⬢" },
   }
   modules["sudo"] = {
     disabled: true,
+    async_render: false,
     format: "[as $symbol]($style)",
     style: "bold blue",
     props: { "symbol": "🧙 " },
   }
   modules["status"] = {
     disabled: true,
+    async_render: false,
     format: "[$symbol$status]($style) ",
     style: "bold red",
     props: {
@@ -485,6 +561,7 @@ pub fn Config::default() -> Config {
   }
   modules["nix_shell"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol$state( \\($name\\))]($style) ",
     style: "bold blue",
     props: {
@@ -497,42 +574,49 @@ pub fn Config::default() -> Config {
   }
   modules["conda"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol$environment]($style) ",
     style: "green bold",
     props: { "symbol": "🅒 ", "ignore_base": "true" },
   }
   modules["pixi"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($version )(\\($environment\\) )]($style)",
     style: "yellow bold",
     props: { "symbol": "🧚 ", "show_default_environment": "true" },
   }
   modules["meson"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol$project]($style) ",
     style: "blue bold",
     props: { "symbol": "⬢ " },
   }
   modules["guix_shell"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol]($style) ",
     style: "yellow bold",
     props: { "symbol": "🐃 " },
   }
   modules["spack"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol$environment]($style) ",
     style: "blue bold",
     props: { "symbol": "🅢 " },
   }
   modules["memory_usage"] = {
     disabled: true,
+    async_render: false,
     format: "via $symbol[$ram( | $swap)]($style) ",
     style: "white bold dimmed",
     props: { "symbol": "🐏 ", "threshold": "75" },
   }
   modules["direnv"] = {
     disabled: true,
+    async_render: false,
     format: "[$symbol$loaded/$allowed]($style) ",
     style: "bold bright-yellow",
     props: {
@@ -546,6 +630,7 @@ pub fn Config::default() -> Config {
   }
   modules["mise"] = {
     disabled: true,
+    async_render: false,
     format: "on [$symbol$health]($style) ",
     style: "bold purple",
     props: {
@@ -556,60 +641,70 @@ pub fn Config::default() -> Config {
   }
   modules["aws"] = {
     disabled: false,
+    async_render: false,
     format: "on [$symbol($profile )(\\($region\\) )]($style)",
     style: "bold yellow",
     props: { "symbol": "☁️  " },
   }
   modules["gcloud"] = {
     disabled: false,
+    async_render: false,
     format: "on [$symbol$account(@$domain)(\\($region\\))]($style) ",
     style: "bold blue",
     props: { "symbol": "☁️  " },
   }
   modules["azure"] = {
     disabled: true,
+    async_render: false,
     format: "on [$symbol($subscription)]($style) ",
     style: "blue bold",
     props: { "symbol": "󰠅 " },
   }
   modules["openstack"] = {
     disabled: false,
+    async_render: false,
     format: "on [$symbol$cloud(\\($project\\))]($style) ",
     style: "bold yellow",
     props: { "symbol": "☁️  " },
   }
   modules["singularity"] = {
     disabled: false,
+    async_render: false,
     format: "[$symbol\\[$env\\]]($style) ",
     style: "blue bold dimmed",
     props: { "symbol": "" },
   }
   modules["kubernetes"] = {
     disabled: true,
+    async_render: false,
     format: "[$symbol$context( \\($namespace\\))]($style) in ",
     style: "cyan bold",
     props: { "symbol": "☸ " },
   }
   modules["nats"] = {
     disabled: true,
+    async_render: false,
     format: "[$symbol($name )]($style)",
     style: "bold purple",
     props: { "symbol": "✉️ " },
   }
   modules["pulumi"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol($username@)$stack]($style) ",
     style: "bold 5",
     props: { "symbol": " " },
   }
   modules["docker_context"] = {
     disabled: false,
+    async_render: false,
     format: "via [$symbol$context]($style) ",
     style: "blue bold",
     props: { "symbol": "🐳 ", "only_with_files": "true" },
   }
   modules["time"] = {
     disabled: true,
+    async_render: false,
     format: "at [$time]($style) ",
     style: "bold yellow",
     props: {
@@ -620,12 +715,14 @@ pub fn Config::default() -> Config {
   }
   modules["fossil_branch"] = {
     disabled: true,
+    async_render: false,
     format: "on [$symbol$branch]($style) ",
     style: "bold purple",
     props: { "symbol": " " },
   }
   modules["fossil_metrics"] = {
     disabled: true,
+    async_render: false,
     format: "([+$added]($added_style) )([-$deleted]($deleted_style) )",
     style: "",
     props: {
@@ -636,24 +733,28 @@ pub fn Config::default() -> Config {
   }
   modules["vcsh"] = {
     disabled: false,
+    async_render: false,
     format: "vcsh [$symbol$repo]($style) ",
     style: "bold yellow",
     props: { "symbol": "" },
   }
   modules["pijul_channel"] = {
     disabled: true,
+    async_render: false,
     format: "on [$symbol$channel]($style) ",
     style: "bold purple",
     props: { "symbol": " " },
   }
   modules["hg_branch"] = {
     disabled: true,
+    async_render: false,
     format: "on [$symbol$branch(:$topic)]($style) ",
     style: "bold purple",
     props: { "symbol": " " },
   }
   modules["hg_state"] = {
     disabled: true,
+    async_render: false,
     format: "\\([$state]($style)\\) ",
     style: "bold yellow",
     props: {
@@ -669,30 +770,35 @@ pub fn Config::default() -> Config {
   }
   modules["env_var"] = {
     disabled: false,
+    async_render: false,
     format: "with [$symbol$env_value]($style) ",
     style: "black bold dimmed",
     props: { "symbol": "", "variable": "", "default": "" },
   }
   modules["hostname"] = {
     disabled: false,
+    async_render: false,
     format: "[$ssh_symbol$hostname]($style) in ",
     style: "green dimmed bold",
     props: { "ssh_only": "true", "trim_at": "." },
   }
   modules["localip"] = {
     disabled: true,
+    async_render: false,
     format: "[$localipv4]($style) ",
     style: "yellow bold",
     props: { "ssh_only": "true" },
   }
   modules["netns"] = {
     disabled: false,
+    async_render: false,
     format: "[$symbol \\[$name\\]]($style) ",
     style: "blue bold dimmed",
     props: { "symbol": "🛜" },
   }
   modules["battery"] = {
     disabled: false,
+    async_render: false,
     format: "[$symbol$percentage]($style) ",
     style: "bold green",
     props: {
@@ -707,12 +813,14 @@ pub fn Config::default() -> Config {
   }
   modules["custom"] = {
     disabled: false,
+    async_render: false,
     format: "[$symbol($output )]($style)",
     style: "green bold",
     props: { "symbol": "", "command": "" },
   }
   modules["username"] = {
     disabled: false,
+    async_render: false,
     format: "[$user]($style) in ",
     style: "",
     props: { "style_root": "red bold", "style_user": "yellow bold" },
@@ -734,7 +842,7 @@ pub fn Config::get_module(self : Config, name : String) -> ModuleConfig {
 
 ///|
 fn ModuleConfig::empty() -> ModuleConfig {
-  { disabled: false, format: "", style: "", props: {} }
+  { disabled: false, async_render: false, format: "", style: "", props: {} }
 }
 
 ///|
@@ -795,6 +903,7 @@ fn parse_module_config(
   base : ModuleConfig,
 ) -> ModuleConfig {
   let disabled = get_bool(table, "disabled").unwrap_or(base.disabled)
+  let async_render = get_bool(table, "async").unwrap_or(base.async_render)
   let format = get_string(table, "format").unwrap_or(base.format)
   let style = get_string(table, "style").unwrap_or(base.style)
 
@@ -809,7 +918,7 @@ fn parse_module_config(
     }
   })
 
-  { disabled, format, style, props }
+  { disabled, async_render, format, style, props }
 }
 
 ///|
@@ -854,6 +963,9 @@ fn module_to_toml(name : String, mc : ModuleConfig) -> String {
 
   if mc.disabled {
     lines.push("disabled = true")
+  }
+  if mc.async_render {
+    lines.push("async = true")
   }
   if not(mc.format.is_empty()) {
     lines.push("format = \{quote(mc.format)}")
