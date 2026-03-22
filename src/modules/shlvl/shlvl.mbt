@@ -71,11 +71,7 @@ pub impl @ms.PromptModule for ShlvlModule with execute(
     let count = ctx.shlvl - self.repeat_offset
     guard count > 0 else { return Skipped("shlvl repeat count zero") }
 
-    let buf = StringBuilder::new()
-    for i = 0; i < count; i = i + 1 {
-      buf.write_string(self.symbol)
-    }
-    buf.to_string()
+    Array::make(count, self.symbol).join("")
   } else {
     self.symbol
   }

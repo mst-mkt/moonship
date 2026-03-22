@@ -124,15 +124,18 @@ fn parse_opam_switch(
   local_indicator : String,
 ) -> (String, String) {
   if switch.has_prefix("/") {
-    let mut last = -1
+    let init : (Int?, Int) = (None, 0)
 
-    for i = 0; i < switch.length(); i = i + 1 {
-      if switch[i] == '/' {
-        last = i
-      }
+    let name = match
+      switch
+      .iter()
+      .fold(init~, fn(acc, ch) {
+        let (result, i) = acc
+        (if ch == '/' { Some(i) } else { result }, i + 1)
+      }).0 {
+      Some(last) => switch[last + 1:].to_string()
+      None => switch
     }
-
-    let name = if last >= 0 { switch[last + 1:].to_string() } else { switch }
     (local_indicator, name)
   } else {
     (global_indicator, switch)

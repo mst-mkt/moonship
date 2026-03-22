@@ -117,49 +117,48 @@ fn read_battery() -> (Int, String) {
     "/sys/class/power_supply/BAT0", "/sys/class/power_supply/BAT1",
   ]
 
-  for path in bat_paths {
-    let cap_str = @fs.read_file_to_string(path + "/capacity") catch {
-      _ => continue
-    }
+  loop 0 {
+    i if i >= bat_paths.length() => break (-1, "")
+    i => {
+      let path = bat_paths[i]
+      let cap_str = @fs.read_file_to_string(path + "/capacity") catch {
+        _ => continue i + 1
+      }
 
-    let status_str = @fs.read_file_to_string(path + "/status") catch {
-      _ => continue
-    }
+      let status_str = @fs.read_file_to_string(path + "/status") catch {
+        _ => continue i + 1
+      }
 
-    let cap_lines = cap_str.split("\n").collect()
-    let cap = if cap_lines.length() > 0 {
-      parse_battery_int(cap_lines[0].to_string())
-    } else {
-      -1
-    }
+      let cap_lines = cap_str.split("\n").map(fn(s) { s.to_string() }).collect()
+      let cap = if cap_lines.length() > 0 {
+        parse_battery_int(cap_lines[0])
+      } else {
+        -1
+      }
 
-    let status_lines = status_str.split("\n").collect()
-    let status = if status_lines.length() > 0 {
-      status_lines[0].to_string()
-    } else {
-      ""
-    }
+      let status_lines = status_str
+        .split("\n")
+        .map(fn(s) { s.to_string() })
+        .collect()
+      let status = if status_lines.length() > 0 { status_lines[0] } else { "" }
 
-    return (cap, status)
+      break (cap, status)
+    }
   }
-
-  (-1, "")
 }
 
 ///|
 fn parse_battery_int(s : String) -> Int {
-  let mut result = 0
-
-  for i = 0; i < s.length(); i = i + 1 {
-    let c = s[i].unsafe_to_char()
-    if c >= '0' && c <= '9' {
-      result = result * 10 + (c.to_int() - '0'.to_int())
+  s
+  .iter()
+  .fold(init=(0, true), fn(acc, c) {
+    let (result, active) = acc
+    if active && c >= '0' && c <= '9' {
+      (result * 10 + (c.to_int() - '0'.to_int()), true)
     } else {
-      break
+      (result, false)
     }
-  }
-
-  result
+  }).0
 }
 
 ///|

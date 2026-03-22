@@ -81,10 +81,10 @@ pub impl @ms.PromptModule for RlangModule with execute(
   let output = @exec.exec_cmd("R", ["--version"])
   guard not(output.is_empty()) else { return Skipped("R not found") }
 
-  let parts = output.split(" ").collect()
+  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
   guard parts.length() >= 3 else { return Skipped("could not parse R version") }
 
-  let version = parts[2].to_string()
+  let version = parts[2]
   guard not(version.is_empty()) else {
     return Skipped("could not parse R version")
   }

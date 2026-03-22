@@ -50,16 +50,19 @@ pub fn ModuleTable::get_string_array(
 ) -> Array[String]? {
   match self.0.get(key) {
     Some(CArray(arr)) => {
-      let result : Array[String] = []
+      guard arr.iter().all(fn(item) { item is CString(_) }) else { return None }
 
-      for item in arr {
-        match item {
-          CString(s) => result.push(s)
-          _ => return None
-        }
-      }
-
-      Some(result)
+      Some(
+        arr
+        .iter()
+        .filter_map(fn(item) {
+          match item {
+            CString(s) => Some(s)
+            _ => None
+          }
+        })
+        .collect(),
+      )
     }
     _ => None
   }
@@ -125,12 +128,16 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
   let cache_ttl = t.get_int("cache_ttl").unwrap_or(d.cache_ttl)
   let add_newline = t.get_bool("add_newline").unwrap_or(d.add_newline)
 
-  let raw_modules : Map[String, ModuleTable] = {}
-
-  table.each(fn(name, value) {
-    guard value is CTable(mod_table) else { return }
-    raw_modules[name] = ModuleTable(mod_table)
-  })
+  let raw_modules = table
+    .iter()
+    .fold(init=(Map::new() : Map[String, ModuleTable]), fn(acc, pair) {
+      let (name, value) = pair
+      match value {
+        CTable(mod_table) => acc.set(name, ModuleTable(mod_table))
+        _ => ()
+      }
+      acc
+    })
 
   { format, scan_timeout, command_timeout, cache_ttl, add_newline, raw_modules }
 }
@@ -161,29 +168,31 @@ pub fn Config::to_toml(self : Config) -> String {
 
 ///|
 fn module_to_toml(name : String, table : ModuleTable) -> String {
-  let lines : Array[String] = ["\n[\{name}]"]
-
   let keys = table.0.keys().collect()
   keys.sort()
 
-  for key in keys {
-    match table.0.get(key) {
-      Some(CString(s)) => lines.push("\{key} = \{escape_string(s)}")
-      Some(CInt(n)) => lines.push("\{key} = \{n}")
-      Some(CBool(b)) => lines.push("\{key} = \{b}")
-      Some(CFloat(f)) => lines.push("\{key} = \{f}")
-      Some(CArray(arr)) => {
-        let items = arr
-          .iter()
-          .map(fn(v) { config_value_to_literal(v) })
-          .collect()
-          .join(", ")
-        lines.push("\{key} = [\{items}]")
+  let key_lines = keys
+    .iter()
+    .filter_map(fn(key) {
+      match table.0.get(key) {
+        Some(CString(s)) => Some("\{key} = \{escape_string(s)}")
+        Some(CInt(n)) => Some("\{key} = \{n}")
+        Some(CBool(b)) => Some("\{key} = \{b}")
+        Some(CFloat(f)) => Some("\{key} = \{f}")
+        Some(CArray(arr)) => {
+          let items = arr
+            .iter()
+            .map(fn(v) { config_value_to_literal(v) })
+            .collect()
+            .join(", ")
+          Some("\{key} = [\{items}]")
+        }
+        _ => None
       }
-      _ => ()
-    }
-  }
+    })
+    .collect()
 
+  let lines : Array[String] = ["\n[\{name}]", ..key_lines]
   lines.join("\n") + "\n"
 }
 
@@ -247,15 +256,14 @@ fn json_to_config(v : Json) -> ConfigValue {
 
 ///|
 fn json_table_to_config(table : Map[String, Json]) -> Map[String, ConfigValue] {
-  let result : Map[String, ConfigValue] = {}
-
-  table.each(fn(key, value) {
-    if not(value is Null) {
-      result[key] = json_to_config(value)
-    }
+  table
+  .iter()
+  .filter(fn(pair) { not(pair.1 is Null) })
+  .fold(init=(Map::new() : Map[String, ConfigValue]), fn(acc, pair) {
+    let (key, value) = pair
+    acc[key] = json_to_config(value)
+    acc
   })
-
-  result
 }
 
 // --- TOML conversion ---
@@ -277,9 +285,11 @@ fn toml_to_config(v : @toml.TomlValue) -> ConfigValue {
 fn toml_table_to_config(
   table : Map[String, @toml.TomlValue],
 ) -> Map[String, ConfigValue] {
-  let result : Map[String, ConfigValue] = {}
-
-  table.each(fn(key, value) { result[key] = toml_to_config(value) })
-
-  result
+  table
+  .iter()
+  .fold(init=(Map::new() : Map[String, ConfigValue]), fn(acc, pair) {
+    let (key, value) = pair
+    acc[key] = toml_to_config(value)
+    acc
+  })
 }

@@ -11,30 +11,41 @@ pub fn wrap_for_shell(shell : String, s : String) -> String {
 pub fn wrap_ansi_for_zsh(s : String) -> String {
   let buf = StringBuilder::new()
   let len = s.length()
-  let mut i = 0
 
-  while i < len {
-    if i + 1 < len &&
-      s[i].unsafe_to_char() == '\u001b' &&
-      s[i + 1].unsafe_to_char() == '[' {
-      buf.write_string("%{\u001b[")
-      i += 2
+  loop 0 {
+    i =>
+      if i >= len {
+        break buf.to_string()
+      } else if i + 1 < len &&
+        s[i].unsafe_to_char() == '\u001b' &&
+        s[i + 1].unsafe_to_char() == '[' {
+        buf.write_string("%{\u001b[")
+        let end = scan_until_m(s, i + 2, buf)
+        buf.write_string("%}")
+        continue end
+      } else {
+        buf.write_char(s[i].unsafe_to_char())
+        continue i + 1
+      }
+  }
+}
 
-      while i < len {
+///|
+fn scan_until_m(s : String, start : Int, buf : StringBuilder) -> Int {
+  let len = s.length()
+
+  loop start {
+    i =>
+      if i >= len {
+        break i
+      } else {
         let ch = s[i].unsafe_to_char()
         buf.write_char(ch)
-        i += 1
         if ch == 'm' {
-          break
+          break i + 1
+        } else {
+          continue i + 1
         }
       }
-
-      buf.write_string("%}")
-    } else {
-      buf.write_char(s[i].unsafe_to_char())
-      i += 1
-    }
   }
-
-  buf.to_string()
 }

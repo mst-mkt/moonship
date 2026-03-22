@@ -74,14 +74,11 @@ pub async fn try_commands(commands : Array[(String, String)]) -> String {
 
 ///|
 pub fn find_semver(output : String) -> String {
-  for part in output.split(" ") {
-    let ver = extract_semver(part.to_string())
-    if not(ver.is_empty()) {
-      return ver
-    }
-  }
-
-  ""
+  output
+  .split(" ")
+  .map(fn(part) { extract_semver(part.to_string()) })
+  .find_first(fn(ver) { not(ver.is_empty()) })
+  .unwrap_or("")
 }
 
 ///|
@@ -96,18 +93,23 @@ fn extract_semver(s : String) -> String {
   }
 
   let buf = StringBuilder::new()
-  let mut dots = 0
 
-  for i = 0; i < s.length(); i = i + 1 {
-    let c = s[i].unsafe_to_char()
-    if c >= '0' && c <= '9' {
-      buf.write_char(c)
-    } else if c == '.' {
-      dots += 1
-      buf.write_char(c)
-    } else {
-      break
-    }
+  let dots = loop (0, 0) {
+    (i, dots) =>
+      if i >= s.length() {
+        break dots
+      } else {
+        let c = s[i].unsafe_to_char()
+        if c >= '0' && c <= '9' {
+          buf.write_char(c)
+          continue (i + 1, dots)
+        } else if c == '.' {
+          buf.write_char(c)
+          continue (i + 1, dots + 1)
+        } else {
+          break dots
+        }
+      }
   }
 
   if dots >= 2 {
@@ -127,14 +129,11 @@ pub fn detect_compiler_name(
   output : String,
   compilers : Array[(String, String)],
 ) -> String {
-  for pair in compilers {
-    let (name, hint) = pair
-    if output.contains(hint) {
-      return name
-    }
-  }
-
-  ""
+  compilers
+  .iter()
+  .find_first(fn(pair) { output.contains(pair.1) })
+  .map(fn(pair) { pair.0 })
+  .unwrap_or("")
 }
 
 ///|
@@ -144,27 +143,17 @@ pub fn detect_project(
   extensions : Array[String],
   folders? : Array[String] = [],
 ) -> Bool {
-  for file in files {
-    if @fs.path_exists(cwd + "/" + file) {
-      return true
-    }
+  if files.iter().any(fn(file) { @fs.path_exists(cwd + "/" + file) }) {
+    return true
   }
 
-  for folder in folders {
-    if @fs.path_exists(cwd + "/" + folder) {
-      return true
-    }
+  if folders.iter().any(fn(folder) { @fs.path_exists(cwd + "/" + folder) }) {
+    return true
   }
 
   let entries = @fs.read_dir(cwd) catch { _ => return false }
 
-  for entry in entries {
-    for ext in extensions {
-      if entry.has_suffix(ext) {
-        return true
-      }
-    }
-  }
-
-  false
+  entries
+  .iter()
+  .any(fn(entry) { extensions.iter().any(fn(ext) { entry.has_suffix(ext) }) })
 }

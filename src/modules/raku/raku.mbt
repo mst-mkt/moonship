@@ -97,31 +97,36 @@ pub impl @ms.PromptModule for RakuModule with execute(
 
 ///|
 fn parse_raku_version(output : String) -> (String, String) {
-  let lines = output.split("\n").collect()
-  let mut version = ""
-  let mut vm_version = ""
-
-  for line in lines {
+  output
+  .split("\n")
+  .fold(init=("", ""), fn(acc, line) {
     let s = line.to_string()
+    let (ver, vm) = acc
 
     if s.has_prefix("This is Rakudo") {
-      let parts = s.split(" ").collect()
-      if parts.length() >= 5 {
-        version = parts[4].to_string()
-      }
+      let parts = s.split(" ").map(fn(p) { p.to_string() }).collect()
+      (if parts.length() >= 5 { parts[4] } else { ver }, vm)
     } else if s.contains("MoarVM version") {
-      let parts = s.split(" ").collect()
-
-      for i = 0; i < parts.length(); i = i + 1 {
-        if parts[i].to_string() == "version" && i + 1 < parts.length() {
-          vm_version = parts[i + 1].to_string()
-          break
-        }
-      }
+      let parts = s.split(" ").map(fn(p) { p.to_string() }).collect()
+      let new_vm = parts
+        .iter()
+        .fold(init=("", false, false), fn(state, p) {
+          let (result, take_next, done) = state
+          if done {
+            state
+          } else if take_next {
+            (p, false, true)
+          } else if p == "version" {
+            (result, true, false)
+          } else {
+            state
+          }
+        }).0
+      (ver, if new_vm.is_empty() { vm } else { new_vm })
+    } else {
+      (ver, vm)
     }
-  }
-
-  (version, vm_version)
+  })
 }
 
 ///|

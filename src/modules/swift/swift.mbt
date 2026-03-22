@@ -92,20 +92,23 @@ pub impl @ms.PromptModule for SwiftModule with execute(
 
 ///|
 fn parse_swift_version(output : String) -> String {
-  let parts = output.split(" ").collect()
-  let mut version_next = false
-
-  for i = 0; i < parts.length(); i = i + 1 {
-    let s = parts[i].to_string()
-    if version_next {
-      return s
+  output
+  .split(" ")
+  .map(fn(s) { s.to_string() })
+  .collect()
+  .iter()
+  .fold(init=("", false, false), fn(acc, s) {
+    let (result, take_next, done) = acc
+    if done {
+      acc
+    } else if take_next {
+      (s, false, true)
+    } else if s == "version" {
+      (result, true, false)
+    } else {
+      acc
     }
-    if s == "version" {
-      version_next = true
-    }
-  }
-
-  ""
+  }).0
 }
 
 ///|

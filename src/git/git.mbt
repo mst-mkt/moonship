@@ -50,40 +50,36 @@ pub fn RepoHandle::get_status(self : RepoHandle) -> (Int, Int, Int, Int) {
 
 ///|
 fn find_repo_root(cwd : String) -> String? {
-  let mut dir = cwd
-
-  for i = 0; i < 50; i = i + 1 {
-    if @fs.path_exists(dir + "/.git") {
-      return Some(dir)
-    }
-
-    match last_slash(dir) {
-      Some(idx) =>
-        if idx == 0 {
-          return None
-        } else {
-          dir = dir[:idx].to_string()
+  loop (cwd, 0) {
+    (dir, i) =>
+      if i >= 50 {
+        break None
+      } else if @fs.path_exists(dir + "/.git") {
+        break Some(dir)
+      } else {
+        match last_slash(dir) {
+          Some(idx) =>
+            if idx == 0 {
+              break None
+            } else {
+              continue (dir[:idx].to_string(), i + 1)
+            }
+          None => break None
         }
-      None => return None
-    }
+      }
   }
-
-  None
 }
 
 ///|
 fn last_slash(s : String) -> Int? {
-  let mut result : Int? = None
-  let mut i = 0
+  let init : (Int?, Int) = (None, 0)
 
-  for ch in s {
-    if ch == '/' {
-      result = Some(i)
-    }
-    i = i + 1
-  }
-
-  result
+  s
+  .iter()
+  .fold(init~, fn(acc, ch) {
+    let (result, i) = acc
+    (if ch == '/' { Some(i) } else { result }, i + 1)
+  }).0
 }
 
 ///|

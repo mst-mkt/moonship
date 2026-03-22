@@ -126,19 +126,20 @@ fn parse_ansi256(s : String) -> Color? {
 
 ///|
 fn parse_hex(s : String) -> Int? {
-  let mut result = 0
+  let len = s.length()
 
-  for ch in s {
-    let digit = match ch {
-      '0'..='9' => ch.to_int() - '0'.to_int()
-      'a'..='f' => ch.to_int() - 'a'.to_int() + 10
-      'A'..='F' => ch.to_int() - 'A'.to_int() + 10
-      _ => return None
+  loop (0, 0) {
+    (i, result) if i >= len => break Some(result)
+    (i, result) => {
+      let digit = match s[i].unsafe_to_char() {
+        '0'..='9' as ch => ch.to_int() - '0'.to_int()
+        'a'..='f' as ch => ch.to_int() - 'a'.to_int() + 10
+        'A'..='F' as ch => ch.to_int() - 'A'.to_int() + 10
+        _ => break None
+      }
+      continue (i + 1, result * 16 + digit)
     }
-    result = result * 16 + digit
   }
-
-  Some(result)
 }
 
 ///|

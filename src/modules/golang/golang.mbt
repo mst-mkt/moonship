@@ -132,16 +132,13 @@ fn parse_go_version(output : String) -> String {
 fn get_go_mod_version(cwd : String) -> String {
   let path = cwd + "/go.mod"
   let content = @fs.read_file_to_string(path) catch { _ => return "" }
-  let lines = content.split("\n").collect()
 
-  for i = 0; i < lines.length(); i = i + 1 {
-    let s = lines[i].to_string()
-    if s.has_prefix("go ") {
-      return trim_ws(s["go ".length():].to_string())
-    }
-  }
-
-  ""
+  content
+  .split("\n")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) { s.has_prefix("go ") })
+  .map(fn(s) { trim_ws(s["go ".length():].to_string()) })
+  .unwrap_or("")
 }
 
 ///|
@@ -150,27 +147,27 @@ fn check_go_version(installed : String, required : String) -> Bool {
     return true
   }
 
-  let inst_parts = installed.split(".").collect()
-  let req_parts = required.split(".").collect()
+  let inst_parts = installed.split(".").map(fn(s) { s.to_string() }).collect()
+  let req_parts = required.split(".").map(fn(s) { s.to_string() }).collect()
 
   let inst_major = if inst_parts.length() >= 1 {
-    parse_int_go(inst_parts[0].to_string())
+    parse_int_go(inst_parts[0])
   } else {
     0
   }
   let inst_minor = if inst_parts.length() >= 2 {
-    parse_int_go(inst_parts[1].to_string())
+    parse_int_go(inst_parts[1])
   } else {
     0
   }
 
   let req_major = if req_parts.length() >= 1 {
-    parse_int_go(req_parts[0].to_string())
+    parse_int_go(req_parts[0])
   } else {
     0
   }
   let req_minor = if req_parts.length() >= 2 {
-    parse_int_go(req_parts[1].to_string())
+    parse_int_go(req_parts[1])
   } else {
     0
   }
@@ -184,44 +181,21 @@ fn check_go_version(installed : String, required : String) -> Bool {
 
 ///|
 fn parse_int_go(s : String) -> Int {
-  let mut result = 0
-
-  for i = 0; i < s.length(); i = i + 1 {
-    let c = s[i].unsafe_to_char()
-    if c >= '0' && c <= '9' {
-      result = result * 10 + (c.to_int() - '0'.to_int())
+  s
+  .iter()
+  .fold(init=(0, true), fn(acc, c) {
+    let (result, active) = acc
+    if active && c >= '0' && c <= '9' {
+      (result * 10 + (c.to_int() - '0'.to_int()), true)
     } else {
-      break
+      (result, false)
     }
-  }
-
-  result
+  }).0
 }
 
 ///|
 fn trim_ws(s : String) -> String {
-  let mut start = 0
-  let mut end = s.length()
-
-  while start < end {
-    let c = s[start].unsafe_to_char()
-    if c == ' ' || c == '\t' || c == '\r' || c == '\n' {
-      start += 1
-    } else {
-      break
-    }
-  }
-
-  while end > start {
-    let c = s[end - 1].unsafe_to_char()
-    if c == ' ' || c == '\t' || c == '\r' || c == '\n' {
-      end -= 1
-    } else {
-      break
-    }
-  }
-
-  s[start:end].to_string()
+  s.trim(chars=" \t\r\n").to_string()
 }
 
 ///|

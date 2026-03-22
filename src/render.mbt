@@ -95,22 +95,25 @@ fn replace_var(s : String, var_name : String, replacement : String) -> String {
   let buf = StringBuilder::new()
   let len = s.length()
   let target_len = target.length()
-  let mut i = 0
 
-  while i < len {
-    if s[i].unsafe_to_char() == '$' && starts_with_at(s, i, target) {
-      let after = i + target_len
-      if after >= len || not(is_ident_char(s[after].unsafe_to_char())) {
-        buf.write_string(replacement)
-        i = after
-        continue
+  loop 0 {
+    i =>
+      if i >= len {
+        break buf.to_string()
+      } else if s[i].unsafe_to_char() == '$' && starts_with_at(s, i, target) {
+        let after = i + target_len
+        if after >= len || not(is_ident_char(s[after].unsafe_to_char())) {
+          buf.write_string(replacement)
+          continue after
+        } else {
+          buf.write_char(s[i].unsafe_to_char())
+          continue i + 1
+        }
+      } else {
+        buf.write_char(s[i].unsafe_to_char())
+        continue i + 1
       }
-    }
-    buf.write_char(s[i].unsafe_to_char())
-    i += 1
   }
-
-  buf.to_string()
 }
 
 ///|
@@ -121,13 +124,16 @@ fn starts_with_at(s : String, offset : Int, prefix : String) -> Bool {
     return false
   }
 
-  for j = 0; j < prefix_len; j = j + 1 {
-    if s[offset + j] != prefix[j] {
-      return false
-    }
+  loop 0 {
+    j =>
+      if j >= prefix_len {
+        break true
+      } else if s[offset + j] != prefix[j] {
+        break false
+      } else {
+        continue j + 1
+      }
   }
-
-  true
 }
 
 ///|

@@ -92,9 +92,9 @@ pub impl @ms.PromptModule for CrystalModule with execute(
 
 ///|
 fn parse_crystal_version(output : String) -> String {
-  let parts = output.split(" ").collect()
+  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
   if parts.length() >= 2 {
-    parts[1].to_string()
+    parts[1]
   } else {
     ""
   }

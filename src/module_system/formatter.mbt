@@ -17,25 +17,24 @@ fn evaluate(
   vars : Map[String, String],
   default_style : @terminal.Style,
 ) -> Array[Segment] {
-  let segments : Array[Segment] = []
-
-  for node in nodes {
+  nodes
+  .iter()
+  .flat_map(fn(node) {
     match node {
-      Text(t) => segments.push(Segment::new(t, style=default_style))
+      Text(t) => Iter::singleton(Segment::new(t, style=default_style))
       Escape(ch) =>
-        segments.push(Segment::new(unescape(ch), style=default_style))
+        Iter::singleton(Segment::new(unescape(ch), style=default_style))
       Variable(name) =>
         match vars.get(name) {
-          Some(val) =>
-            evaluate(parse_format(val), {}, default_style).each(fn(seg) {
-              segments.push(seg)
-            })
-          None => ()
+          Some(val) => evaluate(parse_format(val), {}, default_style).iter()
+          None => Iter::empty()
         }
       EnvVar(name) => {
         let val = @sys.get_env_var(name).unwrap_or("")
         if not(val.is_empty()) {
-          segments.push(Segment::new(val, style=default_style))
+          Iter::singleton(Segment::new(val, style=default_style))
+        } else {
+          Iter::empty()
         }
       }
       Styled(content_nodes, style_spec) => {
@@ -43,19 +42,20 @@ fn evaluate(
         let text = nodes_to_text(content_nodes, vars)
 
         if not(text.is_empty()) {
-          segments.push(Segment::new(text, style=resolved_style))
+          Iter::singleton(Segment::new(text, style=resolved_style))
+        } else {
+          Iter::empty()
         }
       }
       Conditional(content_nodes) =>
         if has_any_string_var(content_nodes, vars) {
-          evaluate(content_nodes, vars, default_style).each(fn(seg) {
-            segments.push(seg)
-          })
+          evaluate(content_nodes, vars, default_style).iter()
+        } else {
+          Iter::empty()
         }
     }
-  }
-
-  segments
+  })
+  .collect()
 }
 
 ///|
@@ -102,41 +102,39 @@ pub fn evaluate_segments(
   segment_vars : Map[String, Array[Segment]],
   default_style : @terminal.Style,
 ) -> Array[Segment] {
-  let segments : Array[Segment] = []
-
-  for node in nodes {
+  nodes
+  .iter()
+  .flat_map(fn(node) {
     match node {
-      Text(t) => segments.push(Segment::new(t, style=default_style))
+      Text(t) => Iter::singleton(Segment::new(t, style=default_style))
       Escape(ch) =>
-        segments.push(Segment::new(unescape(ch), style=default_style))
+        Iter::singleton(Segment::new(unescape(ch), style=default_style))
       Variable(name) =>
         match segment_vars.get(name) {
-          Some(segs) => segs.each(fn(seg) { segments.push(seg) })
-          None => ()
+          Some(segs) => segs.iter()
+          None => Iter::empty()
         }
       EnvVar(name) => {
         let val = @sys.get_env_var(name).unwrap_or("")
         if not(val.is_empty()) {
-          segments.push(Segment::new(val, style=default_style))
+          Iter::singleton(Segment::new(val, style=default_style))
+        } else {
+          Iter::empty()
         }
       }
       Styled(content_nodes, style_spec) => {
         let style = @terminal.parse_style(style_spec)
-        let inner = evaluate_segments(content_nodes, segment_vars, style)
-        inner.each(fn(seg) { segments.push(seg) })
+        evaluate_segments(content_nodes, segment_vars, style).iter()
       }
       Conditional(content_nodes) =>
         if has_any_segment_var(content_nodes, segment_vars) {
-          evaluate_segments(content_nodes, segment_vars, default_style).each(fn(
-            seg,
-          ) {
-            segments.push(seg)
-          })
+          evaluate_segments(content_nodes, segment_vars, default_style).iter()
+        } else {
+          Iter::empty()
         }
     }
-  }
-
-  segments
+  })
+  .collect()
 }
 
 ///|

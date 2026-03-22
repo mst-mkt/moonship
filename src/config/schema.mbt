@@ -97,39 +97,42 @@ fn pad(depth : Int, indent : Int) -> String {
 
 ///|
 pub fn generate_json_schema(modules : Array[ModuleSchema]) -> String {
-  let top_entries : Array[(String, JVal)] = []
+  let module_entries = modules
+    .iter()
+    .map(fn(mod_schema) { (mod_schema.name, module_schema_to_jval(mod_schema)) })
+    .collect()
 
-  top_entries.push(("$schema", JStr("http://json-schema.org/draft-07/schema#")))
-  top_entries.push(("type", JStr("object")))
+  let prop_entries : Array[(String, JVal)] = [
+    ("format", schema_prop("string", JStr("$all"))),
+    ("scan_timeout", schema_prop("integer", JNum(30.0))),
+    ("command_timeout", schema_prop("integer", JNum(500.0))),
+    ("cache_ttl", schema_prop("integer", JNum(5000.0))),
+    ("add_newline", schema_prop("boolean", JBool(true))),
+    ..module_entries,
+  ]
 
-  let prop_entries : Array[(String, JVal)] = []
-  prop_entries.push(("format", schema_prop("string", JStr("$all"))))
-  prop_entries.push(("scan_timeout", schema_prop("integer", JNum(30.0))))
-  prop_entries.push(("command_timeout", schema_prop("integer", JNum(500.0))))
-  prop_entries.push(("cache_ttl", schema_prop("integer", JNum(5000.0))))
-  prop_entries.push(("add_newline", schema_prop("boolean", JBool(true))))
+  let top_entries : Array[(String, JVal)] = [
+    ("$schema", JStr("http://json-schema.org/draft-07/schema#")),
+    ("type", JStr("object")),
+    ("properties", JObj(prop_entries)),
+  ]
 
-  for mod_schema in modules {
-    prop_entries.push((mod_schema.name, module_schema_to_jval(mod_schema)))
-  }
-
-  top_entries.push(("properties", JObj(prop_entries)))
   JObj(top_entries).stringify(indent=2)
 }
 
 ///|
 fn module_schema_to_jval(mod_schema : ModuleSchema) -> JVal {
-  let field_entries : Array[(String, JVal)] = []
+  let custom_fields = mod_schema.fields
+    .iter()
+    .filter(fn(field) { field.name != "disabled" && field.name != "async" })
+    .map(fn(field) { (field.name, field_to_jval(field)) })
+    .collect()
 
-  field_entries.push(("disabled", schema_prop("boolean", JBool(false))))
-  field_entries.push(("async", schema_prop("boolean", JBool(false))))
-
-  for field in mod_schema.fields {
-    if field.name == "disabled" || field.name == "async" {
-      continue
-    }
-    field_entries.push((field.name, field_to_jval(field)))
-  }
+  let field_entries : Array[(String, JVal)] = [
+    ("disabled", schema_prop("boolean", JBool(false))),
+    ("async", schema_prop("boolean", JBool(false))),
+    ..custom_fields,
+  ]
 
   JObj([("type", JStr("object")), ("properties", JObj(field_entries))])
 }

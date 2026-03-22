@@ -72,9 +72,7 @@ fn run_module_list() -> Unit {
   let names = modules.keys().collect()
   names.sort()
 
-  for name in names {
-    println(name)
-  }
+  names.each(fn(name) { println(name) })
 }
 
 ///|
@@ -112,7 +110,7 @@ async fn run_timings(pa : PromptArgs) -> Unit {
 
   println("")
   println(" Here are the timings of modules in your prompt (>=1ms or output):")
-  for entry in entries {
+  entries.each(fn(entry) {
     let (name, ms, output) = entry
     let dur = format_duration(ms)
 
@@ -124,7 +122,7 @@ async fn run_timings(pa : PromptArgs) -> Unit {
     println(
       " \{pad_right(name, max_name)}  -  \{pad_left(dur, max_dur)}  -   \"\{output}\"\{async_marker}",
     )
-  }
+  })
 }
 
 ///|

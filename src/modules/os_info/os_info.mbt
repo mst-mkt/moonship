@@ -82,19 +82,20 @@ async fn detect_os() -> (String, String) {
     _ => return (get_uname(), "")
   }
 
-  let mut name = ""
-  let mut version = ""
-  let lines = content.split("\n").collect()
+  let (name, version) = content
+    .split("\n")
+    .fold(init=("", ""), fn(acc, line) {
+      let s = line.to_string()
+      let (n, v) = acc
 
-  for line in lines {
-    let s = line.to_string()
-
-    if s.has_prefix("ID=") {
-      name = strip_quotes(s["ID=".length():].to_string())
-    } else if s.has_prefix("VERSION_ID=") {
-      version = strip_quotes(s["VERSION_ID=".length():].to_string())
-    }
-  }
+      if s.has_prefix("ID=") {
+        (strip_quotes(s["ID=".length():].to_string()), v)
+      } else if s.has_prefix("VERSION_ID=") {
+        (n, strip_quotes(s["VERSION_ID=".length():].to_string()))
+      } else {
+        (n, v)
+      }
+    })
 
   if name.is_empty() {
     (get_uname(), "")

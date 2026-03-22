@@ -85,18 +85,13 @@ pub impl @ms.PromptModule for AwsModule with execute(
 
 ///|
 fn get_aws_profile() -> String {
-  let env_vars = [
+  [
     "AWSU_PROFILE", "AWS_VAULT", "AWSUME_PROFILE", "AWS_PROFILE", "AWS_SSO_PROFILE",
   ]
-
-  for v in env_vars {
-    let val = @sys.get_env_var(v).unwrap_or("")
-    if not(val.is_empty()) {
-      return val
-    }
-  }
-
-  ""
+  .iter()
+  .map(fn(v) { @sys.get_env_var(v).unwrap_or("") })
+  .find_first(fn(val) { not(val.is_empty()) })
+  .unwrap_or("")
 }
 
 ///|

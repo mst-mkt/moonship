@@ -13,57 +13,59 @@ pub enum FormatNode {
 pub fn parse_format(template : String) -> Array[FormatNode] {
   let nodes : Array[FormatNode] = []
   let len = template.length()
-  let mut i = 0
 
-  while i < len {
-    match char_at(template, i) {
-      '\\' if i + 1 < len => {
-        nodes.push(Escape(char_at(template, i + 1)))
-        i += 2
+  loop 0 {
+    i =>
+      if i >= len {
+        break nodes
+      } else {
+        match char_at(template, i) {
+          '\\' if i + 1 < len => {
+            nodes.push(Escape(char_at(template, i + 1)))
+            continue i + 2
+          }
+          '$' =>
+            match parse_dollar(template, i) {
+              Some((node, end)) => {
+                nodes.push(node)
+                continue end
+              }
+              None => continue i + 1
+            }
+          '[' =>
+            match parse_styled_node(template, i) {
+              Some((node, next_i)) => {
+                nodes.push(node)
+                continue next_i
+              }
+              None => {
+                nodes.push(Text("["))
+                continue i + 1
+              }
+            }
+          '(' =>
+            match find_matching(template, i, '(', ')') {
+              Some(cp) => {
+                let inner = template[i + 1:cp].to_string()
+                let content_nodes = parse_format(inner)
+                nodes.push(Conditional(content_nodes))
+                continue cp + 1
+              }
+              None => {
+                nodes.push(Text("("))
+                continue i + 1
+              }
+            }
+          _ => {
+            let end = scan_while(template, i, fn(c) {
+              c != '$' && c != '[' && c != '\\' && c != '('
+            })
+            nodes.push(Text(template[i:end].to_string()))
+            continue end
+          }
+        }
       }
-      '$' =>
-        match parse_dollar(template, i) {
-          Some((node, end)) => {
-            nodes.push(node)
-            i = end
-          }
-          None => i += 1
-        }
-      '[' =>
-        match parse_styled_node(template, i) {
-          Some((node, next_i)) => {
-            nodes.push(node)
-            i = next_i
-          }
-          None => {
-            nodes.push(Text("["))
-            i += 1
-          }
-        }
-      '(' =>
-        match find_matching(template, i, '(', ')') {
-          Some(cp) => {
-            let inner = template[i + 1:cp].to_string()
-            let content_nodes = parse_format(inner)
-            nodes.push(Conditional(content_nodes))
-            i = cp + 1
-          }
-          None => {
-            nodes.push(Text("("))
-            i += 1
-          }
-        }
-      _ => {
-        let end = scan_while(template, i, fn(c) {
-          c != '$' && c != '[' && c != '\\' && c != '('
-        })
-        nodes.push(Text(template[i:end].to_string()))
-        i = end
-      }
-    }
   }
-
-  nodes
 }
 
 ///|
@@ -115,18 +117,15 @@ fn parse_styled_node(s : String, start : Int) -> (FormatNode, Int)? {
 ///|
 /// Collect all variable names referenced in the AST.
 pub fn collect_variable_names(nodes : Array[FormatNode]) -> Array[String] {
-  let names : Array[String] = []
-
-  for node in nodes {
+  nodes
+  .iter()
+  .flat_map(fn(node) {
     match node {
-      Variable(name) => names.push(name)
-      Styled(content, _) =>
-        collect_variable_names(content).each(fn(n) { names.push(n) })
-      Conditional(content) =>
-        collect_variable_names(content).each(fn(n) { names.push(n) })
-      _ => ()
+      Variable(name) => Iter::singleton(name)
+      Styled(content, _) => collect_variable_names(content).iter()
+      Conditional(content) => collect_variable_names(content).iter()
+      _ => Iter::empty()
     }
-  }
-
-  names
+  })
+  .collect()
 }

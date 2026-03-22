@@ -139,9 +139,9 @@ async fn get_python_version(pyenv_version_name : Bool) -> String {
 
 ///|
 fn parse_python_version(output : String) -> String {
-  let parts = output.split(" ").collect()
+  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
   if parts.length() >= 2 {
-    parts[1].to_string()
+    parts[1]
   } else {
     output
   }
@@ -194,19 +194,14 @@ fn parent_dir(path : String) -> String {
 
 ///|
 fn last_slash(s : String) -> Int? {
-  let mut last = -1
+  let init : (Int?, Int) = (None, 0)
 
-  for i = 0; i < s.length(); i = i + 1 {
-    if s[i] == '/' {
-      last = i
-    }
-  }
-
-  if last >= 0 {
-    Some(last)
-  } else {
-    None
-  }
+  s
+  .iter()
+  .fold(init~, fn(acc, ch) {
+    let (result, i) = acc
+    (if ch == '/' { Some(i) } else { result }, i + 1)
+  }).0
 }
 
 ///|

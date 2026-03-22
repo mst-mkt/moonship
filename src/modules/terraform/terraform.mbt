@@ -115,19 +115,15 @@ pub impl @ms.PromptModule for TerraformModule with execute(
 
 ///|
 fn parse_terraform_version(output : String) -> String {
-  let mut s = output
-  let prefixes = ["Terraform v", "OpenTofu v", "Terraform ", "OpenTofu "]
+  let s = ["Terraform v", "OpenTofu v", "Terraform ", "OpenTofu "]
+    .iter()
+    .find_first(fn(prefix) { output.has_prefix(prefix) })
+    .map(fn(prefix) { output[prefix.length():].to_string() })
+    .unwrap_or(output)
 
-  for prefix in prefixes {
-    if s.has_prefix(prefix) {
-      s = s[prefix.length():].to_string()
-      break
-    }
-  }
-
-  let parts = s.split(" ").collect()
+  let parts = s.split(" ").map(fn(p) { p.to_string() }).collect()
   if parts.length() >= 1 {
-    @exec.strip_v_prefix(parts[0].to_string())
+    @exec.strip_v_prefix(parts[0])
   } else {
     ""
   }

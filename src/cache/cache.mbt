@@ -66,11 +66,7 @@ pub fn clear_cache() -> Unit {
   let dir = cache_dir()
   let files = @fs.read_dir(dir) catch { _ => return }
 
-  for file in files {
-    @fs.remove_file(dir + "/" + file) catch {
-      _ => ()
-    }
-  }
+  files.each(fn(file) { @fs.remove_file(dir + "/" + file) catch { _ => () } })
 }
 
 ///|
@@ -80,11 +76,10 @@ fn cache_file_path(dir : String, cwd : String) -> String {
 
 ///|
 fn hash_path(path : String) -> String {
-  let mut h : UInt = 5381
-  for ch in path {
-    h = (h << 5) + h + ch.to_uint()
-  }
-  h.to_string()
+  path
+  .iter()
+  .fold(init=5381U, fn(h, ch) { (h << 5) + h + ch.to_uint() })
+  .to_string()
 }
 
 ///|

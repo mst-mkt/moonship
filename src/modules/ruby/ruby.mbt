@@ -95,12 +95,12 @@ pub impl @ms.PromptModule for RubyModule with execute(
 
 ///|
 fn parse_ruby_version(output : String) -> String {
-  let parts = output.split(" ").collect()
+  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
   if parts.length() < 2 {
     return ""
   }
 
-  let version_part = parts[1].to_string()
+  let version_part = parts[1]
 
   match version_part.find("p") {
     Some(idx) => version_part[:idx].to_string()

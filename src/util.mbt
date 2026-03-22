@@ -53,20 +53,15 @@ fn load_config() -> @config.Config {
 
 ///|
 fn find_config_file(dir : String) -> String {
-  let candidates = [
+  [
     "\{dir}/moonship.jsonc",
     "\{dir}/moonship.json",
     "\{dir}/moonship.json5",
     "\{dir}/moonship.toml",
   ]
-
-  for path in candidates {
-    if @fs.path_exists(path) {
-      return path
-    }
-  }
-
-  ""
+  .iter()
+  .find_first(fn(path) { @fs.path_exists(path) })
+  .unwrap_or("")
 }
 
 ///|

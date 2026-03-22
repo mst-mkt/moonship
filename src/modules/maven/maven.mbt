@@ -80,11 +80,12 @@ pub impl @ms.PromptModule for MavenModule with execute(
 
   let props_path = ctx.cwd + "/.mvn/wrapper/maven-wrapper.properties"
   let content = @fs.read_file_to_string(props_path) catch { _ => "" }
-  let mut version = parse_maven_wrapper_version(content)
-
-  if version.is_empty() {
+  let wrapper_version = parse_maven_wrapper_version(content)
+  let version = if wrapper_version.is_empty() {
     let output = @exec.exec_cmd("mvn", ["--version"])
-    version = parse_mvn_cli_version(output)
+    parse_mvn_cli_version(output)
+  } else {
+    wrapper_version
   }
 
   guard not(version.is_empty()) else {
@@ -107,25 +108,19 @@ pub impl @ms.PromptModule for MavenModule with execute(
 
 ///|
 fn parse_maven_wrapper_version(content : String) -> String {
-  let lines = content.split("\n").collect()
-
-  for line in lines {
-    let s = line.to_string()
-    if s.has_prefix("distributionUrl") {
-      return extract_maven_version(s)
-    }
-  }
-
-  ""
+  content
+  .split("\n")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) { s.has_prefix("distributionUrl") })
+  .map(fn(s) { extract_maven_version(s) })
+  .unwrap_or("")
 }
 
 ///|
 fn parse_mvn_cli_version(output : String) -> String {
-  let parts = output.split(" ").collect()
-  if parts.length() >= 3 &&
-    parts[0].to_string() == "Apache" &&
-    parts[1].to_string() == "Maven" {
-    parts[2].to_string()
+  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
+  if parts.length() >= 3 && parts[0] == "Apache" && parts[1] == "Maven" {
+    parts[2]
   } else {
     ""
   }
@@ -133,20 +128,18 @@ fn parse_mvn_cli_version(output : String) -> String {
 
 ///|
 fn extract_maven_version(url_line : String) -> String {
-  let parts = url_line.split("/").collect()
-
-  for part in parts {
-    let s = part.to_string()
-    if s.has_prefix("apache-maven-") {
-      let after = s["apache-maven-".length():].to_string()
-      match after.find("-") {
-        Some(idx) => return after[:idx].to_string()
-        None => return after
-      }
+  url_line
+  .split("/")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) { s.has_prefix("apache-maven-") })
+  .map(fn(s) {
+    let after = s["apache-maven-".length():].to_string()
+    match after.find("-") {
+      Some(idx) => after[:idx].to_string()
+      None => after
     }
-  }
-
-  ""
+  })
+  .unwrap_or("")
 }
 
 ///|

@@ -93,56 +93,50 @@ fn parse_azure_subscription(content : String) -> String {
   let default_marker = "\"isDefault\""
   let name_key = "\"name\""
 
-  let mut pos = 0
-  let len = content.length()
+  loop 0 {
+    pos => {
+      guard pos < content.length() else { break "" }
 
-  while pos < len {
-    let remaining = content[pos:].to_string()
-    match remaining.find(default_marker) {
-      None => break
-      Some(idx) => {
-        let after = content[pos + idx + default_marker.length():].to_string()
-        let is_true = is_json_true(after)
-        if is_true {
-          let before = content[:pos + idx].to_string()
-          match find_last_name_value(before, name_key) {
-            "" => {
-              let after_default = content[pos + idx:].to_string()
-              return find_first_name_value(after_default, name_key)
+      let remaining = content[pos:].to_string()
+      match remaining.find(default_marker) {
+        None => break ""
+        Some(idx) => {
+          let after = content[pos + idx + default_marker.length():].to_string()
+          if is_json_true(after) {
+            let before = content[:pos + idx].to_string()
+            match find_last_name_value(before, name_key) {
+              "" => {
+                let after_default = content[pos + idx:].to_string()
+                break find_first_name_value(after_default, name_key)
+              }
+              name => break name
             }
-            name => return name
           }
+          continue pos + idx + default_marker.length()
         }
-        pos = pos + idx + default_marker.length()
       }
     }
   }
-
-  ""
 }
 
 ///|
 fn find_last_name_value(s : String, key : String) -> String {
-  let mut result = ""
-  let mut pos = 0
-  let len = s.length()
+  loop ("", 0) {
+    (result, pos) => {
+      guard pos < s.length() else { break result }
 
-  while pos < len {
-    let remaining = s[pos:].to_string()
-    match remaining.find(key) {
-      None => break
-      Some(idx) => {
-        let after_key = s[pos + idx + key.length():].to_string()
-        let val = extract_json_string_value(after_key)
-        if not(val.is_empty()) {
-          result = val
+      let remaining = s[pos:].to_string()
+      match remaining.find(key) {
+        None => break result
+        Some(idx) => {
+          let after_key = s[pos + idx + key.length():].to_string()
+          let val = extract_json_string_value(after_key)
+          let new_result = if not(val.is_empty()) { val } else { result }
+          continue (new_result, pos + idx + key.length())
         }
-        pos = pos + idx + key.length()
       }
     }
   }
-
-  result
 }
 
 ///|
@@ -185,16 +179,11 @@ fn is_json_true(s : String) -> Bool {
     None => return false
   }
 
-  let after = s[colon + 1:].to_string()
-
-  for i = 0; i < after.length(); i = i + 1 {
-    let c = after[i].unsafe_to_char()
-    if c != ' ' && c != '\t' && c != '\n' && c != '\r' {
-      return after[i:].to_string().has_prefix("true")
-    }
-  }
-
-  false
+  s[colon + 1:]
+  .to_string()
+  .trim_start(chars=" \t\n\r")
+  .to_string()
+  .has_prefix("true")
 }
 
 ///|

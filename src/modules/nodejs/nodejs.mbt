@@ -160,17 +160,11 @@ fn check_version_satisfies(version : String, requirement : String) -> Bool {
     return true
   }
 
-  let ranges = requirement.split("||").collect()
   let ver = parse_semver(@exec.strip_v_prefix(version))
 
-  for range in ranges {
-    let trimmed = trim_spaces(range.to_string())
-    if check_single_range(ver, trimmed) {
-      return true
-    }
-  }
-
-  ranges.length() == 0
+  requirement
+  .split("||")
+  .any(fn(range) { check_single_range(ver, trim_spaces(range.to_string())) })
 }
 
 ///|
@@ -207,56 +201,31 @@ fn caret_satisfies(ver : (Int, Int, Int), req : (Int, Int, Int)) -> Bool {
 
 ///|
 fn trim_spaces(s : String) -> String {
-  let mut start = 0
-  let mut end = s.length()
-
-  while start < end && s[start].unsafe_to_char() == ' ' {
-    start += 1
-  }
-
-  while end > start && s[end - 1].unsafe_to_char() == ' ' {
-    end -= 1
-  }
-
-  s[start:end].to_string()
+  s.trim(chars=" ").to_string()
 }
 
 ///|
 fn parse_semver(s : String) -> (Int, Int, Int) {
-  let parts = s.split(".").collect()
-  let major = if parts.length() >= 1 {
-    parse_int_simple(parts[0].to_string())
-  } else {
-    0
-  }
-  let minor = if parts.length() >= 2 {
-    parse_int_simple(parts[1].to_string())
-  } else {
-    0
-  }
-  let patch = if parts.length() >= 3 {
-    parse_int_simple(parts[2].to_string())
-  } else {
-    0
-  }
+  let parts = s.split(".").map(fn(p) { p.to_string() }).collect()
+  let major = if parts.length() >= 1 { parse_int_simple(parts[0]) } else { 0 }
+  let minor = if parts.length() >= 2 { parse_int_simple(parts[1]) } else { 0 }
+  let patch = if parts.length() >= 3 { parse_int_simple(parts[2]) } else { 0 }
 
   (major, minor, patch)
 }
 
 ///|
 fn parse_int_simple(s : String) -> Int {
-  let mut result = 0
-
-  for i = 0; i < s.length(); i = i + 1 {
-    let c = s[i].unsafe_to_char()
-    if c >= '0' && c <= '9' {
-      result = result * 10 + (c.to_int() - '0'.to_int())
+  s
+  .iter()
+  .fold(init=(0, true), fn(acc, c) {
+    let (result, active) = acc
+    if active && c >= '0' && c <= '9' {
+      (result * 10 + (c.to_int() - '0'.to_int()), true)
     } else {
-      break
+      (result, false)
     }
-  }
-
-  result
+  }).0
 }
 
 ///|

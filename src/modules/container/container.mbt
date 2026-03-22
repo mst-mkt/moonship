@@ -102,8 +102,8 @@ fn detect_container() -> String {
       _ => return ""
     }
 
-    let lines = content.split("\n").collect()
-    let value = if lines.length() > 0 { lines[0].to_string() } else { "" }
+    let lines = content.split("\n").map(fn(s) { s.to_string() }).collect()
+    let value = if lines.length() > 0 { lines[0] } else { "" }
 
     if value == "wsl" {
       return ""
@@ -123,51 +123,49 @@ fn detect_container() -> String {
 
 ///|
 fn parse_containerenv_name(content : String) -> String {
-  let lines = content.split("\n").collect()
-
-  for line in lines {
-    let s = line.to_string()
-
+  content
+  .split("\n")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) {
+    s.has_prefix("name=\"") ||
+    s.has_prefix("name=") ||
+    s.has_prefix("image=\"") ||
+    s.has_prefix("image=")
+  })
+  .map(fn(s) {
     if s.has_prefix("name=\"") || s.has_prefix("name=") {
       let start = if s.has_prefix("name=\"") { 6 } else { 5 }
       let rest = s[start:].to_string()
-
       match rest.find("\"") {
-        Some(idx) => return rest[:idx].to_string()
-        None => return rest
+        Some(idx) => rest[:idx].to_string()
+        None => rest
       }
-    }
-
-    if s.has_prefix("image=\"") || s.has_prefix("image=") {
+    } else {
       let start = if s.has_prefix("image=\"") { 7 } else { 6 }
       let rest = s[start:].to_string()
-
       let image = match rest.find("\"") {
         Some(idx) => rest[:idx].to_string()
         None => rest
       }
-
-      return strip_registry_path(image)
+      strip_registry_path(image)
     }
-  }
-
-  ""
+  })
+  .unwrap_or("")
 }
 
 ///|
 fn strip_registry_path(image : String) -> String {
-  let mut last_slash = -1
+  let init : (Int?, Int) = (None, 0)
 
-  for i = 0; i < image.length(); i = i + 1 {
-    if image[i].unsafe_to_char() == '/' {
-      last_slash = i
-    }
-  }
-
-  if last_slash >= 0 {
-    image[last_slash + 1:].to_string()
-  } else {
+  match
     image
+    .iter()
+    .fold(init~, fn(acc, ch) {
+      let (result, i) = acc
+      (if ch == '/' { Some(i) } else { result }, i + 1)
+    }).0 {
+    Some(last) => image[last + 1:].to_string()
+    None => image
   }
 }
 

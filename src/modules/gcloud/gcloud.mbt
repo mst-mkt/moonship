@@ -132,8 +132,8 @@ fn read_gcloud_config(home_dir : String) -> String {
     _ => "default"
   }
 
-  let name = active_name.split("\n").collect()
-  let raw_name = if name.length() > 0 { name[0].to_string() } else { "default" }
+  let name = active_name.split("\n").map(fn(s) { s.to_string() }).collect()
+  let raw_name = if name.length() > 0 { name[0] } else { "default" }
 
   let config_name = trim_whitespace(raw_name)
   let config_name_trimmed = if config_name.is_empty() {
@@ -151,58 +151,39 @@ fn read_gcloud_config(home_dir : String) -> String {
 
 ///|
 fn get_ini_value(content : String, section : String, key : String) -> String {
-  let lines = content.split("\n").collect()
   let section_header = "[" + section + "]"
-  let mut in_section = false
 
-  for line in lines {
+  content
+  .split("\n")
+  .fold(init=("", false), fn(acc, line) {
     let s = line.to_string()
+    let (result, in_section) = acc
 
-    if s.has_prefix("[") {
-      in_section = s == section_header
-      continue
-    }
-
-    if in_section {
+    if not(result.is_empty()) {
+      acc
+    } else if s.has_prefix("[") {
+      ("", s == section_header)
+    } else if in_section {
       match s.find("=") {
         Some(eq_idx) => {
           let k = trim_whitespace(s[:eq_idx].to_string())
           if k == key {
-            return trim_whitespace(s[eq_idx + 1:].to_string())
+            (trim_whitespace(s[eq_idx + 1:].to_string()), true)
+          } else {
+            acc
           }
         }
-        None => ()
+        None => acc
       }
+    } else {
+      acc
     }
-  }
-
-  ""
+  }).0
 }
 
 ///|
 fn trim_whitespace(s : String) -> String {
-  let mut start = 0
-  let mut end = s.length()
-
-  while start < end {
-    let c = s[start].unsafe_to_char()
-    if c == ' ' || c == '\t' || c == '\r' || c == '\n' {
-      start += 1
-    } else {
-      break
-    }
-  }
-
-  while end > start {
-    let c = s[end - 1].unsafe_to_char()
-    if c == ' ' || c == '\t' || c == '\r' || c == '\n' {
-      end -= 1
-    } else {
-      break
-    }
-  }
-
-  s[start:end].to_string()
+  s.trim(chars=" \t\r\n").to_string()
 }
 
 ///|

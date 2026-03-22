@@ -80,11 +80,12 @@ pub impl @ms.PromptModule for GradleModule with execute(
 
   let props_path = ctx.cwd + "/gradle/wrapper/gradle-wrapper.properties"
   let content = @fs.read_file_to_string(props_path) catch { _ => "" }
-  let mut version = parse_gradle_wrapper_version(content)
-
-  if version.is_empty() {
+  let wrapper_version = parse_gradle_wrapper_version(content)
+  let version = if wrapper_version.is_empty() {
     let output = @exec.exec_cmd("gradle", ["--version"])
-    version = parse_gradle_cli_version(output)
+    parse_gradle_cli_version(output)
+  } else {
+    wrapper_version
   }
 
   guard not(version.is_empty()) else {
@@ -107,23 +108,19 @@ pub impl @ms.PromptModule for GradleModule with execute(
 
 ///|
 fn parse_gradle_wrapper_version(content : String) -> String {
-  let lines = content.split("\n").collect()
-
-  for line in lines {
-    let s = line.to_string()
-    if s.has_prefix("distributionUrl") {
-      return extract_gradle_version(s)
-    }
-  }
-
-  ""
+  content
+  .split("\n")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) { s.has_prefix("distributionUrl") })
+  .map(fn(s) { extract_gradle_version(s) })
+  .unwrap_or("")
 }
 
 ///|
 fn parse_gradle_cli_version(output : String) -> String {
-  let parts = output.split(" ").collect()
-  if parts.length() >= 2 && parts[0].to_string() == "Gradle" {
-    parts[1].to_string()
+  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
+  if parts.length() >= 2 && parts[0] == "Gradle" {
+    parts[1]
   } else {
     ""
   }
@@ -131,20 +128,18 @@ fn parse_gradle_cli_version(output : String) -> String {
 
 ///|
 fn extract_gradle_version(url_line : String) -> String {
-  let parts = url_line.split("/").collect()
-
-  for part in parts {
-    let s = part.to_string()
-    if s.has_prefix("gradle-") {
-      let after = s["gradle-".length():].to_string()
-      match after.find("-") {
-        Some(idx) => return after[:idx].to_string()
-        None => return after
-      }
+  url_line
+  .split("/")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) { s.has_prefix("gradle-") })
+  .map(fn(s) {
+    let after = s["gradle-".length():].to_string()
+    match after.find("-") {
+      Some(idx) => after[:idx].to_string()
+      None => after
     }
-  }
-
-  ""
+  })
+  .unwrap_or("")
 }
 
 ///|

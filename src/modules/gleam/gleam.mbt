@@ -92,12 +92,7 @@ pub impl @ms.PromptModule for GleamModule with execute(
 
 ///|
 fn parse_gleam_version(output : String) -> String {
-  let parts = output.split(" ").collect()
-  if parts.length() == 0 {
-    return ""
-  }
-
-  parts[parts.length() - 1].to_string()
+  output.split(" ").fold(init="", fn(_prev, s) { s.to_string() })
 }
 
 ///|

@@ -92,28 +92,24 @@ pub impl @ms.PromptModule for CobolModule with execute(
 
 ///|
 fn parse_cobol_version(output : String) -> String {
-  let parts = output.split(" ").collect()
-
-  for i = 0; i < parts.length(); i = i + 1 {
-    let s = parts[i].to_string()
-    if not(s.is_empty()) &&
-      s[0].unsafe_to_char() >= '0' &&
-      s[0].unsafe_to_char() <= '9' {
-      return extract_version_digits(s)
-    }
-  }
-
-  ""
+  output
+  .split(" ")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) {
+    not(s.is_empty()) &&
+    s.iter().nth(0).map(fn(c) { c >= '0' && c <= '9' }).unwrap_or(false)
+  })
+  .map(fn(s) { extract_version_digits(s) })
+  .unwrap_or("")
 }
 
 ///|
 fn extract_version_digits(s : String) -> String {
   let buf = StringBuilder::new()
 
-  for i = 0; i < s.length(); i = i + 1 {
-    let c = s[i].unsafe_to_char()
-    if (c >= '0' && c <= '9') || c == '.' {
-      buf.write_char(c)
+  for ch in s {
+    if (ch >= '0' && ch <= '9') || ch == '.' {
+      buf.write_char(ch)
     } else {
       break
     }

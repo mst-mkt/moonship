@@ -78,18 +78,7 @@ pub impl @ms.PromptModule for MesonModule with execute(
 
 ///|
 fn trim(s : String) -> String {
-  let mut start = 0
-  let mut end = s.length()
-
-  while start < end && s[start].unsafe_to_char() == ' ' {
-    start += 1
-  }
-
-  while end > start && s[end - 1].unsafe_to_char() == ' ' {
-    end -= 1
-  }
-
-  s[start:end].to_string()
+  s.trim(chars=" ").to_string()
 }
 
 ///|

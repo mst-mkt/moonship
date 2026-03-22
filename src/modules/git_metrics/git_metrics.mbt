@@ -97,39 +97,35 @@ pub impl @ms.PromptModule for GitMetricsModule with execute(
 
 ///|
 fn parse_shortstat(output : String) -> (Int, Int) {
-  let mut added = 0
-  let mut deleted = 0
-  let parts = output.split(",").collect()
-
-  for part in parts {
+  output
+  .split(",")
+  .fold(init=(0, 0), fn(acc, part) {
     let s = part.to_string()
 
     if s.contains("insertion") {
-      added = extract_leading_number(s)
+      (extract_leading_number(s), acc.1)
     } else if s.contains("deletion") {
-      deleted = extract_leading_number(s)
+      (acc.0, extract_leading_number(s))
+    } else {
+      acc
     }
-  }
-
-  (added, deleted)
+  })
 }
 
 ///|
 fn extract_leading_number(s : String) -> Int {
-  let mut result = 0
-  let mut found = false
-
-  for i = 0; i < s.length(); i = i + 1 {
-    let c = s[i].unsafe_to_char()
-    if c >= '0' && c <= '9' {
-      result = result * 10 + (c.to_int() - '0'.to_int())
-      found = true
+  s
+  .iter()
+  .fold(init=(0, false, true), fn(acc, c) {
+    let (result, found, active) = acc
+    if active && c >= '0' && c <= '9' {
+      (result * 10 + (c.to_int() - '0'.to_int()), true, true)
     } else if found {
-      break
+      (result, found, false)
+    } else {
+      (result, false, true)
     }
-  }
-
-  result
+  }).0
 }
 
 ///|

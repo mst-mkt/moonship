@@ -94,43 +94,45 @@ pub impl @ms.PromptModule for MemoryUsageModule with execute(
 
 ///|
 fn parse_meminfo(content : String) -> (Int64, Int64) {
-  let lines = content.split("\n").collect()
-  let mut total = 0L
-  let mut available = 0L
+  let (total, available) = content
+    .split("\n")
+    .fold(init=(0L, 0L), fn(acc, line) {
+      let s = line.to_string()
 
-  for line in lines {
-    let s = line.to_string()
-    if s.has_prefix("MemTotal:") {
-      total = parse_kb_value(s)
-    } else if s.has_prefix("MemAvailable:") {
-      available = parse_kb_value(s)
-    }
-  }
+      if s.has_prefix("MemTotal:") {
+        (parse_kb_value(s), acc.1)
+      } else if s.has_prefix("MemAvailable:") {
+        (acc.0, parse_kb_value(s))
+      } else {
+        acc
+      }
+    })
 
   (total * 1024L, available * 1024L)
 }
 
 ///|
 fn parse_kb_value(line : String) -> Int64 {
-  let parts = line.split(" ").collect()
-  let mut val = 0L
-
-  for part in parts {
-    let s = part.to_string()
-    if not(s.is_empty()) &&
-      s[0].unsafe_to_char() >= '0' &&
-      s[0].unsafe_to_char() <= '9' {
-      for i = 0; i < s.length(); i = i + 1 {
-        let c = s[i].unsafe_to_char()
-        if c >= '0' && c <= '9' {
-          val = val * 10L + (c.to_int() - '0'.to_int()).to_int64()
-        }
+  line
+  .split(" ")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) {
+    not(s.is_empty()) &&
+    s.iter().nth(0).map(fn(c) { c >= '0' && c <= '9' }).unwrap_or(false)
+  })
+  .map(fn(s) {
+    s
+    .iter()
+    .fold(init=(0L, true), fn(acc, c) {
+      let (val, active) = acc
+      if active && c >= '0' && c <= '9' {
+        (val * 10L + (c.to_int() - '0'.to_int()).to_int64(), true)
+      } else {
+        (val, false)
       }
-      break
-    }
-  }
-
-  val
+    }).0
+  })
+  .unwrap_or(0L)
 }
 
 ///|

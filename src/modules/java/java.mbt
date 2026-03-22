@@ -113,16 +113,18 @@ fn extract_version(s : String, start : Int) -> String {
   let buf = StringBuilder::new()
   let len = s.length()
 
-  for i = start; i < len; i = i + 1 {
-    let c = s[i].unsafe_to_char()
-    if (c >= '0' && c <= '9') || c == '.' {
-      buf.write_char(c)
-    } else {
-      break
+  loop start {
+    i if i >= len => break buf.to_string()
+    i => {
+      let c = s[i].unsafe_to_char()
+      if (c >= '0' && c <= '9') || c == '.' {
+        buf.write_char(c)
+        continue i + 1
+      } else {
+        break buf.to_string()
+      }
     }
   }
-
-  buf.to_string()
 }
 
 ///|

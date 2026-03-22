@@ -137,13 +137,16 @@ fn is_merge_state(hg_dir : String) -> Bool {
 
   guard bytes.length() >= 40 else { return false }
 
-  for i = 20; i < 40; i = i + 1 {
-    if bytes[i] != 0 {
-      return true
+  loop 20 {
+    i => {
+      guard i < 40 else { break false }
+
+      if bytes[i] != 0 {
+        break true
+      }
+      continue i + 1
     }
   }
-
-  false
 }
 
 ///|

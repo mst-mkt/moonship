@@ -64,20 +64,22 @@ pub impl @ms.PromptModule for KubernetesModule with execute(
     return Skipped("no kubeconfig path")
   }
 
-  let mut current_context = ""
-  let mut ns = ""
+  let (current_context, ns) = loop 0 {
+    i if i >= kubeconfig_paths.length() => break ("", "")
+    i => {
+      let path = kubeconfig_paths[i]
+      let content = @fs.read_file_to_string(path) catch { _ => continue i + 1 }
+      let docs = @yaml.Yaml::load_from_string(content) catch {
+        _ => continue i + 1
+      }
+      guard docs.length() > 0 else { continue i + 1 }
 
-  for path in kubeconfig_paths {
-    let content = @fs.read_file_to_string(path) catch { _ => continue }
-    let docs = @yaml.Yaml::load_from_string(content) catch { _ => continue }
-    guard docs.length() > 0 else { continue }
-
-    let doc = docs[0]
-    let ctx_name = get_yaml_string(doc, "current-context")
-    if not(ctx_name.is_empty()) && current_context.is_empty() {
-      current_context = ctx_name
-      ns = get_context_namespace(doc, ctx_name)
-      break
+      let doc = docs[0]
+      let ctx_name = get_yaml_string(doc, "current-context")
+      if not(ctx_name.is_empty()) {
+        break (ctx_name, get_context_namespace(doc, ctx_name))
+      }
+      continue i + 1
     }
   }
 
@@ -132,39 +134,27 @@ fn get_yaml_string(doc : @yaml.Yaml, key : String) -> String {
 
 ///|
 fn get_context_namespace(doc : @yaml.Yaml, context_name : String) -> String {
-  match doc {
-    Map(m) =>
-      match m.get("contexts") {
-        Some(Array(contexts)) => {
-          for ctx in contexts {
-            match ctx {
-              Map(ctx_map) => {
-                let name = match ctx_map.get("name") {
-                  Some(String(s)) => s
-                  _ => ""
-                }
+  guard doc is Map(m) else { return "" }
+  guard m.get("contexts") is Some(Array(contexts)) else { return "" }
 
-                if name == context_name {
-                  match ctx_map.get("context") {
-                    Some(Map(inner)) =>
-                      match inner.get("namespace") {
-                        Some(String(ns)) => return ns
-                        _ => return ""
-                      }
-                    _ => return ""
-                  }
-                }
-              }
-              _ => ()
-            }
-          }
-
-          ""
-        }
-        _ => ""
-      }
-    _ => ""
-  }
+  contexts
+  .iter()
+  .find_first(fn(ctx) {
+    guard ctx is Map(ctx_map) else { return false }
+    match ctx_map.get("name") {
+      Some(String(s)) => s == context_name
+      _ => false
+    }
+  })
+  .map(fn(ctx) {
+    guard ctx is Map(ctx_map) else { return "" }
+    guard ctx_map.get("context") is Some(Map(inner)) else { return "" }
+    match inner.get("namespace") {
+      Some(String(ns)) => ns
+      _ => ""
+    }
+  })
+  .unwrap_or("")
 }
 
 ///|

@@ -41,14 +41,24 @@ fn parse_julia_toml(content : String) -> String {
 fn extract_toml_version(content : String, path~ : Array[String]) -> String {
   let parsed = @toml.parse(content) catch { _ => return "" }
   guard parsed is TomlTable(table) else { return "" }
+  guard path.length() > 0 else { return "" }
 
-  let mut current : Map[String, @toml.TomlValue] = table
+  let init : (Map[String, @toml.TomlValue]?, _) = (Some(table), true)
 
-  for i = 0; i < path.length() - 1; i = i + 1 {
-    guard current.get(path[i]) is Some(TomlTable(next)) else { return "" }
-    current = next
-  }
+  let (final_table, _) = path[:path.length() - 1]
+    .iter()
+    .fold(init~, fn(acc, key) {
+      match acc {
+        (Some(current), true) =>
+          match current.get(key) {
+            Some(TomlTable(next)) => (Some(next), true)
+            _ => (None, false)
+          }
+        _ => acc
+      }
+    })
 
+  guard final_table is Some(current) else { return "" }
   guard current.get(path[path.length() - 1]) is Some(TomlString(v)) else {
     return ""
   }
@@ -58,48 +68,33 @@ fn extract_toml_version(content : String, path~ : Array[String]) -> String {
 
 ///|
 fn extract_version_line(content : String) -> String {
-  for line in content.split("\n") {
-    let s = line.to_string()
-    guard has_version_key(s) else { continue }
-
-    let value = extract_value_after_separator(s)
-    if not(value.is_empty()) {
-      return value
-    }
-  }
-
-  ""
+  content
+  .split("\n")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) {
+    has_version_key(s) && not(extract_value_after_separator(s).is_empty())
+  })
+  .map(fn(s) { extract_value_after_separator(s) })
+  .unwrap_or("")
 }
 
 ///|
 fn has_version_key(line : String) -> Bool {
-  let len = line.length()
-  let mut i = 0
-
-  while i < len {
-    let ch = line[i].unsafe_to_char()
-    if ch != ' ' && ch != '\t' {
-      break
-    }
-    i += 1
-  }
-
-  line[i:].to_string().has_prefix("version")
+  line.trim_start(chars=" \t").to_string().has_prefix("version")
 }
 
 ///|
 fn extract_value_after_separator(line : String) -> String {
-  let separators = [":=", "=", ":"]
-
-  for sep in separators {
-    guard line.find(sep) is Some(idx) else { continue }
-
-    let after = idx + sep.length()
-    let raw = line[after:].to_string()
-    return strip_quotes(raw)
-  }
-
-  ""
+  [":=", "=", ":"]
+  .iter()
+  .find_first(fn(sep) { line.find(sep) is Some(_) })
+  .map(fn(sep) {
+    match line.find(sep) {
+      Some(idx) => strip_quotes(line[idx + sep.length():].to_string())
+      None => ""
+    }
+  })
+  .unwrap_or("")
 }
 
 ///|
@@ -120,14 +115,12 @@ fn strip_quotes(s : String) -> String {
 fn parse_r_description(content : String) -> String {
   let prefix = "Version:"
 
-  for line in content.split("\n") {
-    let s = line.to_string()
-    if s.has_prefix(prefix) {
-      return strip_quotes(s[prefix.length():].to_string())
-    }
-  }
-
-  ""
+  content
+  .split("\n")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) { s.has_prefix(prefix) })
+  .map(fn(s) { strip_quotes(s[prefix.length():].to_string()) })
+  .unwrap_or("")
 }
 
 ///|
@@ -148,24 +141,24 @@ fn extract_xml_version(content : String) -> String {
 fn find_file_with_extension(dir : String, ext : String) -> String {
   let entries = @fs.read_dir(dir) catch { _ => return "" }
 
-  for entry in entries {
-    if entry.has_suffix(ext) {
-      return dir + "/" + entry
-    }
-  }
-
-  ""
+  entries
+  .iter()
+  .find_first(fn(entry) { entry.has_suffix(ext) })
+  .map(fn(entry) { dir + "/" + entry })
+  .unwrap_or("")
 }
 
 ///|
 fn find_char_from(s : String, target : Char, start : Int) -> Int? {
   let len = s.length()
 
-  for i = start; i < len; i = i + 1 {
-    if s[i].unsafe_to_char() == target {
-      return Some(i)
-    }
+  loop start {
+    i if i >= len => break None
+    i =>
+      if s[i].unsafe_to_char() == target {
+        break Some(i)
+      } else {
+        continue i + 1
+      }
   }
-
-  None
 }

@@ -97,27 +97,22 @@ pub impl @ms.PromptModule for ElixirModule with execute(
 
 ///|
 fn parse_elixir_version(output : String) -> (String, String) {
-  let lines = output.split("\n").collect()
-  let mut otp_version = ""
-  let mut elixir_version = ""
-
-  for line in lines {
+  output
+  .split("\n")
+  .fold(init=("", ""), fn(acc, line) {
     let s = line.to_string()
+    let (elixir, otp) = acc
 
     if s.has_prefix("Erlang/OTP") {
-      let parts = s.split(" ").collect()
-      if parts.length() >= 2 {
-        otp_version = parts[1].to_string()
-      }
+      let parts = s.split(" ").map(fn(p) { p.to_string() }).collect()
+      (elixir, if parts.length() >= 2 { parts[1] } else { otp })
     } else if s.has_prefix("Elixir") {
-      let parts = s.split(" ").collect()
-      if parts.length() >= 2 {
-        elixir_version = parts[1].to_string()
-      }
+      let parts = s.split(" ").map(fn(p) { p.to_string() }).collect()
+      (if parts.length() >= 2 { parts[1] } else { elixir }, otp)
+    } else {
+      (elixir, otp)
     }
-  }
-
-  (elixir_version, otp_version)
+  })
 }
 
 ///|

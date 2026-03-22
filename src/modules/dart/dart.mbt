@@ -102,9 +102,9 @@ pub impl @ms.PromptModule for DartModule with execute(
 
 ///|
 fn parse_dart_version(output : String) -> String {
-  let parts = output.split(" ").collect()
+  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
   if parts.length() >= 4 {
-    parts[3].to_string()
+    parts[3]
   } else {
     ""
   }

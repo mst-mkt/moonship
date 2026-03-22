@@ -83,15 +83,9 @@ pub impl @ms.PromptModule for UsernameModule with execute(
 
 ///|
 fn is_ssh_session() -> Bool {
-  let vars = ["SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY"]
-
-  for v in vars {
-    if not(@sys.get_env_var(v).unwrap_or("").is_empty()) {
-      return true
-    }
-  }
-
-  false
+  ["SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY"]
+  .iter()
+  .any(fn(v) { not(@sys.get_env_var(v).unwrap_or("").is_empty()) })
 }
 
 ///|

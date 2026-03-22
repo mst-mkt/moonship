@@ -75,18 +75,17 @@ pub impl @ms.PromptModule for SpackModule with execute(
 
 ///|
 fn basename(path : String) -> String {
-  let mut last = -1
+  let init : (Int?, Int) = (None, 0)
 
-  for i = 0; i < path.length(); i = i + 1 {
-    if path[i] == '/' {
-      last = i
-    }
-  }
-
-  if last >= 0 {
-    path[last + 1:].to_string()
-  } else {
+  match
     path
+    .iter()
+    .fold(init~, fn(acc, ch) {
+      let (result, i) = acc
+      (if ch == '/' { Some(i) } else { result }, i + 1)
+    }).0 {
+    Some(last) => path[last + 1:].to_string()
+    None => path
   }
 }
 

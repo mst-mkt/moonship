@@ -98,48 +98,48 @@ pub impl @ms.PromptModule for DotnetModule with execute(
 fn find_tfm(cwd : String, extensions : Array[String]) -> String {
   let entries = @fs.read_dir(cwd) catch { _ => return "" }
 
-  for entry in entries {
-    for ext in extensions {
-      if entry.has_suffix(ext) {
-        let path = cwd + "/" + entry
-        let content = @fs.read_file_to_string(path) catch { _ => continue }
-        let tfm = extract_tfm(content)
-        if not(tfm.is_empty()) {
-          return tfm
-        }
-      }
-    }
-  }
-
-  ""
+  entries
+  .iter()
+  .filter(fn(entry) { extensions.iter().any(fn(ext) { entry.has_suffix(ext) }) })
+  .find_first(fn(entry) {
+    let path = cwd + "/" + entry
+    let content = @fs.read_file_to_string(path) catch { _ => return false }
+    not(extract_tfm(content).is_empty())
+  })
+  .map(fn(entry) {
+    let path = cwd + "/" + entry
+    let content = @fs.read_file_to_string(path) catch { _ => return "" }
+    extract_tfm(content)
+  })
+  .unwrap_or("")
 }
 
 ///|
 fn extract_tfm(content : String) -> String {
-  let tags = ["<TargetFramework>", "<TargetFrameworks>"]
-
-  for tag in tags {
+  ["<TargetFramework>", "<TargetFrameworks>"]
+  .iter()
+  .find_first(fn(tag) { content.find(tag) is Some(_) })
+  .map(fn(tag) {
     match content.find(tag) {
       Some(idx) => {
         let start = idx + tag.length()
         let remaining = content[start:].to_string()
-        let end_tag = "</"
-
-        match remaining.find(end_tag) {
+        match remaining.find("</") {
           Some(end_idx) => {
             let value = remaining[:end_idx].to_string()
             if not(value.is_empty()) {
-              return value
+              value
+            } else {
+              ""
             }
           }
-          None => ()
+          None => ""
         }
       }
-      None => ()
+      None => ""
     }
-  }
-
-  ""
+  })
+  .unwrap_or("")
 }
 
 ///|

@@ -99,46 +99,44 @@ pub impl @ms.PromptModule for FossilMetricsModule with execute(
 
 ///|
 fn parse_fossil_numstat(output : String) -> (Int, Int) {
-  let lines = output.split("\n").collect()
+  let lines = output.split("\n").map(fn(s) { s.to_string() }).collect()
 
-  for i = lines.length() - 1; i >= 0; i = i - 1 {
-    let s = lines[i].to_string()
-    if s.contains("TOTAL") {
-      let parts = s.split(" ").collect()
-      let nums : Array[Int] = []
+  loop lines.length() - 1 {
+    i => {
+      guard i >= 0 else { break (0, 0) }
 
-      for part in parts {
-        let p = part.to_string()
-        if not(p.is_empty()) &&
-          p[0].unsafe_to_char() >= '0' &&
-          p[0].unsafe_to_char() <= '9' {
-          nums.push(parse_num(p))
+      let s = lines[i]
+      if s.contains("TOTAL") {
+        let nums = s
+          .split(" ")
+          .map(fn(p) { p.to_string() })
+          .filter(fn(p) {
+            not(p.is_empty()) &&
+            p.iter().nth(0).map(fn(c) { c >= '0' && c <= '9' }).unwrap_or(false)
+          })
+          .map(fn(p) { parse_num(p) })
+          .collect()
+        if nums.length() >= 2 {
+          break (nums[0], nums[1])
         }
       }
-
-      if nums.length() >= 2 {
-        return (nums[0], nums[1])
-      }
+      continue i - 1
     }
   }
-
-  (0, 0)
 }
 
 ///|
 fn parse_num(s : String) -> Int {
-  let mut result = 0
-
-  for i = 0; i < s.length(); i = i + 1 {
-    let c = s[i].unsafe_to_char()
-    if c >= '0' && c <= '9' {
-      result = result * 10 + (c.to_int() - '0'.to_int())
+  s
+  .iter()
+  .fold(init=(0, true), fn(acc, c) {
+    let (result, active) = acc
+    if active && c >= '0' && c <= '9' {
+      (result * 10 + (c.to_int() - '0'.to_int()), true)
     } else {
-      break
+      (result, false)
     }
-  }
-
-  result
+  }).0
 }
 
 ///|

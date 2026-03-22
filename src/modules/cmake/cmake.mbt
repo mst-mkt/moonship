@@ -92,9 +92,9 @@ pub impl @ms.PromptModule for CMakeModule with execute(
 
 ///|
 fn parse_cmake_version(output : String) -> String {
-  let parts = output.split(" ").collect()
+  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
   if parts.length() >= 3 {
-    parts[2].to_string()
+    parts[2]
   } else {
     ""
   }

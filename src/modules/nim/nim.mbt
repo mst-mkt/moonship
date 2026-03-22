@@ -92,28 +92,14 @@ pub impl @ms.PromptModule for NimModule with execute(
 
 ///|
 fn parse_nim_version(output : String) -> String {
-  let parts = output.split(" ").collect()
-
-  for i = 0; i < parts.length(); i = i + 1 {
-    let s = parts[i].to_string()
-    if not(s.is_empty()) && is_digit_or_dot(s) {
-      return s
-    }
-  }
-
-  ""
-}
-
-///|
-fn is_digit_or_dot(s : String) -> Bool {
-  for i = 0; i < s.length(); i = i + 1 {
-    let c = s[i].unsafe_to_char()
-    if not((c >= '0' && c <= '9') || c == '.') {
-      return false
-    }
-  }
-
-  true
+  output
+  .split(" ")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) {
+    not(s.is_empty()) &&
+    s.iter().all(fn(c) { (c >= '0' && c <= '9') || c == '.' })
+  })
+  .unwrap_or("")
 }
 
 ///|

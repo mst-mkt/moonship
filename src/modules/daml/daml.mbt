@@ -98,24 +98,19 @@ pub impl @ms.PromptModule for DamlModule with execute(
 
 ///|
 fn parse_sdk_version(content : String) -> String {
-  let lines = content.split("\n").collect()
-
-  for line in lines {
-    let s = line.to_string()
-
-    if s.has_prefix("sdk-version:") {
-      let parts = s.split(":").collect()
-      if parts.length() >= 2 {
-        return parts[1]
-          .to_string()
-          .trim_start(chars=" ")
-          .trim_end(chars=" ")
-          .to_string()
-      }
+  content
+  .split("\n")
+  .map(fn(s) { s.to_string() })
+  .find_first(fn(s) { s.has_prefix("sdk-version:") })
+  .map(fn(s) {
+    let parts = s.split(":").map(fn(p) { p.to_string() }).collect()
+    if parts.length() >= 2 {
+      parts[1].trim(chars=" ").to_string()
+    } else {
+      ""
     }
-  }
-
-  ""
+  })
+  .unwrap_or("")
 }
 
 ///|

@@ -115,29 +115,28 @@ pub impl @ms.PromptModule for DirenvModule with execute(
 
 ///|
 fn parse_direnv_status(output : String) -> (Bool, String) {
-  let lines = output.split("\n").collect()
-  let mut loaded = false
-  let mut allowed = "not_allowed"
-
-  for line in lines {
+  output
+  .split("\n")
+  .fold(init=(false, "not_allowed"), fn(acc, line) {
     let s = line.to_string()
 
     if s.contains("No .envrc") || s.contains("No .env") {
-      loaded = false
+      (false, acc.1)
     } else if s.contains("Found RC") || s.contains("Loaded RC") {
-      loaded = true
-
-      if s.contains("allowed 0") || s.contains("allowed true") {
-        allowed = "allowed"
+      let allowed = if s.contains("allowed 0") || s.contains("allowed true") {
+        "allowed"
       } else if s.contains("allowed 2") || s.contains("allowed false") {
-        allowed = "denied"
+        "denied"
       } else if s.contains("allowed 1") {
-        allowed = "not_allowed"
+        "not_allowed"
+      } else {
+        acc.1
       }
+      (true, allowed)
+    } else {
+      acc
     }
-  }
-
-  (loaded, allowed)
+  })
 }
 
 ///|

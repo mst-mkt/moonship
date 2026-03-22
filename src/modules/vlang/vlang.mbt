@@ -71,10 +71,7 @@ pub impl @ms.PromptModule for VlangModule with execute(
   let output = @exec.exec_cmd("v", ["version"])
   guard not(output.is_empty()) else { return Skipped("v not found") }
 
-  let parts = output.split(" ").collect()
-  guard parts.length() >= 1 else { return Skipped("could not parse V version") }
-
-  let version = parts[parts.length() - 1].to_string()
+  let version = output.split(" ").fold(init="", fn(_prev, s) { s.to_string() })
   guard not(version.is_empty()) else {
     return Skipped("could not parse V version")
   }
