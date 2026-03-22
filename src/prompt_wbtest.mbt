@@ -1,7 +1,7 @@
 ///|
 async test "render: status 0 green symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=0)
-  let output = render_prompt(ctx)
+  let output = render_prompt(ctx, build_modules(ctx.config))
 
   assert_true(output.contains("❯"))
   assert_true(output.contains("32"))
@@ -10,7 +10,7 @@ async test "render: status 0 green symbol" {
 ///|
 async test "render: status 1 red symbol" {
   let ctx = @context.Context::new(cwd="/tmp", status=1)
-  let output = render_prompt(ctx)
+  let output = render_prompt(ctx, build_modules(ctx.config))
 
   assert_true(output.contains("❯"))
   assert_true(output.contains("31"))
@@ -28,7 +28,7 @@ async test "render: all disabled produces empty" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let output = render_prompt(ctx)
+  let output = render_prompt(ctx, build_modules(ctx.config))
 
   assert_eq(output, "\n")
 }
@@ -39,7 +39,7 @@ async test "render: includes directory" {
     cwd="/home/user/project",
     home_dir="/home/user",
   )
-  let output = render_prompt(ctx)
+  let output = render_prompt(ctx, build_modules(ctx.config))
 
   assert_true(output.contains("project"))
 }
@@ -88,7 +88,7 @@ async test "format_duration: nonzero" {
 ///|
 async test "render: non-git directory has character but no git branch" {
   let ctx = @context.Context::new(cwd="/tmp", home_dir="/tmp")
-  let output = render_prompt(ctx)
+  let output = render_prompt(ctx, build_modules(ctx.config))
 
   assert_true(output.contains("❯"))
   // git_branch uses purple (ANSI 35). In /tmp there is no git repo,
@@ -108,7 +108,7 @@ async test "render: custom format with single module excludes others" {
     home_dir="/home/user",
     config~,
   )
-  let output = render_prompt(ctx)
+  let output = render_prompt(ctx, build_modules(ctx.config))
 
   assert_true(output.contains("❯"))
   // directory is not in format, so "project" should not appear
@@ -127,7 +127,7 @@ async test "render: custom format ordering" {
     home_dir="/home/user",
     config~,
   )
-  let output = render_prompt(ctx)
+  let output = render_prompt(ctx, build_modules(ctx.config))
 
   assert_true(output.contains("❯"))
   assert_true(output.contains("project"))
@@ -193,7 +193,7 @@ async test "render: unknown module skipped" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let output = render_prompt(ctx)
+  let output = render_prompt(ctx, build_modules(ctx.config))
 
   assert_true(output.contains("❯"))
 }

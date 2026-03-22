@@ -16,23 +16,27 @@ let module_order : Array[String] = [
 ]
 
 ///|
-async fn render_prompt(ctx : @context.Context) -> String {
-  render_prompt_filtered(ctx, fn(_name) { true })
+async fn render_prompt(
+  ctx : @context.Context,
+  modules : Map[String, &@ms.PromptModule],
+) -> String {
+  render_prompt_filtered(ctx, modules, fn(_m) { true })
 }
 
 ///|
-async fn render_prompt_sync(ctx : @context.Context) -> String {
-  render_prompt_filtered(ctx, fn(name) {
-    not(ctx.config.get_module(name).async_render)
-  })
+async fn render_prompt_sync(
+  ctx : @context.Context,
+  modules : Map[String, &@ms.PromptModule],
+) -> String {
+  render_prompt_filtered(ctx, modules, fn(m) { not(m.is_async()) })
 }
 
 ///|
 async fn render_prompt_filtered(
   ctx : @context.Context,
-  should_run : (String) -> Bool,
+  modules : Map[String, &@ms.PromptModule],
+  should_run : (&@ms.PromptModule) -> Bool,
 ) -> String {
-  let modules = build_modules(ctx.config)
   let format = expand_all(ctx.config.format, modules)
   let names = @ms.extract_module_names(format)
   let segment_vars : Map[String, Array[@ms.Segment]] = {}
@@ -45,7 +49,7 @@ async fn render_prompt_filtered(
 
     for name in names {
       guard modules.get(name) is Some(m) else { continue }
-      guard should_run(name) else { continue }
+      guard should_run(m) else { continue }
       let task = group.spawn(async fn() { m.execute(ctx) }, allow_failure=true)
       tasks.push((name, task))
     }

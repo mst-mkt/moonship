@@ -14,11 +14,11 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
   }
 
   let prefix = if ctx.config.add_newline { "\n" } else { "" }
-  let has_async_modules = has_async_modules(ctx.config)
+  let modules = build_modules(ctx.config)
+  let has_async = modules.values().any(fn(m) { m.is_async() })
 
   if pa.is_async {
-    // Async path: compute ALL modules, write cache, notify shell
-    let raw = prefix + render_prompt(ctx)
+    let raw = prefix + render_prompt(ctx, modules)
     ctx.close_repo()
     println(@shell.wrap_for_shell(shell, raw))
 
@@ -29,14 +29,12 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
     if shell == "fish" {
       notify_parent() |> ignore
     }
-  } else if has_async_modules {
-    // Sync path with async modules: render sync-only, skip cache write
-    let raw = prefix + render_prompt_sync(ctx)
+  } else if has_async {
+    let raw = prefix + render_prompt_sync(ctx, modules)
     ctx.close_repo()
     println(@shell.wrap_for_shell(shell, raw))
   } else {
-    // Sync path without async modules: render all, write cache
-    let raw = prefix + render_prompt(ctx)
+    let raw = prefix + render_prompt(ctx, modules)
     ctx.close_repo()
     println(@shell.wrap_for_shell(shell, raw))
 
@@ -44,11 +42,6 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
       @cache.write_prompt(ctx.cwd, pa.status, raw)
     }
   }
-}
-
-///|
-fn has_async_modules(config : @config.Config) -> Bool {
-  config.modules.values().any(fn(mc) { mc.async_render })
 }
 
 ///|
@@ -123,10 +116,9 @@ async fn run_timings(pa : PromptArgs) -> Unit {
     let (name, ms, output) = entry
     let dur = format_duration(ms)
 
-    let async_marker = if ctx.config.get_module(name).async_render {
-      " [async]"
-    } else {
-      ""
+    let async_marker = match modules.get(name) {
+      Some(m) if m.is_async() => " [async]"
+      _ => ""
     }
 
     println(
