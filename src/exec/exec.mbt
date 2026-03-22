@@ -74,11 +74,8 @@ pub async fn try_commands(commands : Array[(String, String)]) -> String {
 
 ///|
 pub fn find_semver(output : String) -> String {
-  let parts = output.split(" ").collect()
-
-  for i = 0; i < parts.length(); i = i + 1 {
-    let s = parts[i].to_string()
-    let ver = extract_semver(s)
+  for part in output.split(" ") {
+    let ver = extract_semver(part.to_string())
     if not(ver.is_empty()) {
       return ver
     }

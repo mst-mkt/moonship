@@ -94,12 +94,12 @@ fn replace_var(s : String, var_name : String, replacement : String) -> String {
   let target = "$" + var_name
   let buf = StringBuilder::new()
   let len = s.length()
+  let target_len = target.length()
   let mut i = 0
 
   while i < len {
-    let remaining = s[i:].to_string()
-    if remaining.has_prefix(target) {
-      let after = i + target.length()
+    if s[i].unsafe_to_char() == '$' && starts_with_at(s, i, target) {
+      let after = i + target_len
       if after >= len || not(is_ident_char(s[after].unsafe_to_char())) {
         buf.write_string(replacement)
         i = after
@@ -111,6 +111,23 @@ fn replace_var(s : String, var_name : String, replacement : String) -> String {
   }
 
   buf.to_string()
+}
+
+///|
+fn starts_with_at(s : String, offset : Int, prefix : String) -> Bool {
+  let prefix_len = prefix.length()
+
+  if offset + prefix_len > s.length() {
+    return false
+  }
+
+  for j = 0; j < prefix_len; j = j + 1 {
+    if s[offset + j] != prefix[j] {
+      return false
+    }
+  }
+
+  true
 }
 
 ///|

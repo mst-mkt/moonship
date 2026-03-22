@@ -153,7 +153,7 @@ fn field_to_jval(field : FieldSchema) -> JVal {
       } else {
         field.default_value
         .split(",")
-        .map(fn(s) { JStr(s.to_string().trim(chars=" ").to_string()) })
+        .map(fn(s) { JStr(s.trim(chars=" ").to_string()) })
         .collect()
       }
 
