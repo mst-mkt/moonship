@@ -6,6 +6,7 @@ async fn main {
   match cmd {
     Prompt(pa) => run_prompt(pa)
     Timings(pa) => run_timings(pa)
+    Explain(pa) => run_explain(pa)
     Module(name, pa) => run_module(name, pa)
     ModuleList => run_module_list()
     Init(shell_name, print_full) => run_init(shell_name, print_full)

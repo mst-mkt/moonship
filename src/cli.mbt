@@ -2,6 +2,7 @@
 enum Command {
   Prompt(PromptArgs)
   Timings(PromptArgs)
+  Explain(PromptArgs)
   Module(String, PromptArgs)
   ModuleList
   Init(String, Bool)
@@ -37,6 +38,7 @@ fn parse_args(args : Array[String]) -> Command {
   match args[0] {
     "prompt" => parse_prompt_args(args[1:].to_array(), fn(pa) { Prompt(pa) })
     "timings" => parse_prompt_args(args[1:].to_array(), fn(pa) { Timings(pa) })
+    "explain" => parse_prompt_args(args[1:].to_array(), fn(pa) { Explain(pa) })
     "module" => parse_module_command(args)
     "init" => parse_init_command(args)
     "cache" =>

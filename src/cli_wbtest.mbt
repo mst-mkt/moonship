@@ -255,6 +255,22 @@ test "prompt: --pipestatus empty" {
 }
 
 ///|
+test "explain: default" {
+  match parse_args(["explain"]) {
+    Explain(pa) => assert_eq(pa.status, 0)
+    _ => fail("Expected Explain")
+  }
+}
+
+///|
+test "explain: with options" {
+  match parse_args(["explain", "--status", "1"]) {
+    Explain(pa) => assert_eq(pa.status, 1)
+    _ => fail("Expected Explain")
+  }
+}
+
+///|
 test "prompt: --logical-path" {
   let cmd = parse_args(["prompt", "--logical-path", "/virtual/path"])
   match cmd {

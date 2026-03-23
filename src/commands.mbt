@@ -158,6 +158,163 @@ async fn run_timings(pa : PromptArgs) -> Unit {
 }
 
 ///|
+async fn run_explain(pa : PromptArgs) -> Unit {
+  let ctx = build_context(pa)
+  emit_warnings(ctx.config.warnings)
+  let modules = build_modules(ctx.config)
+  let format = expand_all(ctx.config.format, modules)
+  let module_names = @ms.extract_module_names(format)
+
+  let entries : Array[(String, Int64, String)] = []
+
+  for name in module_names {
+    guard name != "line_break" else { continue }
+    guard modules.get(name) is Some(m) else { continue }
+
+    let start = @async.now()
+    let result = m.execute(ctx)
+    let elapsed = @async.now() - start
+
+    let output = match result {
+      Output(out) => out.render().replace(old="\n", new="\\n")
+      Skipped(_) | Disabled => ""
+    }
+
+    if not(output.is_empty()) {
+      entries.push((name, elapsed, output))
+    }
+  }
+
+  ctx.close_repo()
+
+  let max_val_width = entries.iter().fold(init=0, fn(max, e) {
+    let w = e.2.length() + format_duration(e.1).length() + 6
+    if w > max { w } else { max }
+  })
+
+  println("")
+  println(" Here's a breakdown of your prompt:")
+  entries.each(fn(entry) {
+    let (name, ms, output) = entry
+    let dur = format_duration(ms)
+    let val_part = " \"\{output}\" (\{dur})"
+    let padding = pad_right("", max_val_width - val_part.length() + 3)
+
+    println("\{val_part}\{padding}-  \{module_description(name)}")
+  })
+}
+
+///|
+fn module_description(name : String) -> String {
+  match name {
+    "aws" => "The current AWS region and profile"
+    "azure" => "The current Azure subscription"
+    "battery" => "The current charge and status of the battery"
+    "buf" => "The currently installed version of the Buf CLI"
+    "bun" => "The currently installed version of Bun"
+    "c" => "The currently installed version of C compiler"
+    "character" =>
+      "A character beside where the text is entered in your terminal"
+    "cmake" => "The currently installed version of CMake"
+    "cmd_duration" => "How long the last command took to execute"
+    "cobol" => "The currently installed version of COBOL"
+    "conda" => "The current Conda environment"
+    "container" => "The current container indicator"
+    "cpp" => "The currently installed version of C++ compiler"
+    "crystal" => "The currently installed version of Crystal"
+    "custom" => "A custom module"
+    "daml" => "The currently installed version of DAML"
+    "dart" => "The currently installed version of Dart"
+    "deno" => "The currently installed version of Deno"
+    "directory" => "The current working directory"
+    "direnv" => "The current direnv status"
+    "docker_context" => "The current Docker context"
+    "dotnet" => "The currently installed version of .NET"
+    "elixir" => "The currently installed version of Elixir"
+    "elm" => "The currently installed version of Elm"
+    "env_var" => "A configured environment variable"
+    "erlang" => "The currently installed version of Erlang"
+    "fennel" => "The currently installed version of Fennel"
+    "fortran" => "The currently installed version of Fortran"
+    "fossil_branch" => "The current Fossil branch"
+    "fossil_metrics" => "The current Fossil metrics"
+    "gcloud" => "The current GCP project and region"
+    "git_branch" => "The current Git branch"
+    "git_commit" => "The current Git commit hash"
+    "git_metrics" => "The current Git added/deleted lines"
+    "git_state" => "The current Git operation state"
+    "git_status" => "Symbol representing the state of the repo"
+    "gleam" => "The currently installed version of Gleam"
+    "golang" => "The currently installed version of Go"
+    "gradle" => "The currently installed version of Gradle"
+    "guix_shell" => "The current Guix shell environment"
+    "haskell" => "The currently installed version of Haskell"
+    "haxe" => "The currently installed version of Haxe"
+    "helm" => "The currently installed version of Helm"
+    "hg_branch" => "The current Mercurial branch"
+    "hg_state" => "The current Mercurial operation state"
+    "hostname" => "The current hostname"
+    "java" => "The currently installed version of Java"
+    "jobs" => "The current number of background jobs"
+    "julia" => "The currently installed version of Julia"
+    "kotlin" => "The currently installed version of Kotlin"
+    "kubernetes" => "The current Kubernetes context and namespace"
+    "line_break" => "Separates the prompt into two lines"
+    "localip" => "The current local IP address"
+    "lua" => "The currently installed version of Lua"
+    "maven" => "The currently installed version of Maven"
+    "memory_usage" => "Current system memory and swap usage"
+    "meson" => "The current Meson dev environment"
+    "mise" => "The current mise tool versions"
+    "mojo" => "The currently installed version of Mojo"
+    "moonbit" => "The currently installed version of MoonBit"
+    "nats" => "The current NATS context"
+    "netns" => "The current network namespace"
+    "nim" => "The currently installed version of Nim"
+    "nix_shell" => "The current Nix shell environment"
+    "nodejs" => "The currently installed version of Node.js"
+    "ocaml" => "The currently installed version of OCaml"
+    "odin" => "The currently installed version of Odin"
+    "opa" => "The currently installed version of OPA"
+    "openstack" => "The current OpenStack cloud and project"
+    "os" => "The current operating system"
+    "package" => "The current package version"
+    "perl" => "The currently installed version of Perl"
+    "php" => "The currently installed version of PHP"
+    "pijul_channel" => "The current Pijul channel"
+    "pixi" => "The current Pixi environment"
+    "pulumi" => "The current Pulumi stack and version"
+    "purescript" => "The currently installed version of PureScript"
+    "python" => "The currently installed version of Python"
+    "quarto" => "The currently installed version of Quarto"
+    "raku" => "The currently installed version of Raku"
+    "red" => "The currently installed version of Red"
+    "rlang" => "The currently installed version of R"
+    "ruby" => "The currently installed version of Ruby"
+    "rust" => "The currently installed version of Rust"
+    "scala" => "The currently installed version of Scala"
+    "shell" => "The current shell indicator"
+    "shlvl" => "The current shell level"
+    "singularity" => "The current Singularity image"
+    "solidity" => "The currently installed version of Solidity"
+    "spack" => "The current Spack environment"
+    "status" => "The exit code of the last command"
+    "sudo" => "The current sudo credentials status"
+    "swift" => "The currently installed version of Swift"
+    "terraform" => "The current Terraform workspace and version"
+    "time" => "The current local time"
+    "typst" => "The currently installed version of Typst"
+    "username" => "The current username"
+    "vagrant" => "The currently installed version of Vagrant"
+    "vcsh" => "The current VCSH repository"
+    "vlang" => "The currently installed version of V"
+    "xmake" => "The currently installed version of XMake"
+    "zig" => "The currently installed version of Zig"
+    _ => "Unknown module"
+  }
+}
+
+///|
 fn run_init(shell_name : String, print_full : Bool) -> Unit {
   match @shell.Shell::from_string(shell_name) {
     Some(shell) => {
@@ -189,6 +346,7 @@ fn run_help() -> Unit {
     #|Usage:
     #|  moonship prompt [options]    Generate prompt string
     #|  moonship timings [options]   Show module execution times
+    #|  moonship explain [options]   Explain active modules
     #|  moonship module <name>       Run a single module
     #|  moonship module --list       List available modules
     #|  moonship init <shell>        Print shell init stub
