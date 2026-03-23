@@ -9,6 +9,7 @@ enum Command {
   CacheClear
   Time
   PrintConfig(Bool)
+  Config(String, String)
   BugReport
   Completions(String)
   Session
@@ -49,6 +50,11 @@ fn parse_args(args : Array[String]) -> Command {
       } else {
         Help
       }
+    "config" => {
+      let name = if args.length() > 1 { args[1] } else { "" }
+      let value = if args.length() > 2 { args[2] } else { "" }
+      Config(name, value)
+    }
     "bug-report" => BugReport
     "completions" =>
       if args.length() > 1 {

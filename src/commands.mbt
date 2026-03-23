@@ -341,6 +341,115 @@ fn default_config_toml() -> String {
 }
 
 ///|
+async fn run_config(name : String, value : String) -> Unit {
+  if name.is_empty() {
+    let editor = match @sys.get_env_var("VISUAL") {
+      Some(v) => v
+      None => @sys.get_env_var("EDITOR").unwrap_or("vi")
+    }
+
+    let config_path = {
+      let env_path = @sys.get_env_var("MOONSHIP_CONFIG").unwrap_or("")
+      if not(env_path.is_empty()) {
+        env_path
+      } else {
+        let home = @sys.get_env_var("HOME").unwrap_or("")
+        guard not(home.is_empty()) else { return }
+
+        let dir = "\{home}/.config/moonship"
+        let found = find_config_file(dir)
+        if found.is_empty() { "\{dir}/moonship.toml" } else { found }
+      }
+    }
+
+    ignore(@exec.exec_cmd(editor, [config_path]))
+    return
+  }
+
+  let config = load_config()
+  emit_warnings(config.warnings)
+
+  if value.is_empty() {
+    let parts = name.split(".").map(fn(s) { s.to_string() }).collect()
+
+    if parts.length() == 1 {
+      let key = parts[0]
+      let result = match key {
+        "format" => Some(config.format)
+        "scan_timeout" => Some(config.scan_timeout.to_string())
+        "command_timeout" => Some(config.command_timeout.to_string())
+        "cache_ttl" => Some(config.cache_ttl.to_string())
+        "add_newline" => Some(config.add_newline.to_string())
+        _ =>
+          config.get_raw_module(key).map(fn(table) {
+            module_to_toml_string(key, table)
+          })
+      }
+
+      match result {
+        Some(val) => println(val)
+        None => println("moonship: key '\{name}' not found")
+      }
+    } else if parts.length() == 2 {
+      let module = parts[0]
+      let key = parts[1]
+
+      match config.get_raw_module(module) {
+        Some(table) =>
+          match table.0.get(key) {
+            Some(v) => println(config_value_display(v))
+            None => println("moonship: key '\{name}' not found")
+          }
+        None => println("moonship: module '\{module}' not found")
+      }
+    } else {
+      println("moonship: invalid key '\{name}'")
+    }
+  } else {
+    println("moonship: config editing by key is not yet supported")
+    println("Please edit the config file directly.")
+  }
+}
+
+///|
+fn module_to_toml_string(name : String, table : @config.ModuleTable) -> String {
+  let keys = table.0.keys().collect()
+  keys.sort()
+
+  let lines : Array[String] = ["[\{name}]"]
+  for key in keys {
+    match table.0.get(key) {
+      Some(v) => lines.push("\{key} = \{config_value_literal(v)}")
+      None => ()
+    }
+  }
+
+  lines.join("\n")
+}
+
+///|
+fn config_value_display(v : @config.ConfigValue) -> String {
+  match v {
+    @config.CString(s) => s
+    @config.CInt(n) => n.to_string()
+    @config.CBool(b) => b.to_string()
+    @config.CFloat(f) => f.to_string()
+    _ => "..."
+  }
+}
+
+///|
+fn config_value_literal(v : @config.ConfigValue) -> String {
+  match v {
+    @config.CString(s) => @config.escape_string(s)
+    @config.CInt(n) => n.to_string()
+    @config.CBool(b) => b.to_string()
+    @config.CFloat(f) => f.to_string()
+    _ => "..."
+  }
+}
+
+///|
 async fn run_bug_report() -> Unit {
   let shell = @sys.get_env_var("SHELL").unwrap_or("unknown")
   let term = @sys.get_env_var("TERM").unwrap_or("unknown")
@@ -507,6 +616,7 @@ fn run_help() -> Unit {
     #|  moonship module --list       List available modules
     #|  moonship init <shell>        Print shell init stub
     #|    --print-full-init         Print full init script
+    #|  moonship config               Edit config in $EDITOR
     #|  moonship bug-report          Print environment info for bug reports
     #|  moonship completions <shell> Generate shell completions
     #|  moonship cache clear         Clear cached data

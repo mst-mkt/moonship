@@ -14,6 +14,7 @@ async fn main {
       @cache.clear_cache()
       println("Cache cleared.")
     }
+    Config(name, value) => run_config(name, value)
     BugReport => run_bug_report()
     Completions(shell) => run_completions(shell)
     Session => run_session()

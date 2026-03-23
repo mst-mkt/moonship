@@ -246,6 +246,39 @@ test "module: --list" {
 }
 
 ///|
+test "config: no args" {
+  match parse_args(["config"]) {
+    Config(name, value) => {
+      assert_eq(name, "")
+      assert_eq(value, "")
+    }
+    _ => fail("Expected Config")
+  }
+}
+
+///|
+test "config: with name" {
+  match parse_args(["config", "format"]) {
+    Config(name, value) => {
+      assert_eq(name, "format")
+      assert_eq(value, "")
+    }
+    _ => fail("Expected Config")
+  }
+}
+
+///|
+test "config: with name and value" {
+  match parse_args(["config", "format", "$all"]) {
+    Config(name, value) => {
+      assert_eq(name, "format")
+      assert_eq(value, "$all")
+    }
+    _ => fail("Expected Config")
+  }
+}
+
+///|
 test "bug-report" {
   assert_true(parse_args(["bug-report"]) is BugReport)
 }
