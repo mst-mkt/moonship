@@ -115,6 +115,7 @@ import {
   "mst-mkt/moonship/modules/xmake" @mod_xmake,
   "mst-mkt/moonship/modules/zig" @mod_zig,
   "mst-mkt/moonship/shell" @shell,
+  "mst-mkt/moonship/terminal" @terminal,
 }
 
 options(

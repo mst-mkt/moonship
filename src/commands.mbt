@@ -1,9 +1,30 @@
 ///|
 async fn run_prompt(pa : PromptArgs) -> Unit {
   let shell = @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("")
-  let use_cache = (shell == "zsh" || shell == "fish") && pa.keymap.is_empty()
   let ctx = build_context(pa)
   emit_warnings(ctx.config.warnings)
+
+  // Handle --right and --continuation
+  match pa.target {
+    Right => {
+      if ctx.config.right_format.is_empty() {
+        return
+      }
+      let modules = build_modules(ctx.config)
+      let raw = render_prompt_with_format(ctx, modules, ctx.config.right_format)
+      ctx.close_repo()
+      println(@shell.wrap_for_shell(shell, raw))
+      return
+    }
+    Continuation => {
+      let raw = render_continuation(ctx.config.continuation_prompt)
+      println(@shell.wrap_for_shell(shell, raw))
+      return
+    }
+    Main => ()
+  }
+
+  let use_cache = (shell == "zsh" || shell == "fish") && pa.keymap.is_empty()
 
   // Cache hit: return immediately (sync path only)
   if use_cache && not(pa.is_async) {
@@ -321,6 +342,10 @@ fn default_config_toml() -> String {
   let buf = StringBuilder::new()
 
   buf.write_string("format = \{@config.escape_string(d.format)}\n")
+  buf.write_string("right_format = \{@config.escape_string(d.right_format)}\n")
+  buf.write_string(
+    "continuation_prompt = \{@config.escape_string(d.continuation_prompt)}\n",
+  )
   buf.write_string("scan_timeout = \{d.scan_timeout}\n")
   buf.write_string("command_timeout = \{d.command_timeout}\n")
   buf.write_string("cache_ttl = \{d.cache_ttl}\n")
@@ -376,6 +401,8 @@ async fn run_config(name : String, value : String) -> Unit {
       let key = parts[0]
       let result = match key {
         "format" => Some(config.format)
+        "right_format" => Some(config.right_format)
+        "continuation_prompt" => Some(config.continuation_prompt)
         "scan_timeout" => Some(config.scan_timeout.to_string())
         "command_timeout" => Some(config.command_timeout.to_string())
         "cache_ttl" => Some(config.cache_ttl.to_string())
@@ -673,6 +700,8 @@ fn run_help() -> Unit {
     #|  --path=<path>             Override current directory
     #|  --logical-path=<path>    Logical path for display
     #|  --shlvl=<n>               Shell nesting level
+    #|  --right                   Print the right prompt
+    #|  --continuation            Print continuation prompt
     #|  --async                   Recompute and update cache
     #|
     #|Supported shells: zsh, bash, fish

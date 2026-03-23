@@ -22,7 +22,16 @@ enum Command {
 }
 
 ///|
+///|
+pub(all) enum PromptTarget {
+  Main
+  Right
+  Continuation
+}
+
+///|
 struct PromptArgs {
+  target : PromptTarget
   status : Int
   pipestatus : Array[String]
   cmd_duration : Int
@@ -99,6 +108,8 @@ fn parse_prompt_args(
   let path = Ref::new("")
   let logical_path = Ref::new("")
   let shlvl = Ref::new("0")
+  let is_right = Ref::new(false)
+  let is_continuation = Ref::new(false)
   let is_async = Ref::new(false)
 
   let spec : Array[(String, String, @ArgParser.Spec, String)] = [
@@ -131,6 +142,8 @@ fn parse_prompt_args(
       "logical path for display",
     ),
     ("--shlvl", "", Set_string(shlvl), "shell nesting level"),
+    ("--right", "", Set(is_right), "print the right prompt"),
+    ("--continuation", "", Set(is_continuation), "print continuation prompt"),
     ("--async", "", Set(is_async), "recompute and update cache"),
   ]
 
@@ -144,7 +157,16 @@ fn parse_prompt_args(
     pipestatus_raw.val.split(" ").map(fn(s) { s.to_string() }).collect()
   }
 
+  let target = if is_right.val {
+    Right
+  } else if is_continuation.val {
+    Continuation
+  } else {
+    Main
+  }
+
   ctor({
+    target,
     status: parse_int_arg(status.val),
     pipestatus,
     cmd_duration: parse_int_arg(cmd_duration.val),

@@ -16,6 +16,44 @@ let module_order : Array[String] = [
 ]
 
 ///|
+async fn render_prompt_with_format(
+  ctx : @context.Context,
+  modules : Map[String, &@ms.PromptModule],
+  format : String,
+) -> String {
+  let format = expand_all(format, modules)
+  let names = @ms.extract_module_names(format)
+  let segment_vars : Map[String, Array[@ms.Segment]] = {}
+
+  ignore(ctx.get_repo())
+
+  @async.with_task_group(async fn(group) {
+    let tasks : Array[(String, @async.Task[@ms.ModuleResult])] = []
+
+    for name in names {
+      guard modules.get(name) is Some(m) else { continue }
+      let task = group.spawn(async fn() { m.execute(ctx) }, allow_failure=true)
+      tasks.push((name, task))
+    }
+
+    for pair in tasks {
+      let (name, task) = pair
+      guard task.wait() is Output(output) else { continue }
+      segment_vars[name] = output.segments
+    }
+
+    @ms.compose_segments(format, segment_vars).render()
+  })
+}
+
+///|
+fn render_continuation(format : String) -> String {
+  let vars : Map[String, String] = {}
+  let segments = @ms.format_string(format, vars, @terminal.Style::default())
+  @ms.ModuleOutput::new(segments).render()
+}
+
+///|
 async fn render_prompt(
   ctx : @context.Context,
   modules : Map[String, &@ms.PromptModule],

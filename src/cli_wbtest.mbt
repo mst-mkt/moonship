@@ -386,6 +386,33 @@ test "prompt: -P short flag" {
 }
 
 ///|
+test "prompt: --right" {
+  let cmd = parse_args(["prompt", "--right"])
+  match cmd {
+    Prompt(pa) => assert_true(pa.target is Right)
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: --continuation" {
+  let cmd = parse_args(["prompt", "--continuation"])
+  match cmd {
+    Prompt(pa) => assert_true(pa.target is Continuation)
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: default target is Main" {
+  let cmd = parse_args(["prompt"])
+  match cmd {
+    Prompt(pa) => assert_true(pa.target is Main)
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
 test "prompt: no pipestatus defaults to empty" {
   let cmd = parse_args(["prompt"])
   match cmd {

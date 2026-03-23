@@ -71,6 +71,8 @@ pub fn ModuleTable::get_string_array(
 ///|
 pub struct Config {
   format : String
+  right_format : String
+  continuation_prompt : String
   scan_timeout : Int
   command_timeout : Int
   cache_ttl : Int
@@ -83,6 +85,8 @@ pub struct Config {
 pub fn Config::default() -> Config {
   {
     format: "$all",
+    right_format: "",
+    continuation_prompt: "[∙](bright-black) ",
     scan_timeout: 30,
     command_timeout: 500,
     cache_ttl: 5000,
@@ -128,6 +132,10 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
   let t = ModuleTable(table)
 
   let format = t.get_string("format").unwrap_or(d.format)
+  let right_format = t.get_string("right_format").unwrap_or(d.right_format)
+  let continuation_prompt = t
+    .get_string("continuation_prompt")
+    .unwrap_or(d.continuation_prompt)
   let scan_timeout = t.get_int("scan_timeout").unwrap_or(d.scan_timeout)
   let command_timeout = t
     .get_int("command_timeout")
@@ -148,6 +156,8 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
 
   {
     format,
+    right_format,
+    continuation_prompt,
     scan_timeout,
     command_timeout,
     cache_ttl,
@@ -161,6 +171,8 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
 pub fn Config::to_toml(self : Config) -> String {
   let header = [
     "format = \{escape_string(self.format)}",
+    "right_format = \{escape_string(self.right_format)}",
+    "continuation_prompt = \{escape_string(self.continuation_prompt)}",
     "scan_timeout = \{self.scan_timeout}",
     "command_timeout = \{self.command_timeout}",
     "cache_ttl = \{self.cache_ttl}",

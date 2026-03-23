@@ -252,6 +252,22 @@ async test "starts_with_at: exact match at offset" {
 }
 
 ///|
+async test "render_continuation: styled text" {
+  let output = render_continuation("[∙](bright-black) ")
+  assert_true(output.contains("∙"))
+}
+
+///|
+async test "render_prompt_with_format: custom format" {
+  let ctx = @context.Context::new(cwd="/tmp", status=0)
+  let modules = build_modules(ctx.config)
+  let output = render_prompt_with_format(ctx, modules, "$character")
+
+  assert_true(output.contains("❯"))
+  ctx.close_repo()
+}
+
+///|
 test "module_description: known modules" {
   assert_eq(module_description("character"), "A character beside where the text is entered in your terminal")
   assert_eq(module_description("directory"), "The current working directory")
