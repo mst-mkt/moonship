@@ -52,7 +52,8 @@ async fn render_prompt(
       segment_vars[name] = output.segments
     }
 
-    @ms.compose_segments(format, segment_vars).render()
+    let output = @ms.compose_segments(format, segment_vars)
+    output.render_with_fill(ctx.terminal_width)
   })
 }
 
@@ -257,6 +258,7 @@ fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
   modules["netns"] = @mod_netns.NetnsModule::from_config(config)
   modules["status"] = @mod_status.StatusModule::from_config(config)
   modules["container"] = @mod_container.ContainerModule::from_config(config)
+  modules["fill"] = @mod_fill.FillModule::from_config(config)
   modules
 }
 
@@ -290,6 +292,7 @@ fn collect_all_schemas() -> Array[@config.ModuleSchema] {
     @mod_env_var.EnvVarModule::schema(),
     @mod_erlang.ErlangModule::schema(),
     @mod_fennel.FennelModule::schema(),
+    @mod_fill.FillModule::schema(),
     @mod_fortran.FortranModule::schema(),
     @mod_fossil_branch.FossilBranchModule::schema(),
     @mod_fossil_metrics.FossilMetricsModule::schema(),

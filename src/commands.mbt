@@ -260,6 +260,7 @@ fn module_description(name : String) -> String {
     "env_var" => "A configured environment variable"
     "erlang" => "The currently installed version of Erlang"
     "fennel" => "The currently installed version of Fennel"
+    "fill" => "Fill the remaining space on the line"
     "fortran" => "The currently installed version of Fortran"
     "fossil_branch" => "The current Fossil branch"
     "fossil_metrics" => "The current Fossil metrics"

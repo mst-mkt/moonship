@@ -2,14 +2,24 @@
 pub struct Segment {
   text : String
   style : @terminal.Style
+  is_fill : Bool
 }
 
 ///|
 pub fn Segment::new(
   text : String,
   style? : @terminal.Style = @terminal.Style::default(),
+  is_fill? : Bool = false,
 ) -> Segment {
-  { text, style }
+  { text, style, is_fill }
+}
+
+///|
+pub fn Segment::fill(
+  symbol : String,
+  style : @terminal.Style,
+) -> Segment {
+  { text: symbol, style, is_fill: true }
 }
 
 ///|
@@ -29,6 +39,83 @@ pub fn ModuleOutput::render(self : ModuleOutput) -> String {
   .map(fn(seg) { @terminal.stylize(seg.text, seg.style) })
   .collect()
   .join("")
+}
+
+///|
+pub fn ModuleOutput::render_with_fill(
+  self : ModuleOutput,
+  terminal_width : Int,
+) -> String {
+  let has_fill = self.segments.iter().any(fn(seg) { seg.is_fill })
+  guard has_fill else { return self.render() }
+
+  let non_fill_width = self.segments.iter().fold(init=0, fn(acc, seg) {
+    if seg.is_fill { acc } else { acc + visible_width(seg.text) }
+  })
+
+  let fill_count = self.segments.iter().fold(init=0, fn(acc, seg) {
+    if seg.is_fill { acc + 1 } else { acc }
+  })
+
+  let remaining = if terminal_width > non_fill_width {
+    terminal_width - non_fill_width
+  } else {
+    0
+  }
+  let fill_width = remaining / fill_count
+
+  self.segments
+  .iter()
+  .map(fn(seg) {
+    if seg.is_fill {
+      let expanded = repeat_to_width(seg.text, fill_width)
+      @terminal.stylize(expanded, seg.style)
+    } else {
+      @terminal.stylize(seg.text, seg.style)
+    }
+  })
+  .collect()
+  .join("")
+}
+
+///|
+fn visible_width(s : String) -> Int {
+  let len = s.length()
+
+  loop (0, 0, false) {
+    (i, width, in_escape) => {
+      if i >= len {
+        break width
+      }
+
+      let ch = s[i].unsafe_to_char()
+      if in_escape {
+        if ch == 'm' {
+          continue (i + 1, width, false)
+        } else {
+          continue (i + 1, width, true)
+        }
+      } else if ch == '\u001b' {
+        continue (i + 1, width, true)
+      } else {
+        continue (i + 1, width + 1, false)
+      }
+    }
+  }
+}
+
+///|
+fn repeat_to_width(symbol : String, width : Int) -> String {
+  guard width > 0 && not(symbol.is_empty()) else { return "" }
+
+  let sym_len = symbol.length()
+  let buf = StringBuilder::new()
+
+  for i = 0; i < width; i = i + 1 {
+    buf.write_char(symbol[i % sym_len].unsafe_to_char())
+  }
+
+  buf.to_string()
 }
 
 ///|

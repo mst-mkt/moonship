@@ -39,6 +39,7 @@ import {
   "mst-mkt/moonship/modules/env_var" @mod_env_var,
   "mst-mkt/moonship/modules/erlang" @mod_erlang,
   "mst-mkt/moonship/modules/fennel" @mod_fennel,
+  "mst-mkt/moonship/modules/fill" @mod_fill,
   "mst-mkt/moonship/modules/fossil_branch" @mod_fossil_branch,
   "mst-mkt/moonship/modules/fossil_metrics" @mod_fossil_metrics,
   "mst-mkt/moonship/modules/fortran" @mod_fortran,
