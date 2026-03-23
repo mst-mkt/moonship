@@ -9,6 +9,7 @@ enum Command {
   CacheClear
   Time
   PrintConfig(Bool)
+  Completions(String)
   Session
   Schema
   Version
@@ -44,6 +45,12 @@ fn parse_args(args : Array[String]) -> Command {
     "cache" =>
       if args.length() > 1 && args[1] == "clear" {
         CacheClear
+      } else {
+        Help
+      }
+    "completions" =>
+      if args.length() > 1 {
+        Completions(args[1])
       } else {
         Help
       }

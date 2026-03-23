@@ -341,6 +341,82 @@ fn default_config_toml() -> String {
 }
 
 ///|
+fn run_completions(shell_name : String) -> Unit {
+  match shell_name {
+    "zsh" => println(generate_zsh_completions())
+    "bash" => println(generate_bash_completions())
+    "fish" => println(generate_fish_completions())
+    _ =>
+      println(
+        "moonship: unknown shell '\{shell_name}'. Supported: zsh, bash, fish",
+      )
+  }
+}
+
+///|
+fn generate_zsh_completions() -> String {
+  [
+    "#compdef moonship",
+    "",
+    "_moonship() {",
+    "  local -a commands",
+    "  commands=(",
+    "    'prompt:Generate prompt string'",
+    "    'timings:Show module execution times'",
+    "    'explain:Explain active modules'",
+    "    'module:Run a single module'",
+    "    'init:Print shell init script'",
+    "    'cache:Cache operations'",
+    "    'completions:Generate shell completions'",
+    "    'session:Generate random session key'",
+    "    'time:Print current time in ms'",
+    "    'print-config:Print active configuration'",
+    "    'schema:Print JSON Schema for config'",
+    "    'version:Print version'",
+    "    'help:Print help'",
+    "  )",
+    "",
+    "  _describe 'command' commands",
+    "}",
+    "",
+    "_moonship",
+  ].join("\n")
+}
+
+///|
+fn generate_bash_completions() -> String {
+  [
+    "_moonship() {",
+    "  local cur=\"${COMP_WORDS[COMP_CWORD]}\"",
+    "  local commands=\"prompt timings explain module init cache completions session time print-config schema version help\"",
+    "",
+    "  COMPREPLY=( $(compgen -W \"$commands\" -- \"$cur\") )",
+    "}",
+    "",
+    "complete -F _moonship moonship",
+  ].join("\n")
+}
+
+///|
+fn generate_fish_completions() -> String {
+  [
+    "complete -c moonship -n '__fish_use_subcommand' -a prompt -d 'Generate prompt string'",
+    "complete -c moonship -n '__fish_use_subcommand' -a timings -d 'Show module execution times'",
+    "complete -c moonship -n '__fish_use_subcommand' -a explain -d 'Explain active modules'",
+    "complete -c moonship -n '__fish_use_subcommand' -a module -d 'Run a single module'",
+    "complete -c moonship -n '__fish_use_subcommand' -a init -d 'Print shell init script'",
+    "complete -c moonship -n '__fish_use_subcommand' -a cache -d 'Cache operations'",
+    "complete -c moonship -n '__fish_use_subcommand' -a completions -d 'Generate shell completions'",
+    "complete -c moonship -n '__fish_use_subcommand' -a session -d 'Generate random session key'",
+    "complete -c moonship -n '__fish_use_subcommand' -a time -d 'Print current time in ms'",
+    "complete -c moonship -n '__fish_use_subcommand' -a print-config -d 'Print active configuration'",
+    "complete -c moonship -n '__fish_use_subcommand' -a schema -d 'Print JSON Schema for config'",
+    "complete -c moonship -n '__fish_use_subcommand' -a version -d 'Print version'",
+    "complete -c moonship -n '__fish_use_subcommand' -a help -d 'Print help'",
+  ].join("\n")
+}
+
+///|
 fn run_init(shell_name : String, print_full : Bool) -> Unit {
   match @shell.Shell::from_string(shell_name) {
     Some(shell) => {
@@ -377,6 +453,7 @@ fn run_help() -> Unit {
     #|  moonship module --list       List available modules
     #|  moonship init <shell>        Print shell init stub
     #|    --print-full-init         Print full init script
+    #|  moonship completions <shell> Generate shell completions
     #|  moonship cache clear         Clear cached data
     #|  moonship session             Generate random session key
     #|  moonship time                Print current time in ms

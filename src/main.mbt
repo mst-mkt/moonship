@@ -14,6 +14,7 @@ async fn main {
       @cache.clear_cache()
       println("Cache cleared.")
     }
+    Completions(shell) => run_completions(shell)
     Session => run_session()
     Time => println(@async.now().to_string())
     PrintConfig(is_default) =>

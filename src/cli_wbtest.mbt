@@ -246,6 +246,19 @@ test "module: --list" {
 }
 
 ///|
+test "completions: with shell" {
+  match parse_args(["completions", "zsh"]) {
+    Completions(shell) => assert_eq(shell, "zsh")
+    _ => fail("Expected Completions")
+  }
+}
+
+///|
+test "completions: no shell shows help" {
+  assert_true(parse_args(["completions"]) is Help)
+}
+
+///|
 test "session" {
   assert_true(parse_args(["session"]) is Session)
 }
