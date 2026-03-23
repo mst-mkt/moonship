@@ -16,11 +16,14 @@ async fn main {
     }
     Session => run_session()
     Time => println(@async.now().to_string())
-    PrintConfig => {
-      let config = load_config()
-      emit_warnings(config.warnings)
-      println(config.to_toml())
-    }
+    PrintConfig(is_default) =>
+      if is_default {
+        println(default_config_toml())
+      } else {
+        let config = load_config()
+        emit_warnings(config.warnings)
+        println(config.to_toml())
+      }
     Schema => run_schema()
     Version => println("moonship 0.0.0")
     Help => run_help()

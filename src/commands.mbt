@@ -315,6 +315,32 @@ fn module_description(name : String) -> String {
 }
 
 ///|
+fn default_config_toml() -> String {
+  let schemas = collect_all_schemas()
+  let d = @config.Config::default()
+  let buf = StringBuilder::new()
+
+  buf.write_string("format = \{@config.escape_string(d.format)}\n")
+  buf.write_string("scan_timeout = \{d.scan_timeout}\n")
+  buf.write_string("command_timeout = \{d.command_timeout}\n")
+  buf.write_string("cache_ttl = \{d.cache_ttl}\n")
+  buf.write_string("add_newline = \{d.add_newline}\n")
+
+  for schema in schemas {
+    buf.write_string("\n[\{schema.name}]\n")
+    for field in schema.fields {
+      let val = match field.field_type {
+        @config.FString => @config.escape_string(field.default_value)
+        _ => field.default_value
+      }
+      buf.write_string("\{field.name} = \{val}\n")
+    }
+  }
+
+  buf.to_string()
+}
+
+///|
 fn run_init(shell_name : String, print_full : Bool) -> Unit {
   match @shell.Shell::from_string(shell_name) {
     Some(shell) => {
@@ -355,6 +381,7 @@ fn run_help() -> Unit {
     #|  moonship session             Generate random session key
     #|  moonship time                Print current time in ms
     #|  moonship print-config        Print active configuration
+    #|    --default, -d              Print default configuration
     #|  moonship schema              Print JSON Schema for config
     #|  moonship version             Print version
     #|  moonship help                Print this help

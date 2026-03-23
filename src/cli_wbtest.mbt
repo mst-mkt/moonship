@@ -126,7 +126,26 @@ test "version / help" {
 
 ///|
 test "print-config" {
-  assert_true(parse_args(["print-config"]) is PrintConfig)
+  match parse_args(["print-config"]) {
+    PrintConfig(is_default) => assert_false(is_default)
+    _ => fail("Expected PrintConfig")
+  }
+}
+
+///|
+test "print-config: --default" {
+  match parse_args(["print-config", "--default"]) {
+    PrintConfig(is_default) => assert_true(is_default)
+    _ => fail("Expected PrintConfig")
+  }
+}
+
+///|
+test "print-config: -d" {
+  match parse_args(["print-config", "-d"]) {
+    PrintConfig(is_default) => assert_true(is_default)
+    _ => fail("Expected PrintConfig")
+  }
 }
 
 ///|

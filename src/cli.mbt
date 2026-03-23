@@ -8,7 +8,7 @@ enum Command {
   Init(String, Bool)
   CacheClear
   Time
-  PrintConfig
+  PrintConfig(Bool)
   Session
   Schema
   Version
@@ -49,7 +49,13 @@ fn parse_args(args : Array[String]) -> Command {
       }
     "session" => Session
     "time" => Time
-    "print-config" => PrintConfig
+    "print-config" => {
+      let is_default = args[1:]
+        .to_array()
+        .iter()
+        .any(fn(a) { a == "--default" || a == "-d" })
+      PrintConfig(is_default)
+    }
     "schema" => Schema
     "version" | "--version" | "-V" => Version
     "help" | "--help" | "-h" => Help
