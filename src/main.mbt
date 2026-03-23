@@ -8,7 +8,7 @@ async fn main {
     Timings(pa) => run_timings(pa)
     Module(name, pa) => run_module(name, pa)
     ModuleList => run_module_list()
-    Init(shell_name) => run_init(shell_name)
+    Init(shell_name, print_full) => run_init(shell_name, print_full)
     CacheClear => {
       @cache.clear_cache()
       println("Cache cleared.")

@@ -158,11 +158,15 @@ async fn run_timings(pa : PromptArgs) -> Unit {
 }
 
 ///|
-fn run_init(shell_name : String) -> Unit {
+fn run_init(shell_name : String, print_full : Bool) -> Unit {
   match @shell.Shell::from_string(shell_name) {
     Some(shell) => {
       let bin = self_exe()
-      println(@shell.generate_init(shell, bin))
+      if print_full {
+        println(@shell.generate_init(shell, bin))
+      } else {
+        println(@shell.generate_init_stub(shell, bin))
+      }
     }
     None =>
       println(
@@ -187,7 +191,8 @@ fn run_help() -> Unit {
     #|  moonship timings [options]   Show module execution times
     #|  moonship module <name>       Run a single module
     #|  moonship module --list       List available modules
-    #|  moonship init <shell>        Print shell init script
+    #|  moonship init <shell>        Print shell init stub
+    #|    --print-full-init         Print full init script
     #|  moonship cache clear         Clear cached data
     #|  moonship session             Generate random session key
     #|  moonship time                Print current time in ms

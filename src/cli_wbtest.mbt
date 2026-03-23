@@ -132,7 +132,21 @@ test "print-config" {
 ///|
 test "init: with shell" {
   match parse_args(["init", "zsh"]) {
-    Init(shell) => assert_eq(shell, "zsh")
+    Init(shell, print_full) => {
+      assert_eq(shell, "zsh")
+      assert_false(print_full)
+    }
+    _ => fail("Expected Init")
+  }
+}
+
+///|
+test "init: --print-full-init" {
+  match parse_args(["init", "bash", "--print-full-init"]) {
+    Init(shell, print_full) => {
+      assert_eq(shell, "bash")
+      assert_true(print_full)
+    }
     _ => fail("Expected Init")
   }
 }

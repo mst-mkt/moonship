@@ -4,7 +4,7 @@ enum Command {
   Timings(PromptArgs)
   Module(String, PromptArgs)
   ModuleList
-  Init(String)
+  Init(String, Bool)
   CacheClear
   Time
   PrintConfig
@@ -38,7 +38,7 @@ fn parse_args(args : Array[String]) -> Command {
     "prompt" => parse_prompt_args(args[1:].to_array(), fn(pa) { Prompt(pa) })
     "timings" => parse_prompt_args(args[1:].to_array(), fn(pa) { Timings(pa) })
     "module" => parse_module_command(args)
-    "init" => if args.length() > 1 { Init(args[1]) } else { UnknownShell }
+    "init" => parse_init_command(args)
     "cache" =>
       if args.length() > 1 && args[1] == "clear" {
         CacheClear
@@ -139,6 +139,19 @@ fn parse_module_command(args : Array[String]) -> Command {
   let name = args[1]
   let rest = args[2:].to_array()
   parse_prompt_args(rest, fn(pa) { Module(name, pa) })
+}
+
+///|
+fn parse_init_command(args : Array[String]) -> Command {
+  guard args.length() > 1 else { return UnknownShell }
+
+  let shell = args[1]
+  let print_full = args[2:]
+    .to_array()
+    .iter()
+    .any(fn(a) { a == "--print-full-init" })
+
+  Init(shell, print_full)
 }
 
 ///|

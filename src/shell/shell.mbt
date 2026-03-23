@@ -68,3 +68,17 @@ pub fn generate_init(shell : Shell, binary_path : String) -> String {
 
   template.replace(old="::BIN::", new=escaped)
 }
+
+///|
+pub fn generate_init_stub(shell : Shell, binary_path : String) -> String {
+  let escaped = match shell {
+    Zsh | Bash => escape_shell_single_quote(binary_path)
+    Fish => escape_fish_single_quote(binary_path)
+  }
+
+  match shell {
+    Zsh => "eval \"$('\{escaped}' init zsh --print-full-init)\""
+    Bash => "eval \"$('\{escaped}' init bash --print-full-init)\""
+    Fish => "source ('\{escaped}' init fish --print-full-init | psub)"
+  }
+}
