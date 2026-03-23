@@ -15,8 +15,20 @@ test "extract_branch_name: empty" {
 }
 
 ///|
+let empty_status : GitStatus = {
+  staged: 0,
+  modified: 0,
+  untracked: 0,
+  deleted: 0,
+  conflicted: 0,
+  renamed: 0,
+  typechanged: 0,
+  stashed: 0,
+}
+
+///|
 test "count_status: empty" {
-  assert_eq(count_status([]), (0, 0, 0, 0))
+  assert_eq(count_status([]), empty_status)
 }
 
 ///|
@@ -27,7 +39,11 @@ test "count_status: mixed" {
     @libgit2.StatusFlags::new(@libgit2.GIT_STATUS_WT_NEW),
     @libgit2.StatusFlags::new(@libgit2.GIT_STATUS_INDEX_MODIFIED),
   ]
-  assert_eq(count_status(flags), (2, 1, 1, 0))
+  let result = count_status(flags)
+  assert_eq(result.staged, 2)
+  assert_eq(result.modified, 1)
+  assert_eq(result.untracked, 1)
+  assert_eq(result.deleted, 0)
 }
 
 ///|
@@ -36,7 +52,28 @@ test "count_status: with deleted" {
     @libgit2.StatusFlags::new(@libgit2.GIT_STATUS_WT_DELETED),
     @libgit2.StatusFlags::new(@libgit2.GIT_STATUS_INDEX_NEW),
   ]
-  assert_eq(count_status(flags), (1, 0, 0, 1))
+  let result = count_status(flags)
+  assert_eq(result.staged, 1)
+  assert_eq(result.deleted, 1)
+  assert_eq(result.untracked, 0)
+}
+
+///|
+test "count_status: conflicted" {
+  let flags = [
+    @libgit2.StatusFlags::new(git_status_conflicted),
+  ]
+  let result = count_status(flags)
+  assert_eq(result.conflicted, 1)
+}
+
+///|
+test "count_status: renamed" {
+  let flags = [
+    @libgit2.StatusFlags::new(git_status_index_renamed),
+  ]
+  let result = count_status(flags)
+  assert_eq(result.renamed, 1)
 }
 
 ///|

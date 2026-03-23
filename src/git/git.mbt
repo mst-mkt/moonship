@@ -44,8 +44,23 @@ pub fn RepoHandle::get_branch(self : RepoHandle) -> (String, Bool, String) {
 }
 
 ///|
-pub fn RepoHandle::get_status(self : RepoHandle) -> (Int, Int, Int, Int) {
-  count_status(self.repo.status_flags())
+pub(all) struct GitStatus {
+  staged : Int
+  modified : Int
+  untracked : Int
+  deleted : Int
+  conflicted : Int
+  renamed : Int
+  typechanged : Int
+  stashed : Int
+} derive(Show, Eq)
+
+///|
+pub fn RepoHandle::get_status(self : RepoHandle) -> GitStatus {
+  let base = count_status(self.repo.status_flags())
+  let stashed = if has_stash(self.root) { 1 } else { 0 }
+
+  { ..base, stashed }
 }
 
 ///|
@@ -83,6 +98,19 @@ fn last_slash(s : String) -> Int? {
 }
 
 ///|
+fn has_stash(root : String) -> Bool {
+  if @fs.path_exists("\{root}/.git/refs/stash") {
+    return true
+  }
+
+  let packed_refs_path = "\{root}/.git/packed-refs"
+  guard @fs.path_exists(packed_refs_path) else { return false }
+
+  let content = @fs.read_file_to_string(packed_refs_path) catch { _ => return false }
+  content.contains("refs/stash")
+}
+
+///|
 fn extract_branch_name(head_ref : String) -> String {
   let prefix = "refs/heads/"
 
@@ -94,16 +122,57 @@ fn extract_branch_name(head_ref : String) -> String {
 }
 
 ///|
-fn count_status(flags : Array[@libgit2.StatusFlags]) -> (Int, Int, Int, Int) {
+let git_status_index_renamed = 8
+
+///|
+let git_status_index_typechange = 16
+
+///|
+let git_status_wt_renamed = 2048
+
+///|
+let git_status_wt_typechange = 4096
+
+///|
+let git_status_conflicted = 32768
+
+///|
+fn count_status(flags : Array[@libgit2.StatusFlags]) -> GitStatus {
   flags
   .iter()
-  .fold(init=(0, 0, 0, 0), fn(acc, f) {
-    let (s, m, u, d) = acc
-    (
-      s + Bool::to_int(f.is_staged()),
-      m + Bool::to_int(f.is_modified()),
-      u + Bool::to_int(f.is_new()),
-      d + Bool::to_int(f.is_deleted()),
-    )
-  })
+  .fold(
+    init={
+      staged: 0,
+      modified: 0,
+      untracked: 0,
+      deleted: 0,
+      conflicted: 0,
+      renamed: 0,
+      typechanged: 0,
+      stashed: 0,
+    },
+    fn(acc, f) {
+      let bits = f.flags
+      {
+        staged: acc.staged + Bool::to_int(f.is_staged()),
+        modified: acc.modified + Bool::to_int(f.is_modified()),
+        untracked: acc.untracked + Bool::to_int(f.is_new()),
+        deleted: acc.deleted + Bool::to_int(f.is_deleted()),
+        conflicted: acc.conflicted +
+          Bool::to_int(bits.land(git_status_conflicted) != 0),
+        renamed: acc.renamed +
+          Bool::to_int(
+            bits.land(git_status_index_renamed.lor(git_status_wt_renamed)) != 0,
+          ),
+        typechanged: acc.typechanged +
+          Bool::to_int(
+            bits.land(
+              git_status_index_typechange.lor(git_status_wt_typechange),
+            ) !=
+            0,
+          ),
+        stashed: 0,
+      }
+    },
+  )
 }

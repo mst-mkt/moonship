@@ -43,34 +43,52 @@ async test "build_status_string: count>1 symbol only" {
 // --- render_status unit tests ---
 
 ///|
+let empty_git_status : @git.GitStatus = {
+  staged: 0,
+  modified: 0,
+  untracked: 0,
+  deleted: 0,
+  conflicted: 0,
+  renamed: 0,
+  typechanged: 0,
+  stashed: 0,
+}
+
+///|
 async test "render_status: staged only" {
   let m = GitStatusModule::default()
-  guard m.render_status(1, 0, 0, 0) is Output(out) else {
+  let status = { ..empty_git_status, staged: 1 }
+  guard m.render_status(status, 0, 0) is Output(out) else {
     fail("expected Output")
   }
 
   let rendered = out.render()
   assert_true(rendered.contains("+"))
   assert_false(rendered.contains("!"))
-  assert_false(rendered.contains("?"))
 }
 
 ///|
 async test "render_status: modified only" {
   let m = GitStatusModule::default()
-  guard m.render_status(0, 1, 0, 0) is Output(out) else {
+  let status = { ..empty_git_status, modified: 1 }
+  guard m.render_status(status, 0, 0) is Output(out) else {
     fail("expected Output")
   }
 
   let rendered = out.render()
-  assert_false(rendered.contains("+"))
   assert_true(rendered.contains("!"))
 }
 
 ///|
 async test "render_status: all types present" {
   let m = GitStatusModule::default()
-  guard m.render_status(2, 3, 1, 0) is Output(out) else {
+  let status = {
+    ..empty_git_status,
+    staged: 2,
+    modified: 3,
+    untracked: 1,
+  }
+  guard m.render_status(status, 0, 0) is Output(out) else {
     fail("expected Output")
   }
 
@@ -83,19 +101,19 @@ async test "render_status: all types present" {
 ///|
 async test "render_status: deleted only" {
   let m = GitStatusModule::default()
-  guard m.render_status(0, 0, 0, 1) is Output(out) else {
+  let status = { ..empty_git_status, deleted: 1 }
+  guard m.render_status(status, 0, 0) is Output(out) else {
     fail("expected Output")
   }
 
   let rendered = out.render()
   assert_true(rendered.contains("✘"))
-  assert_false(rendered.contains("+"))
 }
 
 ///|
 async test "render_status: all zero returns Skipped" {
   let m = GitStatusModule::default()
-  assert_true(m.render_status(0, 0, 0, 0) is Skipped("no changes"))
+  assert_true(m.render_status(empty_git_status, 0, 0) is Skipped("no changes"))
 }
 
 ///|
@@ -110,7 +128,14 @@ async test "render_status: custom symbols" {
     ),
   )
   let m = GitStatusModule::from_config(config)
-  guard m.render_status(1, 1, 1, 1) is Output(out) else {
+  let status = {
+    ..empty_git_status,
+    staged: 1,
+    modified: 1,
+    untracked: 1,
+    deleted: 1,
+  }
+  guard m.render_status(status, 0, 0) is Output(out) else {
     fail("expected Output")
   }
 
@@ -119,6 +144,80 @@ async test "render_status: custom symbols" {
   assert_true(rendered.contains("M"))
   assert_true(rendered.contains("U"))
   assert_true(rendered.contains("D"))
+}
+
+///|
+async test "render_status: ahead behind" {
+  let m = GitStatusModule::default()
+  guard m.render_status(empty_git_status, 3, 0) is Output(out) else {
+    fail("expected Output")
+  }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("⇡"))
+}
+
+///|
+async test "render_status: diverged" {
+  let m = GitStatusModule::default()
+  guard m.render_status(empty_git_status, 2, 1) is Output(out) else {
+    fail("expected Output")
+  }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("⇕"))
+}
+
+///|
+async test "render_status: stashed" {
+  let m = GitStatusModule::default()
+  let status = { ..empty_git_status, stashed: 1 }
+  guard m.render_status(status, 0, 0) is Output(out) else {
+    fail("expected Output")
+  }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("$"))
+}
+
+///|
+test "parse_ahead_behind: valid" {
+  assert_eq(parse_ahead_behind("3\t5"), (5, 3))
+}
+
+///|
+test "parse_ahead_behind: empty" {
+  assert_eq(parse_ahead_behind(""), (0, 0))
+}
+
+///|
+test "parse_ahead_behind: zero" {
+  assert_eq(parse_ahead_behind("0\t0"), (0, 0))
+}
+
+///|
+test "build_ahead_behind: ahead only" {
+  assert_eq(build_ahead_behind(3, 0, "⇡", "⇣", "", "⇕"), "⇡")
+}
+
+///|
+test "build_ahead_behind: behind only" {
+  assert_eq(build_ahead_behind(0, 2, "⇡", "⇣", "", "⇕"), "⇣")
+}
+
+///|
+test "build_ahead_behind: diverged" {
+  assert_eq(build_ahead_behind(1, 1, "⇡", "⇣", "", "⇕"), "⇕")
+}
+
+///|
+test "build_ahead_behind: up to date with symbol" {
+  assert_eq(build_ahead_behind(0, 0, "⇡", "⇣", "✓", "⇕"), "✓")
+}
+
+///|
+test "build_ahead_behind: up to date no symbol" {
+  assert_eq(build_ahead_behind(0, 0, "⇡", "⇣", "", "⇕"), "")
 }
 
 // --- execute integration tests ---

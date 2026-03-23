@@ -8,6 +8,14 @@ pub struct GitStatusModule {
   modified : String
   untracked : String
   deleted : String
+  conflicted : String
+  renamed : String
+  typechanged : String
+  stashed : String
+  ahead : String
+  behind : String
+  up_to_date : String
+  diverged : String
 }
 
 ///|
@@ -21,6 +29,14 @@ pub fn GitStatusModule::default() -> GitStatusModule {
     modified: "!",
     untracked: "?",
     deleted: "✘",
+    conflicted: "=",
+    renamed: "»",
+    typechanged: "",
+    stashed: "$",
+    ahead: "⇡",
+    behind: "⇣",
+    up_to_date: "",
+    diverged: "⇕",
   }
 }
 
@@ -38,6 +54,14 @@ pub fn GitStatusModule::from_table(
     modified: table.get_string("modified").unwrap_or(d.modified),
     untracked: table.get_string("untracked").unwrap_or(d.untracked),
     deleted: table.get_string("deleted").unwrap_or(d.deleted),
+    conflicted: table.get_string("conflicted").unwrap_or(d.conflicted),
+    renamed: table.get_string("renamed").unwrap_or(d.renamed),
+    typechanged: table.get_string("typechanged").unwrap_or(d.typechanged),
+    stashed: table.get_string("stashed").unwrap_or(d.stashed),
+    ahead: table.get_string("ahead").unwrap_or(d.ahead),
+    behind: table.get_string("behind").unwrap_or(d.behind),
+    up_to_date: table.get_string("up_to_date").unwrap_or(d.up_to_date),
+    diverged: table.get_string("diverged").unwrap_or(d.diverged),
   }
 }
 
@@ -69,34 +93,73 @@ pub impl @ms.PromptModule for GitStatusModule with execute(
     return Skipped("not in git repository")
   }
 
-  let (staged, modified, untracked, deleted) = repo.get_status()
-  self.render_status(staged, modified, untracked, deleted)
+  let status = repo.get_status()
+  let ahead_behind = @exec.exec_cmd(
+    "git",
+    ["-C", ctx.cwd, "rev-list", "--count", "--left-right", "@{upstream}...HEAD"],
+  )
+
+  let (ahead_count, behind_count) = parse_ahead_behind(ahead_behind)
+  self.render_status(status, ahead_count, behind_count)
 }
 
 ///|
 fn GitStatusModule::render_status(
   self : GitStatusModule,
-  staged : Int,
-  modified : Int,
-  untracked : Int,
-  deleted : Int,
+  status : @git.GitStatus,
+  ahead_count : Int,
+  behind_count : Int,
 ) -> @ms.ModuleResult {
   let all_status = build_status_string([
-    (staged, self.staged),
-    (modified, self.modified),
-    (untracked, self.untracked),
-    (deleted, self.deleted),
+    (status.staged, self.staged),
+    (status.modified, self.modified),
+    (status.untracked, self.untracked),
+    (status.deleted, self.deleted),
+    (status.conflicted, self.conflicted),
+    (status.renamed, self.renamed),
+    (status.typechanged, self.typechanged),
+    (status.stashed, self.stashed),
   ])
-  guard not(all_status.is_empty()) else { return Skipped("no changes") }
+
+  let ahead_behind = build_ahead_behind(
+    ahead_count,
+    behind_count,
+    self.ahead,
+    self.behind,
+    self.up_to_date,
+    self.diverged,
+  )
+
+  guard not(all_status.is_empty()) || not(ahead_behind.is_empty()) else {
+    return Skipped("no changes")
+  }
 
   let vars : Map[String, String] = {
     "all_status": all_status,
-    "staged": format_count(staged, self.staged),
-    "modified": format_count(modified, self.modified),
-    "untracked": format_count(untracked, self.untracked),
-    "deleted": format_count(deleted, self.deleted),
+    "ahead_behind": ahead_behind,
+    "staged": format_count(status.staged, self.staged),
+    "modified": format_count(status.modified, self.modified),
+    "untracked": format_count(status.untracked, self.untracked),
+    "deleted": format_count(status.deleted, self.deleted),
+    "conflicted": format_count(status.conflicted, self.conflicted),
+    "renamed": format_count(status.renamed, self.renamed),
+    "typechanged": format_count(status.typechanged, self.typechanged),
+    "stashed": format_count(status.stashed, self.stashed),
+    "ahead": if ahead_count > 0 { self.ahead } else { "" },
+    "behind": if behind_count > 0 { self.behind } else { "" },
+    "up_to_date": if ahead_count == 0 && behind_count == 0 {
+      self.up_to_date
+    } else {
+      ""
+    },
+    "diverged": if ahead_count > 0 && behind_count > 0 {
+      self.diverged
+    } else {
+      ""
+    },
     "style": self.style,
   }
+
   let segments = @ms.format_string(
     self.format,
     vars,
@@ -126,6 +189,40 @@ fn build_status_string(counts : Array[(Int, String)]) -> String {
 }
 
 ///|
+fn parse_ahead_behind(output : String) -> (Int, Int) {
+  guard not(output.is_empty()) else { return (0, 0) }
+
+  let parts = output.split("\t").map(fn(s) { s.to_string() }).collect()
+  guard parts.length() == 2 else { return (0, 0) }
+
+  let behind = @strconv.parse_int(parts[0]) catch { _ => 0 }
+  let ahead = @strconv.parse_int(parts[1]) catch { _ => 0 }
+  (ahead, behind)
+}
+
+///|
+fn build_ahead_behind(
+  ahead : Int,
+  behind : Int,
+  ahead_sym : String,
+  behind_sym : String,
+  up_to_date_sym : String,
+  diverged_sym : String,
+) -> String {
+  if ahead > 0 && behind > 0 {
+    diverged_sym
+  } else if ahead > 0 {
+    ahead_sym
+  } else if behind > 0 {
+    behind_sym
+  } else if not(up_to_date_sym.is_empty()) {
+    up_to_date_sym
+  } else {
+    ""
+  }
+}
+
+///|
 pub fn GitStatusModule::schema() -> @config.ModuleSchema {
   let d = GitStatusModule::default()
   {
@@ -150,6 +247,30 @@ pub fn GitStatusModule::schema() -> @config.ModuleSchema {
         default_value: d.untracked,
       },
       { name: "deleted", field_type: @config.FString, default_value: d.deleted },
+      {
+        name: "conflicted",
+        field_type: @config.FString,
+        default_value: d.conflicted,
+      },
+      { name: "renamed", field_type: @config.FString, default_value: d.renamed },
+      {
+        name: "typechanged",
+        field_type: @config.FString,
+        default_value: d.typechanged,
+      },
+      { name: "stashed", field_type: @config.FString, default_value: d.stashed },
+      { name: "ahead", field_type: @config.FString, default_value: d.ahead },
+      { name: "behind", field_type: @config.FString, default_value: d.behind },
+      {
+        name: "up_to_date",
+        field_type: @config.FString,
+        default_value: d.up_to_date,
+      },
+      {
+        name: "diverged",
+        field_type: @config.FString,
+        default_value: d.diverged,
+      },
     ],
   }
 }
