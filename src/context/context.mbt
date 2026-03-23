@@ -1,6 +1,7 @@
 ///|
 pub struct Context {
   cwd : String
+  logical_dir : String
   home_dir : String
   status : Int
   pipestatus : Array[String]
@@ -17,6 +18,7 @@ pub struct Context {
 ///|
 pub fn Context::new(
   cwd~ : String,
+  logical_dir? : String = "",
   home_dir? : String = "",
   status? : Int = 0,
   pipestatus? : Array[String] = [],
@@ -29,6 +31,7 @@ pub fn Context::new(
 ) -> Context {
   {
     cwd,
+    logical_dir: if logical_dir.is_empty() { cwd } else { logical_dir },
     home_dir,
     status,
     pipestatus,

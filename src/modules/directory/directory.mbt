@@ -8,6 +8,7 @@ pub struct DirectoryModule {
   truncate_to_repo : Bool
   truncation_symbol : String
   home_symbol : String
+  use_logical_path : Bool
 }
 
 ///|
@@ -21,6 +22,7 @@ pub fn DirectoryModule::default() -> DirectoryModule {
     truncate_to_repo: true,
     truncation_symbol: "",
     home_symbol: "~",
+    use_logical_path: true,
   }
 }
 
@@ -44,6 +46,9 @@ pub fn DirectoryModule::from_table(
     .get_string("truncation_symbol")
     .unwrap_or(d.truncation_symbol),
     home_symbol: table.get_string("home_symbol").unwrap_or(d.home_symbol),
+    use_logical_path: table
+    .get_bool("use_logical_path")
+    .unwrap_or(d.use_logical_path),
   }
 }
 
@@ -78,8 +83,10 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
     None
   }
 
+  let display_dir = if self.use_logical_path { ctx.logical_dir } else { ctx.cwd }
+
   let path = format_path(
-    ctx.cwd,
+    display_dir,
     ctx.home_dir,
     self.truncation_length,
     self.truncate_to_repo,
@@ -200,6 +207,11 @@ pub fn DirectoryModule::schema() -> @config.ModuleSchema {
         name: "home_symbol",
         field_type: @config.FString,
         default_value: d.home_symbol,
+      },
+      {
+        name: "use_logical_path",
+        field_type: @config.FBool,
+        default_value: d.use_logical_path.to_string(),
       },
     ],
   }

@@ -272,3 +272,45 @@ async test "execute: truncation applied" {
   assert_true(rendered.contains("e"))
   assert_false(rendered.contains("/a/b/c/d/e"))
 }
+
+///|
+async test "execute: use_logical_path displays logical_dir" {
+  let ctx = @context.Context::new(
+    cwd="/real/path",
+    logical_dir="/virtual/path",
+  )
+  let m = DirectoryModule::default()
+  guard m.execute(ctx) is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("virtual"))
+  assert_false(rendered.contains("real"))
+}
+
+///|
+async test "execute: use_logical_path=false displays cwd" {
+  let config = @config.Config::from_toml(
+    (
+      #|[directory]
+      #|use_logical_path = false
+    ),
+  )
+  let ctx = @context.Context::new(
+    cwd="/real/path",
+    logical_dir="/virtual/path",
+    config~,
+  )
+  let m = DirectoryModule::from_config(config)
+  guard m.execute(ctx) is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("real"))
+  assert_false(rendered.contains("virtual"))
+}
+
+///|
+async test "execute: logical_dir defaults to cwd when empty" {
+  let ctx = @context.Context::new(cwd="/some/path")
+
+  assert_eq(ctx.logical_dir, "/some/path")
+}

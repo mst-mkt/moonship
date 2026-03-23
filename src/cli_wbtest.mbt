@@ -241,6 +241,24 @@ test "prompt: --pipestatus empty" {
 }
 
 ///|
+test "prompt: --logical-path" {
+  let cmd = parse_args(["prompt", "--logical-path", "/virtual/path"])
+  match cmd {
+    Prompt(pa) => assert_eq(pa.logical_path, "/virtual/path")
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: -P short flag" {
+  let cmd = parse_args(["prompt", "-P", "/virtual/path"])
+  match cmd {
+    Prompt(pa) => assert_eq(pa.logical_path, "/virtual/path")
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
 test "prompt: no pipestatus defaults to empty" {
   let cmd = parse_args(["prompt"])
   match cmd {

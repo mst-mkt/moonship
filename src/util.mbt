@@ -18,6 +18,7 @@ fn build_context(pa : PromptArgs) -> @context.Context {
 
   @context.Context::new(
     cwd~,
+    logical_dir=pa.logical_path,
     home_dir~,
     status=pa.status,
     pipestatus=pa.pipestatus,

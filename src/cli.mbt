@@ -25,6 +25,7 @@ struct PromptArgs {
   terminal_width : Int
   keymap : String
   path : String
+  logical_path : String
   shlvl : Int
   is_async : Bool
 }
@@ -66,6 +67,7 @@ fn parse_prompt_args(
   let terminal_width = Ref::new("80")
   let keymap = Ref::new("")
   let path = Ref::new("")
+  let logical_path = Ref::new("")
   let shlvl = Ref::new("0")
   let is_async = Ref::new(false)
 
@@ -92,6 +94,12 @@ fn parse_prompt_args(
     ),
     ("--keymap", "-k", Set_string(keymap), "vim keymap mode"),
     ("--path", "-p", Set_string(path), "override current directory"),
+    (
+      "--logical-path",
+      "-P",
+      Set_string(logical_path),
+      "logical path for display",
+    ),
     ("--shlvl", "", Set_string(shlvl), "shell nesting level"),
     ("--async", "", Set(is_async), "recompute and update cache"),
   ]
@@ -114,6 +122,7 @@ fn parse_prompt_args(
     terminal_width: parse_int_arg(terminal_width.val),
     keymap: keymap.val,
     path: path.val,
+    logical_path: logical_path.val,
     shlvl: parse_int_arg(shlvl.val),
     is_async: is_async.val,
   })

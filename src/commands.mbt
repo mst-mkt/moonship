@@ -204,6 +204,7 @@ fn run_help() -> Unit {
     #|  --terminal-width=<cols>   Terminal width in columns
     #|  --keymap=<mode>           Vim keymap mode (vicmd, visual, replace)
     #|  --path=<path>             Override current directory
+    #|  --logical-path=<path>    Logical path for display
     #|  --shlvl=<n>               Shell nesting level
     #|  --async                   Recompute and update cache
     #|
