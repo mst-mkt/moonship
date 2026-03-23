@@ -309,6 +309,16 @@ async test "execute: use_logical_path=false displays cwd" {
 }
 
 ///|
+test "is_writable: writable directory" {
+  assert_true(is_writable("/tmp"))
+}
+
+///|
+test "is_writable: non-writable directory" {
+  assert_false(is_writable("/root"))
+}
+
+///|
 async test "execute: logical_dir defaults to cwd when empty" {
   let ctx = @context.Context::new(cwd="/some/path")
 

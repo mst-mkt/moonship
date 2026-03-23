@@ -8,6 +8,8 @@ pub struct DirectoryModule {
   truncate_to_repo : Bool
   truncation_symbol : String
   home_symbol : String
+  read_only : String
+  read_only_style : String
   use_logical_path : Bool
 }
 
@@ -22,6 +24,8 @@ pub fn DirectoryModule::default() -> DirectoryModule {
     truncate_to_repo: true,
     truncation_symbol: "",
     home_symbol: "~",
+    read_only: "🔒",
+    read_only_style: "red",
     use_logical_path: true,
   }
 }
@@ -46,6 +50,10 @@ pub fn DirectoryModule::from_table(
     .get_string("truncation_symbol")
     .unwrap_or(d.truncation_symbol),
     home_symbol: table.get_string("home_symbol").unwrap_or(d.home_symbol),
+    read_only: table.get_string("read_only").unwrap_or(d.read_only),
+    read_only_style: table
+    .get_string("read_only_style")
+    .unwrap_or(d.read_only_style),
     use_logical_path: table
     .get_bool("use_logical_path")
     .unwrap_or(d.use_logical_path),
@@ -94,7 +102,16 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
     truncation_symbol=self.truncation_symbol,
     home_symbol=self.home_symbol,
   )
-  let vars : Map[String, String] = { "path": path, "style": self.style }
+
+  let is_read_only = not(is_writable(ctx.cwd))
+  let read_only_val = if is_read_only { self.read_only } else { "" }
+
+  let vars : Map[String, String] = {
+    "path": path,
+    "style": self.style,
+    "read_only": read_only_val,
+    "read_only_style": self.read_only_style,
+  }
   let segments = @ms.format_string(
     self.format,
     vars,
@@ -176,6 +193,17 @@ fn split_path(path : String) -> Array[String] {
 }
 
 ///|
+fn is_writable(path : String) -> Bool {
+  // Try to create a temp file to check writability
+  let test_path = path + "/.moonship_write_test"
+
+  @fs.write_string_to_file(test_path, "") catch { _ => return false }
+
+  @fs.remove_file(test_path) catch { _ => () }
+  true
+}
+
+///|
 pub fn DirectoryModule::schema() -> @config.ModuleSchema {
   let d = DirectoryModule::default()
   {
@@ -207,6 +235,16 @@ pub fn DirectoryModule::schema() -> @config.ModuleSchema {
         name: "home_symbol",
         field_type: @config.FString,
         default_value: d.home_symbol,
+      },
+      {
+        name: "read_only",
+        field_type: @config.FString,
+        default_value: d.read_only,
+      },
+      {
+        name: "read_only_style",
+        field_type: @config.FString,
+        default_value: d.read_only_style,
       },
       {
         name: "use_logical_path",

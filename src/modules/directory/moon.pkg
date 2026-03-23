@@ -1,4 +1,5 @@
 import {
+  "moonbitlang/x/fs" @fs,
   "mst-mkt/moonship/config" @config,
   "mst-mkt/moonship/context" @context,
   "mst-mkt/moonship/module_system" @ms,
