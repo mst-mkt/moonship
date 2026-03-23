@@ -3,6 +3,7 @@ pub struct Context {
   cwd : String
   home_dir : String
   status : Int
+  pipestatus : Array[String]
   cmd_duration : Int
   jobs : Int
   terminal_width : Int
@@ -18,6 +19,7 @@ pub fn Context::new(
   cwd~ : String,
   home_dir? : String = "",
   status? : Int = 0,
+  pipestatus? : Array[String] = [],
   cmd_duration? : Int = 0,
   jobs? : Int = 0,
   terminal_width? : Int = 80,
@@ -29,6 +31,7 @@ pub fn Context::new(
     cwd,
     home_dir,
     status,
+    pipestatus,
     cmd_duration,
     jobs,
     terminal_width,

@@ -19,6 +19,7 @@ enum Command {
 ///|
 struct PromptArgs {
   status : Int
+  pipestatus : Array[String]
   cmd_duration : Int
   jobs : Int
   terminal_width : Int
@@ -59,6 +60,7 @@ fn parse_prompt_args(
   ctor : (PromptArgs) -> Command,
 ) -> Command {
   let status = Ref::new("0")
+  let pipestatus_raw = Ref::new("")
   let cmd_duration = Ref::new("0")
   let jobs = Ref::new("0")
   let terminal_width = Ref::new("80")
@@ -69,6 +71,12 @@ fn parse_prompt_args(
 
   let spec : Array[(String, String, @ArgParser.Spec, String)] = [
     ("--status", "-s", Set_string(status), "exit code of last command"),
+    (
+      "--pipestatus",
+      "",
+      Set_string(pipestatus_raw),
+      "pipe status of last command",
+    ),
     (
       "--cmd-duration",
       "-d",
@@ -92,8 +100,15 @@ fn parse_prompt_args(
     _ => ()
   }
 
+  let pipestatus = if pipestatus_raw.val.is_empty() {
+    []
+  } else {
+    pipestatus_raw.val.split(" ").map(fn(s) { s.to_string() }).collect()
+  }
+
   ctor({
     status: parse_int_arg(status.val),
+    pipestatus,
     cmd_duration: parse_int_arg(cmd_duration.val),
     jobs: parse_int_arg(jobs.val),
     terminal_width: parse_int_arg(terminal_width.val),

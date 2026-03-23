@@ -216,3 +216,35 @@ test "module: --list" {
 test "session" {
   assert_true(parse_args(["session"]) is Session)
 }
+
+///|
+test "prompt: --pipestatus" {
+  let cmd = parse_args(["prompt", "--pipestatus", "0 1 0"])
+  match cmd {
+    Prompt(pa) => {
+      assert_eq(pa.pipestatus.length(), 3)
+      assert_eq(pa.pipestatus[0], "0")
+      assert_eq(pa.pipestatus[1], "1")
+      assert_eq(pa.pipestatus[2], "0")
+    }
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: --pipestatus empty" {
+  let cmd = parse_args(["prompt", "--pipestatus", ""])
+  match cmd {
+    Prompt(pa) => assert_eq(pa.pipestatus.length(), 0)
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: no pipestatus defaults to empty" {
+  let cmd = parse_args(["prompt"])
+  match cmd {
+    Prompt(pa) => assert_eq(pa.pipestatus.length(), 0)
+    _ => fail("Expected Prompt")
+  }
+}

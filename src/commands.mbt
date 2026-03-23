@@ -198,6 +198,7 @@ fn run_help() -> Unit {
     #|
     #|Prompt options:
     #|  --status=<n>              Exit code of last command
+    #|  --pipestatus=<codes>     Pipe status (space-delimited)
     #|  --cmd-duration=<ms>       Duration of last command
     #|  --jobs=<n>                Number of background jobs
     #|  --terminal-width=<cols>   Terminal width in columns

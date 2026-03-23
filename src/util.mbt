@@ -20,6 +20,7 @@ fn build_context(pa : PromptArgs) -> @context.Context {
     cwd~,
     home_dir~,
     status=pa.status,
+    pipestatus=pa.pipestatus,
     cmd_duration=pa.cmd_duration,
     jobs=pa.jobs,
     terminal_width=pa.terminal_width,
