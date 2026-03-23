@@ -341,6 +341,60 @@ fn default_config_toml() -> String {
 }
 
 ///|
+async fn run_bug_report() -> Unit {
+  let shell = @sys.get_env_var("SHELL").unwrap_or("unknown")
+  let term = @sys.get_env_var("TERM").unwrap_or("unknown")
+  let term_program = @sys.get_env_var("TERM_PROGRAM").unwrap_or("unknown")
+
+  let os_info = {
+    let out = @exec.exec_cmd("uname", ["-srm"])
+    if out.is_empty() { "unknown" } else { out }
+  }
+
+  let config_path = {
+    let env_path = @sys.get_env_var("MOONSHIP_CONFIG").unwrap_or("")
+    if not(env_path.is_empty()) {
+      env_path
+    } else {
+      let home = @sys.get_env_var("HOME").unwrap_or("")
+      if home.is_empty() {
+        "(none)"
+      } else {
+        find_config_file("\{home}/.config/moonship")
+      }
+    }
+  }
+
+  let config_contents = if config_path.is_empty() || config_path == "(none)" {
+    "(no config file found)"
+  } else {
+    @fs.read_file_to_string(config_path) catch { _ => "(could not read)" }
+  }
+
+  println(
+    [
+      "#### Environment",
+      "",
+      "- **moonship version**: moonship 0.0.0",
+      "- **Shell**: \{shell}",
+      "- **Terminal**: \{term_program} (\{term})",
+      {
+        let os = os_info.trim_end(chars=" \n\r\t")
+        "- **Operating System**: \{os}"
+      },
+      "",
+      "#### Config",
+      "",
+      "**Config path**: `\{config_path}`",
+      "",
+      "```toml",
+      config_contents,
+      "```",
+    ].join("\n"),
+  )
+}
+
+///|
 fn run_completions(shell_name : String) -> Unit {
   match shell_name {
     "zsh" => println(generate_zsh_completions())
@@ -453,6 +507,7 @@ fn run_help() -> Unit {
     #|  moonship module --list       List available modules
     #|  moonship init <shell>        Print shell init stub
     #|    --print-full-init         Print full init script
+    #|  moonship bug-report          Print environment info for bug reports
     #|  moonship completions <shell> Generate shell completions
     #|  moonship cache clear         Clear cached data
     #|  moonship session             Generate random session key

@@ -246,6 +246,11 @@ test "module: --list" {
 }
 
 ///|
+test "bug-report" {
+  assert_true(parse_args(["bug-report"]) is BugReport)
+}
+
+///|
 test "completions: with shell" {
   match parse_args(["completions", "zsh"]) {
     Completions(shell) => assert_eq(shell, "zsh")

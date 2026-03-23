@@ -9,6 +9,7 @@ enum Command {
   CacheClear
   Time
   PrintConfig(Bool)
+  BugReport
   Completions(String)
   Session
   Schema
@@ -48,6 +49,7 @@ fn parse_args(args : Array[String]) -> Command {
       } else {
         Help
       }
+    "bug-report" => BugReport
     "completions" =>
       if args.length() > 1 {
         Completions(args[1])
