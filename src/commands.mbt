@@ -49,6 +49,26 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
 extern "C" fn notify_parent() -> Int = "moonship_notify_parent"
 
 ///|
+fn run_session() -> Unit {
+  let charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  let charset_len = charset.length().reinterpret_as_uint()
+  let now = @async.now().reinterpret_as_uint64()
+  let seed = Bytes::makei(32, fn(i) {
+    ((now >> ((i % 8) * 8)) ^ (i.reinterpret_as_uint().to_uint64() * 0x9E3779B97F4A7C15UL)).to_byte()
+  })
+
+  let rng = @random.Rand::chacha8(seed~)
+
+  let result = StringBuilder::new()
+  for _ in 0..<16 {
+    let idx = rng.uint(limit=charset_len).reinterpret_as_int()
+    result.write_char(charset[idx].unsafe_to_char())
+  }
+
+  println(result.to_string())
+}
+
+///|
 async fn emit_warnings(warnings : Array[String]) -> Unit {
   for msg in warnings {
     @stdio.stderr.write("moonship: warning: \{msg}\n") catch {
@@ -169,6 +189,7 @@ fn run_help() -> Unit {
     #|  moonship module --list       List available modules
     #|  moonship init <shell>        Print shell init script
     #|  moonship cache clear         Clear cached data
+    #|  moonship session             Generate random session key
     #|  moonship time                Print current time in ms
     #|  moonship print-config        Print active configuration
     #|  moonship schema              Print JSON Schema for config

@@ -3,6 +3,7 @@ import {
   "moonbitlang/async",
   "moonbitlang/async/stdio" @stdio,
   "moonbitlang/core/env" @env,
+  "moonbitlang/core/random" @random,
   "moonbitlang/core/strconv" @strconv,
   "moonbitlang/x/fs" @fs,
   "moonbitlang/x/sys" @sys,

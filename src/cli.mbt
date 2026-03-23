@@ -8,6 +8,7 @@ enum Command {
   CacheClear
   Time
   PrintConfig
+  Session
   Schema
   Version
   Help
@@ -42,6 +43,7 @@ fn parse_args(args : Array[String]) -> Command {
       } else {
         Help
       }
+    "session" => Session
     "time" => Time
     "print-config" => PrintConfig
     "schema" => Schema

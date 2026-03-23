@@ -211,3 +211,8 @@ test "module: --list" {
   assert_true(parse_args(["module", "--list"]) is ModuleList)
   assert_true(parse_args(["module", "-l"]) is ModuleList)
 }
+
+///|
+test "session" {
+  assert_true(parse_args(["session"]) is Session)
+}

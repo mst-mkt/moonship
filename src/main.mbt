@@ -13,6 +13,7 @@ async fn main {
       @cache.clear_cache()
       println("Cache cleared.")
     }
+    Session => run_session()
     Time => println(@async.now().to_string())
     PrintConfig => {
       let config = load_config()
