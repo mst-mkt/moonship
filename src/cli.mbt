@@ -10,6 +10,7 @@ enum Command {
   Time
   PrintConfig(Bool)
   Config(String, String)
+  Toggle(String, String)
   BugReport
   Completions(String)
   Session
@@ -54,6 +55,12 @@ fn parse_args(args : Array[String]) -> Command {
       let name = if args.length() > 1 { args[1] } else { "" }
       let value = if args.length() > 2 { args[2] } else { "" }
       Config(name, value)
+    }
+    "toggle" => {
+      guard args.length() > 1 else { return Help }
+      let name = args[1]
+      let key = if args.length() > 2 { args[2] } else { "disabled" }
+      Toggle(name, key)
     }
     "bug-report" => BugReport
     "completions" =>

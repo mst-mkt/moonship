@@ -412,6 +412,40 @@ async fn run_config(name : String, value : String) -> Unit {
 }
 
 ///|
+fn run_toggle(module_name : String, key : String) -> Unit {
+  let config = load_config()
+
+  match config.get_raw_module(module_name) {
+    Some(table) =>
+      match table.0.get(key) {
+        Some(@config.CBool(current)) => {
+          let new_val = not(current)
+          println(
+            "Toggled \{module_name}.\{key}: \{current} -> \{new_val}",
+          )
+          println(
+            "Note: To persist this change, add to your config file:",
+          )
+          println("  [\{module_name}]")
+          println("  \{key} = \{new_val}")
+        }
+        Some(_) =>
+          println(
+            "moonship: '\{module_name}.\{key}' is not a boolean value",
+          )
+        None =>
+          println(
+            "moonship: key '\{key}' not found in module '\{module_name}'",
+          )
+      }
+    None =>
+      println(
+        "moonship: module '\{module_name}' not found in config",
+      )
+  }
+}
+
+///|
 fn module_to_toml_string(name : String, table : @config.ModuleTable) -> String {
   let keys = table.0.keys().collect()
   keys.sort()
@@ -617,6 +651,7 @@ fn run_help() -> Unit {
     #|  moonship init <shell>        Print shell init stub
     #|    --print-full-init         Print full init script
     #|  moonship config               Edit config in $EDITOR
+    #|  moonship toggle <name> [key] Toggle a module config value
     #|  moonship bug-report          Print environment info for bug reports
     #|  moonship completions <shell> Generate shell completions
     #|  moonship cache clear         Clear cached data

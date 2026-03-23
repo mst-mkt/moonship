@@ -15,6 +15,7 @@ async fn main {
       println("Cache cleared.")
     }
     Config(name, value) => run_config(name, value)
+    Toggle(name, key) => run_toggle(name, key)
     BugReport => run_bug_report()
     Completions(shell) => run_completions(shell)
     Session => run_session()

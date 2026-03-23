@@ -279,6 +279,33 @@ test "config: with name and value" {
 }
 
 ///|
+test "toggle: with name" {
+  match parse_args(["toggle", "status"]) {
+    Toggle(name, key) => {
+      assert_eq(name, "status")
+      assert_eq(key, "disabled")
+    }
+    _ => fail("Expected Toggle")
+  }
+}
+
+///|
+test "toggle: with name and key" {
+  match parse_args(["toggle", "git_status", "stashed"]) {
+    Toggle(name, key) => {
+      assert_eq(name, "git_status")
+      assert_eq(key, "stashed")
+    }
+    _ => fail("Expected Toggle")
+  }
+}
+
+///|
+test "toggle: no name shows help" {
+  assert_true(parse_args(["toggle"]) is Help)
+}
+
+///|
 test "bug-report" {
   assert_true(parse_args(["bug-report"]) is BugReport)
 }
