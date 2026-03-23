@@ -11,7 +11,7 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
         return
       }
       let modules = build_modules(ctx.config)
-      let raw = render_prompt_with_format(ctx, modules, ctx.config.right_format)
+      let raw = render_prompt(ctx, modules, format=ctx.config.right_format)
       ctx.close_repo()
       println(@shell.wrap_for_shell(shell, raw))
       return
@@ -52,7 +52,11 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
       notify_parent() |> ignore
     }
   } else if has_async {
-    let raw = prefix + render_prompt_sync(ctx, modules)
+    let raw = prefix + render_prompt(
+      ctx,
+      modules,
+      should_run=fn(m) { not(m.is_async()) },
+    )
     ctx.close_repo()
     println(@shell.wrap_for_shell(shell, raw))
   } else {

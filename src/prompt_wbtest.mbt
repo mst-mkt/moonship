@@ -258,10 +258,10 @@ async test "render_continuation: styled text" {
 }
 
 ///|
-async test "render_prompt_with_format: custom format" {
+async test "render_prompt: custom format" {
   let ctx = @context.Context::new(cwd="/tmp", status=0)
   let modules = build_modules(ctx.config)
-  let output = render_prompt_with_format(ctx, modules, "$character")
+  let output = render_prompt(ctx, modules, format="$character")
 
   assert_true(output.contains("❯"))
   ctx.close_repo()
