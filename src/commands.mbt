@@ -355,6 +355,7 @@ fn default_config_toml() -> String {
   buf.write_string("command_timeout = \{d.command_timeout}\n")
   buf.write_string("cache_ttl = \{d.cache_ttl}\n")
   buf.write_string("add_newline = \{d.add_newline}\n")
+  buf.write_string("follow_symlinks = \{d.follow_symlinks}\n")
 
   for schema in schemas {
     buf.write_string("\n[\{schema.name}]\n")
@@ -412,6 +413,7 @@ async fn run_config(name : String, value : String) -> Unit {
         "command_timeout" => Some(config.command_timeout.to_string())
         "cache_ttl" => Some(config.cache_ttl.to_string())
         "add_newline" => Some(config.add_newline.to_string())
+        "follow_symlinks" => Some(config.follow_symlinks.to_string())
         _ =>
           config.get_raw_module(key).map(fn(table) {
             module_to_toml_string(key, table)

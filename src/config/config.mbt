@@ -77,6 +77,7 @@ pub struct Config {
   command_timeout : Int
   cache_ttl : Int
   add_newline : Bool
+  follow_symlinks : Bool
   raw_modules : Map[String, ModuleTable]
   warnings : Array[String]
 }
@@ -91,6 +92,7 @@ pub fn Config::default() -> Config {
     command_timeout: 500,
     cache_ttl: 5000,
     add_newline: true,
+    follow_symlinks: true,
     raw_modules: {},
     warnings: [],
   }
@@ -142,6 +144,7 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
     .unwrap_or(d.command_timeout)
   let cache_ttl = t.get_int("cache_ttl").unwrap_or(d.cache_ttl)
   let add_newline = t.get_bool("add_newline").unwrap_or(d.add_newline)
+  let follow_symlinks = t.get_bool("follow_symlinks").unwrap_or(d.follow_symlinks)
 
   let raw_modules = table
     .iter()
@@ -162,6 +165,7 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
     command_timeout,
     cache_ttl,
     add_newline,
+    follow_symlinks,
     raw_modules,
     warnings: [],
   }
@@ -177,6 +181,7 @@ pub fn Config::to_toml(self : Config) -> String {
     "command_timeout = \{self.command_timeout}",
     "cache_ttl = \{self.cache_ttl}",
     "add_newline = \{self.add_newline}",
+    "follow_symlinks = \{self.follow_symlinks}",
   ].join("\n")
 
   let module_names = self.raw_modules.keys().collect()
