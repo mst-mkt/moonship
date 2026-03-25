@@ -308,6 +308,117 @@ async test "execute: use_logical_path=false displays cwd" {
   assert_false(rendered.contains("virtual"))
 }
 
+// --- build_repo_root_parts tests ---
+
+///|
+test "build_repo_root_parts: basic" {
+  let (before, root, after) = build_repo_root_parts(
+    "/home/user/repos/myproject/src/lib",
+    "/home/user/repos/myproject",
+    "/home/user",
+    "~",
+  )
+  assert_eq(before, "~/repos/")
+  assert_eq(root, "myproject")
+  assert_eq(after, "/src/lib")
+}
+
+///|
+test "build_repo_root_parts: at repo root" {
+  let (before, root, after) = build_repo_root_parts(
+    "/home/user/myproject",
+    "/home/user/myproject",
+    "/home/user",
+    "~",
+  )
+  assert_eq(before, "~/")
+  assert_eq(root, "myproject")
+  assert_eq(after, "")
+}
+
+///|
+test "build_repo_root_parts: no home match" {
+  let (before, root, after) = build_repo_root_parts(
+    "/opt/repos/project/src",
+    "/opt/repos/project",
+    "/home/user",
+    "~",
+  )
+  assert_eq(before, "/opt/repos/")
+  assert_eq(root, "project")
+  assert_eq(after, "/src")
+}
+
+///|
+test "build_repo_root_parts: cwd not under repo_root" {
+  let (before, root, after) = build_repo_root_parts(
+    "/other/path",
+    "/home/user/project",
+    "/home/user",
+    "~",
+  )
+  assert_eq(before, "")
+  assert_eq(root, "")
+  assert_eq(after, "/other/path")
+}
+
+///|
+async test "execute: repo_root_format used when repo_root_style set" {
+  let config = @config.Config::from_toml(
+    (
+      #|[directory]
+      #|repo_root_style = "bold green"
+    ),
+  )
+  let m = DirectoryModule::from_config(config)
+
+  // Use this project's own root as test path
+  let path = @env.current_dir().unwrap_or(".")
+  let ctx = @context.Context::new(cwd=path, config~)
+  guard m.execute(ctx) is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  // bold green = "1;32m", should appear for repo root name
+  assert_true(rendered.contains(";32m"))
+  ctx.close_repo()
+}
+
+///|
+async test "execute: before_repo_root_style falls back to style" {
+  let config = @config.Config::from_toml(
+    (
+      #|[directory]
+      #|repo_root_style = "bold green"
+    ),
+  )
+  let m = DirectoryModule::from_config(config)
+
+  // before_repo_root_style is empty -> fallback to style (cyan bold = ";36m")
+  assert_eq(m.before_repo_root_style, "")
+
+  let path = @env.current_dir().unwrap_or(".")
+  let ctx = @context.Context::new(
+    cwd=path + "/src/modules",
+    config~,
+  )
+  guard m.execute(ctx) is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  // style is "cyan bold" = "1;36m" which should be used for before_repo_root
+  assert_true(rendered.contains(";36m"))
+  ctx.close_repo()
+}
+
+///|
+async test "execute: repo_root_style empty uses normal format" {
+  let m = DirectoryModule::default()
+  let ctx = @context.Context::new(cwd="/tmp")
+  guard m.execute(ctx) is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("tmp"))
+}
+
 ///|
 test "is_writable: writable directory" {
   assert_true(is_writable("/tmp"))
