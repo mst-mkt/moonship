@@ -16,6 +16,7 @@ pub struct DirectoryModule {
   read_only : String
   read_only_style : String
   use_logical_path : Bool
+  use_os_path_sep : Bool
 }
 
 ///|
@@ -37,6 +38,7 @@ pub fn DirectoryModule::default() -> DirectoryModule {
     read_only: "🔒",
     read_only_style: "red",
     use_logical_path: true,
+    use_os_path_sep: true,
   }
 }
 
@@ -80,6 +82,9 @@ pub fn DirectoryModule::from_table(
     use_logical_path: table
     .get_bool("use_logical_path")
     .unwrap_or(d.use_logical_path),
+    use_os_path_sep: table
+    .get_bool("use_os_path_sep")
+    .unwrap_or(d.use_os_path_sep),
   }
 }
 
@@ -413,6 +418,11 @@ pub fn DirectoryModule::schema() -> @config.ModuleSchema {
         name: "use_logical_path",
         field_type: @config.FBool,
         default_value: d.use_logical_path.to_string(),
+      },
+      {
+        name: "use_os_path_sep",
+        field_type: @config.FBool,
+        default_value: d.use_os_path_sep.to_string(),
       },
     ],
   }
