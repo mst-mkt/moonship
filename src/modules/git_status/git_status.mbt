@@ -16,6 +16,7 @@ pub struct GitStatusModule {
   behind : String
   up_to_date : String
   diverged : String
+  ignore_submodules : Bool
 }
 
 ///|
@@ -37,6 +38,7 @@ pub fn GitStatusModule::default() -> GitStatusModule {
     behind: "⇣",
     up_to_date: "",
     diverged: "⇕",
+    ignore_submodules: false,
   }
 }
 
@@ -62,6 +64,9 @@ pub fn GitStatusModule::from_table(
     behind: table.get_string("behind").unwrap_or(d.behind),
     up_to_date: table.get_string("up_to_date").unwrap_or(d.up_to_date),
     diverged: table.get_string("diverged").unwrap_or(d.diverged),
+    ignore_submodules: table
+    .get_bool("ignore_submodules")
+    .unwrap_or(d.ignore_submodules),
   }
 }
 
@@ -270,6 +275,11 @@ pub fn GitStatusModule::schema() -> @config.ModuleSchema {
         name: "diverged",
         field_type: @config.FString,
         default_value: d.diverged,
+      },
+      {
+        name: "ignore_submodules",
+        field_type: @config.FBool,
+        default_value: d.ignore_submodules.to_string(),
       },
     ],
   }
