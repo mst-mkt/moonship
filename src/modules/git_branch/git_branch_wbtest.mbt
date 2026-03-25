@@ -9,7 +9,7 @@ async test "name" {
 ///|
 async test "render_branch: normal branch" {
   let m = GitBranchModule::default()
-  guard m.render_branch("main", false, "abc1234") is Output(out) else {
+  guard m.render_branch("main", false, "abc1234", "", "") is Output(out) else {
     fail("expected Output")
   }
 
@@ -21,7 +21,7 @@ async test "render_branch: normal branch" {
 ///|
 async test "render_branch: detached HEAD shows commit hash" {
   let m = GitBranchModule::default()
-  guard m.render_branch("", true, "abc1234") is Output(out) else {
+  guard m.render_branch("", true, "abc1234", "", "") is Output(out) else {
     fail("expected Output")
   }
 
@@ -31,7 +31,7 @@ async test "render_branch: detached HEAD shows commit hash" {
 ///|
 async test "render_branch: detached HEAD with empty hash returns Skipped" {
   let m = GitBranchModule::default()
-  assert_true(m.render_branch("", true, "") is Skipped(_))
+  assert_true(m.render_branch("", true, "", "", "") is Skipped(_))
 }
 
 ///|
@@ -43,7 +43,7 @@ async test "render_branch: truncation" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  guard m.render_branch("feature/long-branch-name", false, "") is Output(out) else {
+  guard m.render_branch("feature/long-branch-name", false, "", "", "") is Output(out) else {
     fail("expected Output")
   }
 
@@ -62,7 +62,7 @@ async test "render_branch: custom symbol" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  guard m.render_branch("main", false, "") is Output(out) else {
+  guard m.render_branch("main", false, "", "", "") is Output(out) else {
     fail("expected Output")
   }
 
@@ -79,7 +79,7 @@ async test "render_branch: custom truncation_symbol" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  guard m.render_branch("feature/long", false, "") is Output(out) else {
+  guard m.render_branch("feature/long", false, "", "", "") is Output(out) else {
     fail("expected Output")
   }
 
@@ -97,7 +97,7 @@ async test "render_branch: only_attached skips detached" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  assert_true(m.render_branch("", true, "abc1234") is Skipped(_))
+  assert_true(m.render_branch("", true, "abc1234", "", "") is Skipped(_))
 }
 
 ///|
@@ -109,7 +109,7 @@ async test "render_branch: only_attached allows normal branch" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  assert_true(m.render_branch("main", false, "") is Output(_))
+  assert_true(m.render_branch("main", false, "", "", "") is Output(_))
 }
 
 ///|
@@ -121,7 +121,7 @@ async test "render_branch: ignore_branches hides matching" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  assert_true(m.render_branch("main", false, "") is Skipped(_))
+  assert_true(m.render_branch("main", false, "", "", "") is Skipped(_))
 }
 
 ///|
@@ -133,7 +133,7 @@ async test "render_branch: ignore_branches allows non-matching" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  assert_true(m.render_branch("feature/test", false, "") is Output(_))
+  assert_true(m.render_branch("feature/test", false, "", "", "") is Output(_))
 }
 
 ///|
@@ -144,6 +144,103 @@ async test "parse_string_list: basic" {
 ///|
 async test "parse_string_list: empty" {
   assert_eq(parse_string_list(""), [])
+}
+
+// --- remote branch tests ---
+
+///|
+async test "render_branch: remote_branch shown when differs from local" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|format = "[$branch(:$remote_branch)]($style)"
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  guard m.render_branch("main", false, "", "origin", "upstream-main")
+    is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("main"))
+  assert_true(rendered.contains("upstream-main"))
+}
+
+///|
+async test "render_branch: remote_branch hidden when same as local" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|format = "[$branch(:$remote_branch)]($style)"
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  guard m.render_branch("main", false, "", "origin", "main")
+    is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("main"))
+  assert_false(rendered.contains(":main"))
+}
+
+///|
+async test "render_branch: always_show_remote forces remote display" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|always_show_remote = true
+      #|format = "[$branch(:$remote_branch)]($style)"
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  guard m.render_branch("main", false, "", "origin", "main")
+    is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains(":main"))
+}
+
+///|
+async test "render_branch: no remote tracking" {
+  let m = GitBranchModule::default()
+  guard m.render_branch("feature", false, "", "", "")
+    is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("feature"))
+}
+
+///|
+async test "render_branch: remote_name in vars" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|always_show_remote = true
+      #|format = "[$remote_name/$remote_branch]($style)"
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  guard m.render_branch("main", false, "", "origin", "main")
+    is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("origin"))
+}
+
+///|
+async test "render_branch: always_show_remote with no tracking" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|always_show_remote = true
+      #|format = "[$branch(:$remote_branch)]($style)"
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  guard m.render_branch("main", false, "", "", "")
+    is Output(out) else { fail("expected Output") }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("main"))
 }
 
 // --- execute integration tests ---

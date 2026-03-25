@@ -44,6 +44,31 @@ pub fn RepoHandle::get_branch(self : RepoHandle) -> (String, Bool, String) {
 }
 
 ///|
+pub fn RepoHandle::get_remote_branch(
+  self : RepoHandle,
+  branch : String,
+) -> (String, String) {
+  guard not(branch.is_empty()) else { return ("", "") }
+
+  let remote_name = self.repo
+    .config_get("branch.\{branch}.remote")
+    .unwrap_or("")
+
+  let merge_ref = self.repo
+    .config_get("branch.\{branch}.merge")
+    .unwrap_or("")
+
+  let refs_heads = "refs/heads/"
+  let remote_branch = if merge_ref.has_prefix(refs_heads) {
+    merge_ref[refs_heads.length():].to_string()
+  } else {
+    merge_ref
+  }
+
+  (remote_name, remote_branch)
+}
+
+///|
 pub(all) struct GitStatus {
   staged : Int
   modified : Int

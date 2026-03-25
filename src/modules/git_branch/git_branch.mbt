@@ -8,6 +8,7 @@ pub struct GitBranchModule {
   truncation_symbol : String
   symbol : String
   only_attached : Bool
+  always_show_remote : Bool
   ignore_branches : Array[String]
 }
 
@@ -22,6 +23,7 @@ pub fn GitBranchModule::default() -> GitBranchModule {
     truncation_symbol: "…",
     symbol: " ",
     only_attached: false,
+    always_show_remote: false,
     ignore_branches: [],
   }
 }
@@ -44,6 +46,9 @@ pub fn GitBranchModule::from_table(
     .unwrap_or(d.truncation_symbol),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
     only_attached: table.get_bool("only_attached").unwrap_or(d.only_attached),
+    always_show_remote: table
+    .get_bool("always_show_remote")
+    .unwrap_or(d.always_show_remote),
     ignore_branches: match table.get_string_array("ignore_branches") {
       Some(arr) => arr
       None =>
@@ -84,7 +89,8 @@ pub impl @ms.PromptModule for GitBranchModule with execute(
   }
 
   let (raw_branch, is_detached, commit_hash) = repo.get_branch()
-  self.render_branch(raw_branch, is_detached, commit_hash)
+  let (remote_name, remote_branch) = repo.get_remote_branch(raw_branch)
+  self.render_branch(raw_branch, is_detached, commit_hash, remote_name, remote_branch)
 }
 
 ///|
@@ -93,6 +99,8 @@ fn GitBranchModule::render_branch(
   raw_branch : String,
   is_detached : Bool,
   commit_hash : String,
+  remote_name : String,
+  remote_branch : String,
 ) -> @ms.ModuleResult {
   let branch = if is_detached {
     guard not(self.only_attached) else { return Skipped("detached HEAD") }
@@ -114,11 +122,17 @@ fn GitBranchModule::render_branch(
     branch
   }
 
+  let show_remote = self.always_show_remote ||
+    (not(remote_branch.is_empty()) && remote_branch != branch)
+
   let vars : Map[String, String] = {
     "branch": display_branch,
+    "remote_name": if show_remote { remote_name } else { "" },
+    "remote_branch": if show_remote { remote_branch } else { "" },
     "symbol": self.symbol,
     "style": self.style,
   }
+
   let segments = @ms.format_string(
     self.format,
     vars,
@@ -169,6 +183,11 @@ pub fn GitBranchModule::schema() -> @config.ModuleSchema {
         name: "only_attached",
         field_type: @config.FBool,
         default_value: d.only_attached.to_string(),
+      },
+      {
+        name: "always_show_remote",
+        field_type: @config.FBool,
+        default_value: d.always_show_remote.to_string(),
       },
       {
         name: "ignore_branches",
