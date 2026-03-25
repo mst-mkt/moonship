@@ -11,6 +11,7 @@ pub struct DirectoryModule {
   repo_root_format : String
   repo_root_style : String
   before_repo_root_style : String
+  substitutions : Array[(String, String)]
   read_only : String
   read_only_style : String
   use_logical_path : Bool
@@ -30,6 +31,7 @@ pub fn DirectoryModule::default() -> DirectoryModule {
     repo_root_format: "[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style) ",
     repo_root_style: "",
     before_repo_root_style: "",
+    substitutions: [],
     read_only: "🔒",
     read_only_style: "red",
     use_logical_path: true,
@@ -65,6 +67,7 @@ pub fn DirectoryModule::from_table(
     before_repo_root_style: table
     .get_string("before_repo_root_style")
     .unwrap_or(d.before_repo_root_style),
+    substitutions: parse_substitutions(table),
     read_only: table.get_string("read_only").unwrap_or(d.read_only),
     read_only_style: table
     .get_string("read_only_style")
@@ -107,9 +110,15 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
 
   let (format, vars) = match repo_root {
     Some(root) if not(self.repo_root_style.is_empty()) && display_dir.has_prefix(root) => {
-      let (before_root_path, repo_root_name, path_in_repo) = build_repo_root_parts(
+      let (raw_before, raw_root, raw_after) = build_repo_root_parts(
         display_dir, root, ctx.home_dir, self.home_symbol,
       )
+      // Note: substitutions are applied per-part, not to the full joined path.
+      // Patterns spanning part boundaries won't match (minor Starship divergence).
+      let before_root_path = apply_substitutions(raw_before, self.substitutions)
+      let repo_root_name = apply_substitutions(raw_root, self.substitutions)
+      let path_in_repo = apply_substitutions(raw_after, self.substitutions)
+
       let vars : Map[String, String] = {
         "before_root_path": before_root_path,
         "repo_root": repo_root_name,
@@ -136,6 +145,7 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
         effective_root,
         truncation_symbol=self.truncation_symbol,
         home_symbol=self.home_symbol,
+        substitutions=self.substitutions,
       )
       let vars : Map[String, String] = {
         "path": path,
@@ -160,6 +170,7 @@ fn format_path(
   repo_root : String?,
   truncation_symbol? : String = "",
   home_symbol? : String = "~",
+  substitutions? : Array[(String, String)] = [],
 ) -> String {
   let display = match (truncate_to_repo, repo_root) {
     (true, Some(root)) if cwd.has_prefix(root) => {
@@ -173,7 +184,8 @@ fn format_path(
     _ => replace_home(cwd, home, home_symbol)
   }
 
-  truncate_path(display, truncation_length, truncation_symbol)
+  let substituted = apply_substitutions(display, substitutions)
+  truncate_path(substituted, truncation_length, truncation_symbol)
 }
 
 ///|
@@ -220,6 +232,33 @@ fn split_path(path : String) -> Array[String] {
   .map(fn(sv) { sv.to_string() })
   .filter(fn(s) { not(s.is_empty()) })
   .collect()
+}
+
+///|
+fn parse_substitutions(table : @config.ModuleTable) -> Array[(String, String)] {
+  match table.0.get("substitutions") {
+    Some(@config.CTable(sub_table)) =>
+      sub_table
+      .iter()
+      .filter_map(fn(pair) {
+        match pair.1 {
+          @config.CString(to) => Some((pair.0, to))
+          _ => None
+        }
+      })
+      .collect()
+    _ => []
+  }
+}
+
+///|
+fn apply_substitutions(
+  path : String,
+  substitutions : Array[(String, String)],
+) -> String {
+  substitutions.fold(init=path, fn(acc, pair) {
+    acc.replace(old=pair.0, new=pair.1)
+  })
 }
 
 ///|

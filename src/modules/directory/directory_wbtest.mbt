@@ -419,6 +419,52 @@ async test "execute: repo_root_style empty uses normal format" {
   assert_true(rendered.contains("tmp"))
 }
 
+// --- substitutions tests ---
+
+///|
+test "apply_substitutions: basic" {
+  let result = apply_substitutions(
+    "~/Documents/project",
+    [("~/Documents", "docs")],
+  )
+  assert_eq(result, "docs/project")
+}
+
+///|
+test "apply_substitutions: multiple" {
+  let result = apply_substitutions(
+    "~/repos/myproject",
+    [("~/repos", "R"), ("myproject", "MP")],
+  )
+  assert_eq(result, "R/MP")
+}
+
+///|
+test "apply_substitutions: no match" {
+  let result = apply_substitutions("~/code/project", [("~/docs", "D")])
+  assert_eq(result, "~/code/project")
+}
+
+///|
+test "apply_substitutions: empty list" {
+  assert_eq(apply_substitutions("~/path", []), "~/path")
+}
+
+///|
+test "format_path: with substitutions" {
+  assert_eq(
+    format_path(
+      "/home/user/Documents/project",
+      "/home/user",
+      3,
+      false,
+      None,
+      substitutions=[("~/Documents", "docs")],
+    ),
+    "docs/project",
+  )
+}
+
 ///|
 test "is_writable: writable directory" {
   assert_true(is_writable("/tmp"))
