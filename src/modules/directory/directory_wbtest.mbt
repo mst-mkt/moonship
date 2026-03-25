@@ -419,6 +419,92 @@ async test "execute: repo_root_style empty uses normal format" {
   assert_true(rendered.contains("tmp"))
 }
 
+// --- fish style tests ---
+
+///|
+test "apply_fish_style: abbreviate intermediate dirs" {
+  assert_eq(apply_fish_style("~/repos/project/src/lib", 1), "~/r/p/s/lib")
+}
+
+///|
+test "apply_fish_style: char_count=2" {
+  assert_eq(apply_fish_style("~/repos/project/src/lib", 2), "~/re/pr/sr/lib")
+}
+
+///|
+test "apply_fish_style: absolute path" {
+  assert_eq(apply_fish_style("/home/user/project/src", 1), "/h/u/p/src")
+}
+
+///|
+test "apply_fish_style: single component" {
+  assert_eq(apply_fish_style("project", 1), "project")
+}
+
+///|
+test "apply_fish_style: home only" {
+  assert_eq(apply_fish_style("~", 1), "~")
+}
+
+///|
+test "apply_fish_style: short dirs unchanged" {
+  assert_eq(apply_fish_style("~/a/b/lib", 1), "~/a/b/lib")
+}
+
+///|
+test "apply_fish_style: empty path" {
+  assert_eq(apply_fish_style("", 1), "")
+}
+
+///|
+test "apply_fish_style: root path" {
+  assert_eq(apply_fish_style("/", 1), "/")
+}
+
+///|
+test "apply_fish_style: char_count larger than component" {
+  assert_eq(apply_fish_style("~/ab/cd/lib", 5), "~/ab/cd/lib")
+}
+
+///|
+test "format_path: fish_style with truncation" {
+  assert_eq(
+    format_path("/a/bb/cc/dd/ee", "", 3, false, None, fish_style=1),
+    "c/d/ee",
+  )
+}
+
+///|
+test "format_path: fish_style disabled when substitutions active" {
+  assert_eq(
+    format_path(
+      "/home/user/repos/project/src",
+      "/home/user",
+      10,
+      false,
+      None,
+      substitutions=[("~/repos", "R")],
+      fish_style=1,
+    ),
+    "R/project/src",
+  )
+}
+
+///|
+test "format_path: with fish_style" {
+  assert_eq(
+    format_path(
+      "/home/user/repos/project/src/lib",
+      "/home/user",
+      10,
+      false,
+      None,
+      fish_style=1,
+    ),
+    "~/r/p/s/lib",
+  )
+}
+
 // --- substitutions tests ---
 
 ///|

@@ -12,6 +12,7 @@ pub struct DirectoryModule {
   repo_root_style : String
   before_repo_root_style : String
   substitutions : Array[(String, String)]
+  fish_style_pwd_dir_length : Int
   read_only : String
   read_only_style : String
   use_logical_path : Bool
@@ -32,6 +33,7 @@ pub fn DirectoryModule::default() -> DirectoryModule {
     repo_root_style: "",
     before_repo_root_style: "",
     substitutions: [],
+    fish_style_pwd_dir_length: 0,
     read_only: "🔒",
     read_only_style: "red",
     use_logical_path: true,
@@ -68,6 +70,9 @@ pub fn DirectoryModule::from_table(
     .get_string("before_repo_root_style")
     .unwrap_or(d.before_repo_root_style),
     substitutions: parse_substitutions(table),
+    fish_style_pwd_dir_length: table
+    .get_int("fish_style_pwd_dir_length")
+    .unwrap_or(d.fish_style_pwd_dir_length),
     read_only: table.get_string("read_only").unwrap_or(d.read_only),
     read_only_style: table
     .get_string("read_only_style")
@@ -146,6 +151,7 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
         truncation_symbol=self.truncation_symbol,
         home_symbol=self.home_symbol,
         substitutions=self.substitutions,
+        fish_style=self.fish_style_pwd_dir_length,
       )
       let vars : Map[String, String] = {
         "path": path,
@@ -171,6 +177,7 @@ fn format_path(
   truncation_symbol? : String = "",
   home_symbol? : String = "~",
   substitutions? : Array[(String, String)] = [],
+  fish_style? : Int = 0,
 ) -> String {
   let display = match (truncate_to_repo, repo_root) {
     (true, Some(root)) if cwd.has_prefix(root) => {
@@ -185,7 +192,13 @@ fn format_path(
   }
 
   let substituted = apply_substitutions(display, substitutions)
-  truncate_path(substituted, truncation_length, truncation_symbol)
+  let truncated = truncate_path(substituted, truncation_length, truncation_symbol)
+
+  if fish_style > 0 && substitutions.is_empty() {
+    apply_fish_style(truncated, fish_style)
+  } else {
+    truncated
+  }
 }
 
 ///|
@@ -232,6 +245,34 @@ fn split_path(path : String) -> Array[String] {
   .map(fn(sv) { sv.to_string() })
   .filter(fn(s) { not(s.is_empty()) })
   .collect()
+}
+
+///|
+fn apply_fish_style(path : String, char_count : Int) -> String {
+  let parts = split_path(path)
+  guard parts.length() > 1 else { return path }
+
+  let has_home = path.has_prefix("~")
+
+  let abbreviated = parts.mapi(fn(i, part) {
+    if i == parts.length() - 1 {
+      part
+    } else if i == 0 && has_home {
+      part
+    } else if part.length() > char_count {
+      part[:char_count].to_string()
+    } else {
+      part
+    }
+  })
+
+  let joined = abbreviated.join("/")
+
+  if path.has_prefix("/") && not(has_home) {
+    "/" + joined
+  } else {
+    joined
+  }
 }
 
 ///|
@@ -352,6 +393,11 @@ pub fn DirectoryModule::schema() -> @config.ModuleSchema {
         name: "before_repo_root_style",
         field_type: @config.FString,
         default_value: d.before_repo_root_style,
+      },
+      {
+        name: "fish_style_pwd_dir_length",
+        field_type: @config.FInt,
+        default_value: d.fish_style_pwd_dir_length.to_string(),
       },
       {
         name: "read_only",
