@@ -29,6 +29,14 @@ pub fn RepoHandle::repo_root(self : RepoHandle) -> String {
 }
 
 ///|
+pub fn RepoHandle::is_bare(self : RepoHandle) -> Bool {
+  // Normal repos: repo.path() ends with "/.git/" or "/.git"
+  // Bare repos: repo.path() is the repo root itself (no .git suffix)
+  let repo_path = self.repo.path()
+  not(repo_path.has_suffix("/.git/") || repo_path.has_suffix("/.git"))
+}
+
+///|
 pub fn RepoHandle::get_branch(self : RepoHandle) -> (String, Bool, String) {
   let (branch, is_detached) = match self.repo.head_name() {
     Some(name) => (extract_branch_name(name), false)

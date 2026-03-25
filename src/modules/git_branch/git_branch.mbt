@@ -9,6 +9,7 @@ pub struct GitBranchModule {
   symbol : String
   only_attached : Bool
   always_show_remote : Bool
+  ignore_bare_repo : Bool
   ignore_branches : Array[String]
 }
 
@@ -24,6 +25,7 @@ pub fn GitBranchModule::default() -> GitBranchModule {
     symbol: " ",
     only_attached: false,
     always_show_remote: false,
+    ignore_bare_repo: false,
     ignore_branches: [],
   }
 }
@@ -49,6 +51,9 @@ pub fn GitBranchModule::from_table(
     always_show_remote: table
     .get_bool("always_show_remote")
     .unwrap_or(d.always_show_remote),
+    ignore_bare_repo: table
+    .get_bool("ignore_bare_repo")
+    .unwrap_or(d.ignore_bare_repo),
     ignore_branches: match table.get_string_array("ignore_branches") {
       Some(arr) => arr
       None =>
@@ -86,6 +91,9 @@ pub impl @ms.PromptModule for GitBranchModule with execute(
   guard not(self.disabled) else { return Disabled }
   guard ctx.get_repo() is Some(repo) else {
     return Skipped("not in git repository")
+  }
+  guard not(self.ignore_bare_repo && repo.is_bare()) else {
+    return Skipped("bare repository")
   }
 
   let (raw_branch, is_detached, commit_hash) = repo.get_branch()
@@ -188,6 +196,11 @@ pub fn GitBranchModule::schema() -> @config.ModuleSchema {
         name: "always_show_remote",
         field_type: @config.FBool,
         default_value: d.always_show_remote.to_string(),
+      },
+      {
+        name: "ignore_bare_repo",
+        field_type: @config.FBool,
+        default_value: d.ignore_bare_repo.to_string(),
       },
       {
         name: "ignore_branches",
