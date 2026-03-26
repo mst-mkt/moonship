@@ -620,6 +620,43 @@ test "palettes roundtrip in to_toml" {
 }
 
 ///|
+test "parse profiles from TOML" {
+  let config = @config.Config::from_toml(
+    (
+      #|[profiles]
+      #|test = "0_0$character"
+      #|minimal = "$directory$character"
+    ),
+  )
+  assert_eq(config.profiles.get("test"), Some("0_0$character"))
+  assert_eq(config.profiles.get("minimal"), Some("$directory$character"))
+}
+
+///|
+test "profiles roundtrip in to_toml" {
+  let config = @config.Config::from_toml(
+    (
+      #|[profiles]
+      #|test = "0_0$character"
+    ),
+  )
+  let toml = config.to_toml()
+  assert_true(toml.contains("[profiles]"))
+  assert_true(toml.contains("test"))
+}
+
+///|
+test "profiles not in raw_modules" {
+  let config = @config.Config::from_toml(
+    (
+      #|[profiles]
+      #|test = "0_0$character"
+    ),
+  )
+  assert_true(config.get_raw_module("profiles") is None)
+}
+
+///|
 test "get_active_palette: unknown palette returns empty" {
   let config = @config.Config::from_toml(
     (

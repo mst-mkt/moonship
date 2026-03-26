@@ -22,6 +22,15 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
       println(@shell.wrap_for_shell(shell, raw))
       return
     }
+    Profile(name) => {
+      let format = ctx.config.profiles.get(name).unwrap_or("> ")
+      let prefix = if ctx.config.add_newline { "\n" } else { "" }
+      let modules = build_modules(ctx.config)
+      let raw = prefix + render_prompt(ctx, modules, format~)
+      ctx.close_repo()
+      println(@shell.wrap_for_shell(shell, raw))
+      return
+    }
     Main => ()
   }
 
@@ -420,6 +429,14 @@ async fn run_config(name : String, value : String) -> Unit {
         "add_newline" => Some(config.add_newline.to_string())
         "follow_symlinks" => Some(config.follow_symlinks.to_string())
         "palette" => Some(config.palette)
+        "profiles" =>
+          Some(
+            config.profiles
+            .iter()
+            .map(fn(pair) { "\{pair.0} = \{@config.escape_string(pair.1)}" })
+            .collect()
+            .join("\n"),
+          )
         _ =>
           config.get_raw_module(key).map(fn(table) {
             module_to_toml_string(key, table)
@@ -715,6 +732,7 @@ fn run_help() -> Unit {
     #|  --shlvl=<n>               Shell nesting level
     #|  --right                   Print the right prompt
     #|  --continuation            Print continuation prompt
+    #|  --profile=<name>         Use a named profile format
     #|  --async                   Recompute and update cache
     #|
     #|Supported shells: zsh, bash, fish

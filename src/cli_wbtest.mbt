@@ -404,6 +404,28 @@ test "prompt: --continuation" {
 }
 
 ///|
+test "prompt: --profile" {
+  let cmd = parse_args(["prompt", "--profile", "test"])
+  match cmd {
+    Prompt(pa) =>
+      match pa.target {
+        Profile(name) => assert_eq(name, "test")
+        _ => fail("Expected Profile target")
+      }
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
+test "prompt: --profile takes priority over --right" {
+  let cmd = parse_args(["prompt", "--profile", "x", "--right"])
+  match cmd {
+    Prompt(pa) => assert_true(pa.target is Profile(_))
+    _ => fail("Expected Prompt")
+  }
+}
+
+///|
 test "prompt: default target is Main" {
   let cmd = parse_args(["prompt"])
   match cmd {

@@ -22,11 +22,11 @@ enum Command {
 }
 
 ///|
-///|
 pub(all) enum PromptTarget {
   Main
   Right
   Continuation
+  Profile(String)
 }
 
 ///|
@@ -110,6 +110,7 @@ fn parse_prompt_args(
   let shlvl = Ref::new("0")
   let is_right = Ref::new(false)
   let is_continuation = Ref::new(false)
+  let profile = Ref::new("")
   let is_async = Ref::new(false)
 
   let spec : Array[(String, String, @ArgParser.Spec, String)] = [
@@ -144,6 +145,7 @@ fn parse_prompt_args(
     ("--shlvl", "", Set_string(shlvl), "shell nesting level"),
     ("--right", "", Set(is_right), "print the right prompt"),
     ("--continuation", "", Set(is_continuation), "print continuation prompt"),
+    ("--profile", "", Set_string(profile), "use a named profile format"),
     ("--async", "", Set(is_async), "recompute and update cache"),
   ]
 
@@ -157,7 +159,9 @@ fn parse_prompt_args(
     pipestatus_raw.val.split(" ").map(fn(s) { s.to_string() }).collect()
   }
 
-  let target = if is_right.val {
+  let target = if not(profile.val.is_empty()) {
+    Profile(profile.val)
+  } else if is_right.val {
     Right
   } else if is_continuation.val {
     Continuation

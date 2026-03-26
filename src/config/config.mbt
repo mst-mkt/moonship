@@ -80,6 +80,7 @@ pub struct Config {
   follow_symlinks : Bool
   palette : String
   palettes : Map[String, Map[String, String]]
+  profiles : Map[String, String]
   raw_modules : Map[String, ModuleTable]
   warnings : Array[String]
 }
@@ -97,6 +98,7 @@ pub fn Config::default() -> Config {
     follow_symlinks: true,
     palette: "",
     palettes: {},
+    profiles: {},
     raw_modules: {},
     warnings: [],
   }
@@ -152,7 +154,8 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
   let palette = t.get_string("palette").unwrap_or(d.palette)
   let palettes = parse_palettes(table)
 
-  let top_level_tables : Array[String] = ["palettes"]
+  let profiles = parse_profiles(table)
+  let top_level_tables : Array[String] = ["palettes", "profiles"]
 
   let raw_modules = table
     .iter()
@@ -177,6 +180,7 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
     follow_symlinks,
     palette,
     palettes,
+    profiles,
     raw_modules,
     warnings: [],
   }
@@ -227,7 +231,25 @@ pub fn Config::to_toml(self : Config) -> String {
     })
     .to_string()
 
-  "\{header}\n\{palette_sections}\{sections}"
+  let profile_sections = if self.profiles.is_empty() {
+    ""
+  } else {
+    let buf = StringBuilder::new()
+    buf.write_string("\n[profiles]\n")
+
+    let keys = self.profiles.keys().collect()
+    keys.sort()
+    keys.each(fn(key) {
+      match self.profiles.get(key) {
+        Some(val) => buf.write_string("\{key} = \{escape_string(val)}\n")
+        None => ()
+      }
+    })
+
+    buf.to_string()
+  }
+
+  "\{header}\n\{palette_sections}\{profile_sections}\{sections}"
 }
 
 ///|
@@ -326,6 +348,23 @@ fn parse_palettes(
       acc
     },
   )
+}
+
+///|
+fn parse_profiles(
+  table : Map[String, ConfigValue],
+) -> Map[String, String] {
+  guard table.get("profiles") is Some(CTable(profiles_table)) else {
+    return {}
+  }
+
+  profiles_table
+  .iter()
+  .fold(init=(Map::new() : Map[String, String]), fn(acc, pair) {
+    guard pair.1 is CString(format) else { return acc }
+    acc[pair.0] = format
+    acc
+  })
 }
 
 // --- JSON conversion ---
