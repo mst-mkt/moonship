@@ -23,5 +23,5 @@ async test "execute: enabled produces output when MOONSHIP_SHELL is set" {
   let ctx = @context.Context::new(cwd="/tmp", config~)
   let result = m.execute(ctx)
   // MOONSHIP_SHELL may or may not be set in test env
-  assert_true(result is Output(_) || result is Skipped(_))
+  assert_true(not(result is Disabled))
 }

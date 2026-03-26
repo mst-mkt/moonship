@@ -34,7 +34,7 @@ async test "execute: detects Cargo.toml" {
   @fs.write_string_to_file(path + "/Cargo.toml", "")
   let m = RustModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -45,7 +45,7 @@ async test "execute: detects .rs extension" {
   @fs.write_string_to_file(path + "/main.rs", "")
   let m = RustModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 

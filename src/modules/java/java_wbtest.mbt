@@ -34,7 +34,7 @@ async test "execute: detects pom.xml" {
   @fs.write_string_to_file(path + "/pom.xml", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -45,7 +45,7 @@ async test "execute: detects build.gradle.kts" {
   @fs.write_string_to_file(path + "/build.gradle.kts", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -56,7 +56,7 @@ async test "execute: detects .java extension" {
   @fs.write_string_to_file(path + "/Main.java", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -67,7 +67,7 @@ async test "execute: detects build.sbt" {
   @fs.write_string_to_file(path + "/build.sbt", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -78,7 +78,7 @@ async test "execute: detects .sdkmanrc" {
   @fs.write_string_to_file(path + "/.sdkmanrc", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -89,7 +89,7 @@ async test "execute: detects .java-version" {
   @fs.write_string_to_file(path + "/.java-version", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -100,7 +100,7 @@ async test "execute: detects .jar extension" {
   @fs.write_string_to_file(path + "/app.jar", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 

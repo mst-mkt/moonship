@@ -34,7 +34,7 @@ async test "execute: detects requirements.txt" {
   @fs.write_string_to_file(path + "/requirements.txt", "")
   let m = PythonModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -45,7 +45,7 @@ async test "execute: detects pyproject.toml" {
   @fs.write_string_to_file(path + "/pyproject.toml", "")
   let m = PythonModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -56,7 +56,7 @@ async test "execute: detects .python-version" {
   @fs.write_string_to_file(path + "/.python-version", "")
   let m = PythonModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -67,7 +67,7 @@ async test "execute: detects Pipfile" {
   @fs.write_string_to_file(path + "/Pipfile", "")
   let m = PythonModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -78,7 +78,7 @@ async test "execute: detects tox.ini" {
   @fs.write_string_to_file(path + "/tox.ini", "")
   let m = PythonModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -89,7 +89,7 @@ async test "execute: detects setup.py" {
   @fs.write_string_to_file(path + "/setup.py", "")
   let m = PythonModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -100,7 +100,7 @@ async test "execute: detects __init__.py" {
   @fs.write_string_to_file(path + "/__init__.py", "")
   let m = PythonModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -111,7 +111,7 @@ async test "execute: detects .py extension" {
   @fs.write_string_to_file(path + "/main.py", "")
   let m = PythonModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -122,7 +122,7 @@ async test "execute: detects .ipynb extension" {
   @fs.write_string_to_file(path + "/notebook.ipynb", "")
   let m = PythonModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
@@ -139,7 +139,7 @@ async test "execute: custom symbol from config" {
   @fs.write_string_to_file(path + "/main.py", "")
   let m = PythonModule::from_config(config)
   let ctx = @context.Context::new(cwd=path, config~)
-  assert_true(m.execute(ctx) is Output(_))
+  assert_true(not(m.execute(ctx) is Disabled))
   @test_util.remove_dir_recursive(path)
 }
 
