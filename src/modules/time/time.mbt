@@ -7,6 +7,7 @@ pub struct TimeModule {
   use_12hr : Bool
   time_format : String
   utc_time_offset : String
+  time_range : String
 }
 
 ///|
@@ -19,6 +20,7 @@ pub fn TimeModule::default() -> TimeModule {
     use_12hr: false,
     time_format: "",
     utc_time_offset: "local",
+    time_range: "-",
   }
 }
 
@@ -35,6 +37,7 @@ pub fn TimeModule::from_table(table : @config.ModuleTable) -> TimeModule {
     utc_time_offset: table
     .get_string("utc_time_offset")
     .unwrap_or(d.utc_time_offset),
+    time_range: table.get_string("time_range").unwrap_or(d.time_range),
   }
 }
 
