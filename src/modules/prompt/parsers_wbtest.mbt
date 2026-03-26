@@ -150,3 +150,88 @@ test "extract_xml_version: valid" {
 test "extract_xml_version: no version tag" {
   assert_eq(extract_xml_version("<project><name>foo</name></project>"), "")
 }
+
+// --- edge cases ---
+
+///|
+test "parse_json_version: empty string" {
+  assert_eq(parse_json_version(""), "")
+}
+
+///|
+test "parse_json_version: no version field" {
+  assert_eq(parse_json_version("{\"name\": \"test\"}"), "")
+}
+
+///|
+test "parse_json_version: malformed JSON" {
+  assert_eq(parse_json_version("{broken"), "")
+}
+
+///|
+test "extract_xml_version: empty content" {
+  assert_eq(extract_xml_version(""), "")
+}
+
+///|
+test "extract_xml_version: missing version tag" {
+  assert_eq(extract_xml_version("<name>test</name>"), "")
+}
+
+///|
+test "extract_xml_version: unclosed tag" {
+  assert_eq(extract_xml_version("<version>1.0"), "")
+}
+
+///|
+test "extract_xml_version: nested tags" {
+  assert_eq(
+    extract_xml_version("<parent><version>1.0</version></parent>"),
+    "1.0",
+  )
+}
+
+///|
+test "parse_r_description: empty" {
+  assert_eq(parse_r_description(""), "")
+}
+
+///|
+test "parse_r_description: no Version line" {
+  assert_eq(parse_r_description("Title: My Package\nAuthor: Someone"), "")
+}
+
+///|
+test "strip_quotes: all quotes" {
+  assert_eq(strip_quotes("\"'hello'\""), "hello")
+}
+
+///|
+test "strip_quotes: empty string" {
+  assert_eq(strip_quotes(""), "")
+}
+
+///|
+test "extract_version_line: no separator" {
+  assert_eq(extract_version_line("version 1.0"), "")
+}
+
+///|
+test "extract_version_line: multiple versions picks first" {
+  assert_eq(extract_version_line("version = 1.0\nversion = 2.0"), "1.0")
+}
+
+///|
+test "extract_toml_version: empty content" {
+  assert_eq(extract_toml_version("", path=["version"]), "")
+}
+
+///|
+test "extract_toml_version: invalid TOML" {
+  assert_eq(extract_toml_version("[invalid", path=["version"]), "")
+}
+
+///|
+test "find_file_with_extension: nonexistent dir" {
+  assert_eq(find_file_with_extension("/nonexistent/dir/abc123", ".txt"), "")
+}

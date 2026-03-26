@@ -731,3 +731,101 @@ test "parse_format: nested conditional with styled content and var" {
   let has_var = inner.iter().any(fn(n) { n is Variable("var") })
   assert_true(has_var)
 }
+
+// --- edge cases: malformed input ---
+
+///|
+test "format: style spec with dollar var" {
+  let vars : Map[String, String] = { "path": "/home", "style": "bold cyan" }
+  let segs = @format.format_string(
+    "[$path]($style)",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs[0].text, "/home")
+  assert_true(segs[0].style.bold)
+}
+
+///|
+test "format: empty styled block" {
+  let segs = @format.format_string("[](bold)", {}, @terminal.Style::default())
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "format: styled block with only empty var" {
+  let vars : Map[String, String] = { "x": "" }
+  let segs = @format.format_string(
+    "[$x](bold)",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "format: deeply nested conditionals" {
+  let vars : Map[String, String] = { "x": "val" }
+  let segs = @format.format_string("((($x)))", vars, @terminal.Style::default())
+  assert_true(segs.length() > 0)
+}
+
+///|
+test "format: consecutive escaped chars" {
+  let segs = @format.format_string("\\n\\t\\\\", {}, @terminal.Style::default())
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "\n\t\\")
+}
+
+///|
+test "format: escape at end of string" {
+  let segs = @format.format_string("abc\\", {}, @terminal.Style::default())
+  assert_true(segs.length() >= 1)
+}
+
+///|
+test "format: multiple dollar signs" {
+  let segs = @format.format_string("$$name", {}, @terminal.Style::default())
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "format: styled with empty style spec" {
+  let segs = @format.format_string("[text]()", {}, @terminal.Style::default())
+  assert_eq(segs[0].text, "text")
+}
+
+///|
+test "format: variable value contains format syntax" {
+  let vars : Map[String, String] = { "x": "[nested](bold)" }
+  let segs = @format.format_string("$x", vars, @terminal.Style::default())
+  assert_eq(segs[0].text, "nested")
+  assert_true(segs[0].style.bold)
+}
+
+///|
+test "evaluate_segments: conditional with empty segment array" {
+  let segment_vars : Map[String, Array[@format.Segment]] = { "mod": [] }
+  let ast = @format.parse_format("($mod)")
+  let segs = @format.evaluate_segments(
+    ast,
+    segment_vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.length(), 0)
+}
+
+///|
+test "evaluate_segments: styled block inherits parent style" {
+  let bold = @terminal.Style::default().with_bold()
+  let segment_vars : Map[String, Array[@format.Segment]] = {
+    "x": [@format.Segment::new("hi", style=bold)],
+  }
+  let ast = @format.parse_format("[$x](bold red)")
+  let segs = @format.evaluate_segments(
+    ast,
+    segment_vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs[0].text, "hi")
+  assert_true(segs[0].style.bold)
+}

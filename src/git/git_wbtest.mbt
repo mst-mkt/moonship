@@ -83,3 +83,54 @@ test "last_slash: basic" {
 test "find_repo_root: not found returns None" {
   assert_eq(find_repo_root("/nonexistent/path"), None)
 }
+
+// --- edge cases ---
+
+///|
+test "extract_branch_name: only prefix" {
+  assert_eq(extract_branch_name("refs/heads/"), "")
+}
+
+///|
+test "extract_branch_name: wrong prefix" {
+  assert_eq(extract_branch_name("refs/tags/v1.0"), "refs/tags/v1.0")
+}
+
+///|
+test "count_status: typechanged" {
+  let flags = [@libgit2.StatusFlags::new(git_status_index_typechange)]
+  let result = count_status(flags)
+  assert_eq(result.typechanged, 1)
+}
+
+///|
+test "count_status: worktree renamed" {
+  let flags = [@libgit2.StatusFlags::new(git_status_wt_renamed)]
+  let result = count_status(flags)
+  assert_eq(result.renamed, 1)
+}
+
+///|
+test "count_status: worktree typechanged" {
+  let flags = [@libgit2.StatusFlags::new(git_status_wt_typechange)]
+  let result = count_status(flags)
+  assert_eq(result.typechanged, 1)
+}
+
+///|
+test "count_status: combined flags" {
+  let combined = git_status_index_renamed.lor(git_status_wt_renamed)
+  let flags = [@libgit2.StatusFlags::new(combined)]
+  let result = count_status(flags)
+  assert_eq(result.renamed, 1)
+}
+
+///|
+test "find_repo_root: empty string returns None" {
+  assert_eq(find_repo_root(""), None)
+}
+
+///|
+test "find_repo_root: root path returns None" {
+  assert_eq(find_repo_root("/"), None)
+}

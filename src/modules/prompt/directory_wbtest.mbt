@@ -544,3 +544,102 @@ async test "execute: logical_dir defaults to cwd when empty" {
 
   assert_eq(ctx.logical_dir, "/some/path")
 }
+
+// --- edge cases ---
+
+///|
+test "format_path: empty cwd" {
+  assert_eq(format_path("", "/home/user", 3, false, None), "")
+}
+
+///|
+test "format_path: cwd is root" {
+  assert_eq(format_path("/", "/home/user", 3, false, None), "/")
+}
+
+///|
+test "format_path: home is empty string no substitution" {
+  // With empty home, no ~ replacement, truncation_length=3 keeps 3 components
+  assert_eq(
+    format_path("/home/user/project", "", 3, false, None),
+    "/home/user/project",
+  )
+}
+
+///|
+test "format_path: truncation_length zero" {
+  // TODO: Starship treats 0 as "no limit", but moonship currently truncates to 0 components
+  assert_eq(format_path("/a/b/c", "", 0, false, None), "")
+}
+
+///|
+test "format_path: truncation_length very large" {
+  assert_eq(format_path("/a/b/c", "", 100, false, None), "/a/b/c")
+}
+
+///|
+test "format_path: home equals cwd" {
+  assert_eq(format_path("/home/user", "/home/user", 3, false, None), "~")
+}
+
+///|
+test "truncate_path: empty path" {
+  assert_eq(truncate_path("", 3, "…"), "")
+}
+
+///|
+test "last_path_component: root path returns slash" {
+  // split_path("/") returns [], so last() returns the path itself
+  assert_eq(last_path_component("/"), "/")
+}
+
+///|
+test "last_path_component: single component" {
+  assert_eq(last_path_component("project"), "project")
+}
+
+///|
+test "split_path: empty string" {
+  assert_eq(split_path(""), [])
+}
+
+///|
+test "split_path: root only" {
+  assert_eq(split_path("/"), [])
+}
+
+///|
+test "apply_fish_style: single component unchanged" {
+  assert_eq(apply_fish_style("project", 1), "project")
+}
+
+///|
+test "apply_fish_style: home prefix preserved" {
+  assert_eq(apply_fish_style("~/long_dir/sub/project", 1), "~/l/s/project")
+}
+
+///|
+test "apply_substitutions: empty substitutions" {
+  assert_eq(apply_substitutions("~/Documents", []), "~/Documents")
+}
+
+///|
+test "apply_substitutions: multiple substitutions applied in order" {
+  assert_eq(
+    apply_substitutions("~/Documents/work", [
+      ("~/Documents", "docs"),
+      ("work", "w"),
+    ]),
+    "docs/w",
+  )
+}
+
+///|
+test "build_repo_root_parts: cwd not in repo" {
+  let (before, root, after) = build_repo_root_parts(
+    "/other/path", "/repo", "/home", "~",
+  )
+  assert_eq(before, "")
+  assert_eq(root, "")
+  assert_eq(after, "/other/path")
+}

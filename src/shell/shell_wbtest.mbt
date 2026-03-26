@@ -115,3 +115,37 @@ test "wrap_for_shell: zsh wraps sequences" {
   let result = wrap_for_shell("zsh", input)
   assert_eq(result, "%{\u001b[31m%}red%{\u001b[0m%}")
 }
+
+// --- edge cases ---
+
+///|
+test "wrap_ansi_for_zsh: no ANSI sequences passes through" {
+  assert_eq(wrap_ansi_for_zsh("plain text"), "plain text")
+}
+
+///|
+test "wrap_ansi_for_zsh: multiple ANSI sequences wrapped" {
+  let input = "\u001b[1mbold\u001b[0m \u001b[31mred\u001b[0m"
+  let output = wrap_ansi_for_zsh(input)
+  assert_true(output.contains("%{"))
+  assert_true(output.contains("%}"))
+  assert_true(output.contains("bold"))
+  assert_true(output.contains("red"))
+}
+
+///|
+test "wrap_ansi_for_zsh: ESC without bracket not wrapped" {
+  let input = "\u001bXtext"
+  let output = wrap_ansi_for_zsh(input)
+  assert_true(output.contains("text"))
+}
+
+///|
+test "wrap_for_shell: empty shell name passes through" {
+  assert_eq(wrap_for_shell("", "text"), "text")
+}
+
+///|
+test "escape_fish_single_quote: backslash and quote combined" {
+  assert_eq(escape_fish_single_quote("it\\'s"), "it\\\\\\'s")
+}

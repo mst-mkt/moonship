@@ -359,3 +359,143 @@ test "resolve_prev: no prev colors unchanged" {
   assert_true(resolved.fg is Red)
   assert_true(resolved.bg is Blue)
 }
+
+// --- parse_color edge cases ---
+
+///|
+test "parse_color: invalid hex returns Default" {
+  assert_true(@terminal.parse_color("#GGGGGG", palette={}) is Default)
+}
+
+///|
+test "parse_color: incomplete hex returns Default" {
+  assert_true(@terminal.parse_color("#FF0", palette={}) is Default)
+}
+
+///|
+test "parse_color: hex too long returns Default" {
+  assert_true(@terminal.parse_color("#FF00FF00", palette={}) is Default)
+}
+
+///|
+test "parse_color: empty string returns Default" {
+  assert_true(@terminal.parse_color("", palette={}) is Default)
+}
+
+///|
+test "parse_color: ANSI256 boundary 255 is valid" {
+  assert_true(@terminal.parse_color("255", palette={}) is Ansi256(255))
+}
+
+///|
+test "parse_color: ANSI256 boundary 256 is Default" {
+  assert_true(@terminal.parse_color("256", palette={}) is Default)
+}
+
+///|
+test "parse_color: negative number returns Default" {
+  assert_true(@terminal.parse_color("-1", palette={}) is Default)
+}
+
+///|
+test "parse_color: palette color with empty palette" {
+  assert_true(@terminal.parse_color("my_color", palette={}) is Default)
+}
+
+///|
+test "parse_color: palette lookup resolves named color" {
+  let palette : Map[String, String] = { "primary": "red" }
+  assert_true(@terminal.parse_color("primary", palette~) is Red)
+}
+
+///|
+test "parse_color: palette lookup resolves hex" {
+  let palette : Map[String, String] = { "accent": "#FF0000" }
+  assert_true(@terminal.parse_color("accent", palette~) is Hex(0xFF0000))
+}
+
+// --- parse_style edge cases ---
+
+///|
+test "parse_style: empty string returns default" {
+  let s = @terminal.parse_style("", palette={})
+  assert_true(s.fg is Default)
+  assert_false(s.bold)
+}
+
+///|
+test "parse_style: none resets all" {
+  let s = @terminal.parse_style("bold none", palette={})
+  assert_false(s.bold)
+}
+
+///|
+test "parse_style: multiple attributes combine" {
+  let s = @terminal.parse_style("bold italic underline", palette={})
+  assert_true(s.bold)
+  assert_true(s.italic)
+  assert_true(s.underline)
+}
+
+///|
+test "parse_style: bg: prefix sets background" {
+  let s = @terminal.parse_style("bg:red", palette={})
+  assert_true(s.bg is Red)
+  assert_true(s.fg is Default)
+}
+
+///|
+test "parse_style: fg: prefix sets foreground" {
+  let s = @terminal.parse_style("fg:blue", palette={})
+  assert_true(s.fg is Blue)
+}
+
+///|
+test "parse_style: bg: with hex color" {
+  let s = @terminal.parse_style("bg:#FF0000", palette={})
+  assert_true(s.bg is Hex(_))
+}
+
+///|
+test "parse_style: unknown attribute treated as color" {
+  let s = @terminal.parse_style("red", palette={})
+  assert_true(s.fg is Red)
+}
+
+///|
+test "parse_style: case insensitive" {
+  let s = @terminal.parse_style("BOLD RED", palette={})
+  assert_true(s.bold)
+  assert_true(s.fg is Red)
+}
+
+// --- stylize edge cases ---
+
+///|
+test "stylize: empty text returns empty" {
+  let s = @terminal.Style::default().with_bold()
+  assert_eq(@terminal.stylize("", s), "")
+}
+
+///|
+test "stylize: default style returns text unchanged" {
+  assert_eq(@terminal.stylize("hello", @terminal.Style::default()), "hello")
+}
+
+// --- resolve_prev edge cases ---
+
+///|
+test "resolve_prev: PrevFg with default prev uses default" {
+  let style = @terminal.Style::default().with_fg(PrevFg)
+  let prev = @terminal.Style::default()
+  let resolved = style.resolve_prev(prev)
+  assert_true(resolved.fg is Default)
+}
+
+///|
+test "resolve_prev: PrevBg resolves to prev bg color" {
+  let style = @terminal.Style::default().with_fg(PrevBg)
+  let prev = @terminal.Style::default().with_bg(Blue)
+  let resolved = style.resolve_prev(prev)
+  assert_true(resolved.fg is Blue)
+}

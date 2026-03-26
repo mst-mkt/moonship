@@ -666,3 +666,152 @@ test "get_active_palette: unknown palette returns empty" {
   let active = config.get_active_palette()
   assert_eq(active.length(), 0)
 }
+
+// --- error/edge cases ---
+
+///|
+test "from_toml: whitespace only is default" {
+  let config = @config.Config::from_toml("   \n\n  ")
+  assert_eq(config.format, @config.Config::default().format)
+}
+
+///|
+test "from_toml: comments only is default" {
+  let config = @config.Config::from_toml("# comment\n# another")
+  assert_eq(config.format, @config.Config::default().format)
+}
+
+///|
+test "from_json: invalid root type raises" {
+  let result = @config.Config::from_json("[1,2,3]") catch {
+    _ => @config.Config::default()
+  }
+  assert_eq(result.format, @config.Config::default().format)
+}
+
+///|
+test "from_json: nested object becomes module" {
+  let json =
+    #|{
+    #|  "custom_mod": {
+    #|    "key": "value",
+    #|    "num": 42,
+    #|    "flag": true
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("custom_mod") is Some(table)
+  assert_eq(table.get_string("key"), Some("value"))
+  assert_eq(table.get_int("num"), Some(42))
+  assert_eq(table.get_bool("flag"), Some(true))
+}
+
+///|
+test "get_string on int returns None" {
+  let toml =
+    #|[directory]
+    #|truncation_length = 5
+    #|
+  let config = @config.Config::from_toml(toml)
+  guard config.get_raw_module("directory") is Some(table)
+  assert_true(table.get_string("truncation_length") is None)
+}
+
+///|
+test "get_bool on string returns None" {
+  let toml =
+    #|[character]
+    #|symbol = "❯"
+    #|
+  let config = @config.Config::from_toml(toml)
+  guard config.get_raw_module("character") is Some(table)
+  assert_true(table.get_bool("symbol") is None)
+}
+
+///|
+test "get_int on bool returns None" {
+  let toml =
+    #|[git_status]
+    #|disabled = true
+    #|
+  let config = @config.Config::from_toml(toml)
+  guard config.get_raw_module("git_status") is Some(table)
+  assert_true(table.get_int("disabled") is None)
+}
+
+///|
+test "from_toml: negative integer" {
+  let toml =
+    #|scan_timeout = -1
+    #|
+  let config = @config.Config::from_toml(toml)
+  assert_eq(config.scan_timeout, -1)
+}
+
+///|
+test "from_toml: unicode in string values" {
+  let toml =
+    #|[character]
+    #|success_symbol = "🚀"
+    #|
+  let config = @config.Config::from_toml(toml)
+  guard config.get_raw_module("character") is Some(table)
+  assert_eq(table.get_string("success_symbol"), Some("🚀"))
+}
+
+///|
+test "from_json: float value preserved" {
+  let json =
+    #|{
+    #|  "my_mod": {
+    #|    "threshold": 1.5
+    #|  }
+    #|}
+  let config = @config.Config::from_json(json)
+  guard config.get_raw_module("my_mod") is Some(table)
+  assert_true(table.get_int("threshold") is None)
+}
+
+///|
+test "get_string_array: empty array" {
+  let toml =
+    #|[python]
+    #|detect_files = []
+    #|
+  let config = @config.Config::from_toml(toml)
+  guard config.get_raw_module("python") is Some(table)
+  guard table.get_string_array("detect_files") is Some(files)
+  assert_eq(files.length(), 0)
+}
+
+///|
+test "from_toml: empty module section" {
+  let toml =
+    #|[rust]
+    #|
+  let config = @config.Config::from_toml(toml)
+  guard config.get_raw_module("rust") is Some(table)
+  assert_true(table.get_string("format") is None)
+}
+
+///|
+test "with_warnings: preserves config values" {
+  let config = @config.Config::from_toml(
+    (
+      #|format = "$character"
+    ),
+  ).with_warnings(["test warning"])
+  assert_eq(config.format, "$character")
+  assert_eq(config.warnings.length(), 1)
+  assert_eq(config.warnings[0], "test warning")
+}
+
+///|
+test "escape_string: empty string" {
+  assert_eq(@config.escape_string(""), "\"\"")
+}
+
+///|
+test "escape_string: string with no special chars" {
+  assert_eq(@config.escape_string("hello"), "\"hello\"")
+}

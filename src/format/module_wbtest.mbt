@@ -106,3 +106,58 @@ test "render_with_fill: multiple fills share remaining width" {
   assert_true(result.contains("B"))
   assert_true(result.contains("C"))
 }
+
+// --- edge cases ---
+
+///|
+test "visible_width: only ANSI escapes no text" {
+  assert_eq(visible_width("\u001b[1m\u001b[0m"), 0)
+}
+
+///|
+test "visible_width: incomplete ANSI (no m terminator)" {
+  let width = visible_width("\u001b[31")
+  assert_eq(width, 0)
+}
+
+///|
+test "visible_width: mixed text and ANSI" {
+  assert_eq(visible_width("\u001b[1mhello\u001b[0m world"), 11)
+}
+
+///|
+test "repeat_to_width: width zero returns empty" {
+  assert_eq(repeat_to_width("abc", 0), "")
+}
+
+///|
+test "repeat_to_width: width smaller than symbol" {
+  assert_eq(repeat_to_width("abc", 2), "ab")
+}
+
+///|
+test "repeat_to_width: width exactly symbol length" {
+  assert_eq(repeat_to_width("abc", 3), "abc")
+}
+
+///|
+test "repeat_to_width: width exactly double symbol" {
+  assert_eq(repeat_to_width("ab", 4), "abab")
+}
+
+///|
+test "repeat_to_width: single char symbol repeat" {
+  assert_eq(repeat_to_width("-", 5), "-----")
+}
+
+///|
+test "render_with_fill: no fill segments returns normal render" {
+  let output = ModuleOutput::new([Segment::new("hello"), Segment::new(" world")])
+  assert_eq(output.render_with_fill(80), "hello world")
+}
+
+///|
+test "render: empty segments array" {
+  let output = ModuleOutput::new([])
+  assert_eq(output.render_with_fill(80), "")
+}

@@ -290,4 +290,33 @@ async test "execute: real repo returns Output with branch" {
   cleanup_test_repo(repo, path)
 }
 
+// --- edge cases ---
+
+///|
+async test "render_branch: detached HEAD shows short hash" {
+  let m = GitBranchModule::default()
+  guard m.render_branch("", true, "abc1234def5678", "", "") is Output(out) else {
+    fail("expected Output")
+  }
+  let rendered = out.render()
+  assert_true(rendered.contains("abc1234"))
+}
+
+///|
+async test "render_branch: very long branch name truncated" {
+  let config = @config.Config::from_toml(
+    (
+      #|[git_branch]
+      #|truncation_length = 10
+    ),
+  )
+  let m = GitBranchModule::from_config(config)
+  guard m.render_branch("feature/very-long-branch-name-here", false, "", "", "")
+    is Output(out) else {
+    fail("expected Output")
+  }
+  let rendered = out.render()
+  assert_true(rendered.contains("…"))
+}
+
 // --- test helpers ---

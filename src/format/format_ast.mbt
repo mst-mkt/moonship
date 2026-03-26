@@ -56,6 +56,11 @@ pub fn parse_format(template : String) -> Array[FormatNode] {
                 continue i + 1
               }
             }
+          '\\' => {
+            // Trailing backslash at end of string (no char to escape)
+            nodes.push(Text("\\"))
+            continue i + 1
+          }
           _ => {
             let end = scan_while(template, i, fn(c) {
               c != '$' && c != '[' && c != '\\' && c != '('

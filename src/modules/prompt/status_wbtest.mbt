@@ -327,3 +327,124 @@ test "hex_string" {
   assert_eq(hex_string(255), "FF")
   assert_eq(hex_string(127), "7F")
 }
+
+// --- hex_string edge cases ---
+
+///|
+test "hex_string: zero" {
+  assert_eq(hex_string(0), "0")
+}
+
+///|
+test "hex_string: positive" {
+  assert_eq(hex_string(255), "FF")
+}
+
+///|
+test "hex_string: negative" {
+  assert_eq(hex_string(-1), "-1")
+}
+
+///|
+test "hex_string: large number" {
+  assert_eq(hex_string(65535), "FFFF")
+}
+
+///|
+test "hex_string: one" {
+  assert_eq(hex_string(1), "1")
+}
+
+///|
+test "hex_string: sixteen" {
+  assert_eq(hex_string(16), "10")
+}
+
+// --- build_status_vars edge cases ---
+
+///|
+async test "build_status_vars: status zero with success_symbol" {
+  let config = @config.Config::from_toml(
+    (
+      #|[status]
+      #|success_symbol = "✓"
+    ),
+  )
+  let m = StatusModule::from_config(config)
+  let vars = m.build_status_vars(0)
+  assert_eq(vars["symbol"], "✓")
+  assert_eq(vars["status"], "0")
+  assert_eq(vars["common_meaning"], "")
+  assert_eq(vars["signal_name"], "")
+}
+
+///|
+async test "build_status_vars: SIGKILL (128+9=137)" {
+  let m = StatusModule::default()
+  let vars = m.build_status_vars(137)
+  assert_eq(vars["signal_name"], "KILL")
+  assert_eq(vars["signal_number"], "9")
+}
+
+///|
+async test "build_status_vars: SIGSEGV (128+11=139)" {
+  let m = StatusModule::default()
+  let vars = m.build_status_vars(139)
+  assert_eq(vars["signal_name"], "SEGV")
+  assert_eq(vars["signal_number"], "11")
+}
+
+///|
+async test "build_status_vars: unknown signal (128+99=227)" {
+  let m = StatusModule::default()
+  let vars = m.build_status_vars(227)
+  assert_eq(vars["signal_name"], "")
+  assert_eq(vars["signal_number"], "99")
+}
+
+///|
+async test "build_status_vars: exit 126 NOPERM" {
+  let m = StatusModule::default()
+  let vars = m.build_status_vars(126)
+  assert_eq(vars["common_meaning"], "NOPERM")
+}
+
+///|
+async test "build_status_vars: exit 127 NOTFOUND" {
+  let m = StatusModule::default()
+  let vars = m.build_status_vars(127)
+  assert_eq(vars["common_meaning"], "NOTFOUND")
+}
+
+///|
+async test "build_status_vars: exit 2 USAGE" {
+  let m = StatusModule::default()
+  let vars = m.build_status_vars(2)
+  assert_eq(vars["common_meaning"], "USAGE")
+}
+
+///|
+async test "build_status_vars: map_symbol for 126" {
+  let config = @config.Config::from_toml(
+    (
+      #|[status]
+      #|map_symbol = true
+    ),
+  )
+  let m = StatusModule::from_config(config)
+  let vars = m.build_status_vars(126)
+  assert_eq(vars["symbol"], "🚫")
+}
+
+///|
+async test "build_status_vars: map_symbol for 127" {
+  let config = @config.Config::from_toml(
+    (
+      #|[status]
+      #|map_symbol = true
+    ),
+  )
+  let m = StatusModule::from_config(config)
+  let vars = m.build_status_vars(127)
+  assert_eq(vars["symbol"], "🔍")
+}

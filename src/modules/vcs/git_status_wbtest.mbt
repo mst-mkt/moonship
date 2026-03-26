@@ -282,6 +282,58 @@ async test "execute: untracked file returns Output with untracked symbol" {
   cleanup_test_repo(repo, path)
 }
 
+// --- edge cases ---
+
+///|
+test "format_count: zero count" {
+  assert_eq(format_count(0, "+"), "")
+}
+
+///|
+test "format_count: count of 1" {
+  assert_eq(format_count(1, "+"), "+")
+}
+
+///|
+test "format_count: count greater than 1" {
+  assert_eq(format_count(5, "+"), "+5")
+}
+
+///|
+test "format_count: empty symbol" {
+  assert_eq(format_count(3, ""), "3")
+}
+
+///|
+test "build_status_string: all zeros" {
+  assert_eq(build_status_string([(0, "+"), (0, "!"), (0, "?")]), "")
+}
+
+///|
+test "build_ahead_behind: both zero no up_to_date symbol" {
+  assert_eq(build_ahead_behind(0, 0, "⇡", "⇣", "", "⇕"), "")
+}
+
+///|
+test "build_ahead_behind: both zero with up_to_date symbol" {
+  assert_eq(build_ahead_behind(0, 0, "⇡", "⇣", "✓", "⇕"), "✓")
+}
+
+///|
+test "parse_ahead_behind: empty string" {
+  assert_eq(parse_ahead_behind(""), (0, 0))
+}
+
+///|
+test "parse_ahead_behind: malformed input" {
+  assert_eq(parse_ahead_behind("not-valid"), (0, 0))
+}
+
+///|
+test "parse_ahead_behind: tab separated" {
+  assert_eq(parse_ahead_behind("3\t5"), (5, 3))
+}
+
 // --- test helpers ---
 
 ///|

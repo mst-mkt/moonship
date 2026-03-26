@@ -177,3 +177,66 @@ test "find_matching: escape at end of string" {
   let result = find_matching("(a\\", 0, '(', ')')
   assert_eq(result, None)
 }
+
+// --- edge cases ---
+
+///|
+test "find_matching: escape before closing bracket" {
+  let result = find_matching("[\\]more]", 0, '[', ']')
+  assert_true(result is Some(_))
+}
+
+///|
+test "find_matching: empty content brackets" {
+  let result = find_matching("[]", 0, '[', ']')
+  assert_true(result is Some(1))
+}
+
+///|
+test "find_matching: deeply nested" {
+  let result = find_matching("[[[inner]]]", 0, '[', ']')
+  assert_true(result is Some(10))
+}
+
+///|
+test "scan_ident: starts with digit edge" {
+  let (name, end) = scan_ident("123abc", 0)
+  assert_eq(name, "123abc")
+  assert_eq(end, 6)
+}
+
+///|
+test "scan_ident: single char" {
+  let (name, end) = scan_ident("x", 0)
+  assert_eq(name, "x")
+  assert_eq(end, 1)
+}
+
+///|
+test "scan_ident: starts with underscore" {
+  let (name, end) = scan_ident("_private", 0)
+  assert_eq(name, "_private")
+  assert_eq(end, 8)
+}
+
+///|
+test "scan_while: all chars match" {
+  let end = scan_while("aaaa", 0, fn(c) { c == 'a' })
+  assert_eq(end, 4)
+}
+
+///|
+test "scan_while: no chars match" {
+  let end = scan_while("bbbb", 0, fn(c) { c == 'a' })
+  assert_eq(end, 0)
+}
+
+///|
+test "char_at: first char" {
+  assert_eq(char_at("hello", 0), 'h')
+}
+
+///|
+test "unescape: unknown char returns itself" {
+  assert_eq(unescape('x'), "x")
+}
