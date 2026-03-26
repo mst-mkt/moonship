@@ -137,4 +137,3 @@ fn is_ident_char(c : Char) -> Bool {
     _ => false
   }
 }
-
