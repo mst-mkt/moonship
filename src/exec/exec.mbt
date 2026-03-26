@@ -161,6 +161,60 @@ pub fn detect_compiler_name(
 }
 
 ///|
+pub fn is_ssh_session() -> Bool {
+  ["SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY"]
+  .iter()
+  .any(fn(env_name) { not(@sys.get_env_var(env_name).unwrap_or("").is_empty()) })
+}
+
+///|
+pub fn basename(path : String) -> String {
+  let trimmed = if path.has_suffix("/") {
+    path[:path.length() - 1].to_string()
+  } else {
+    path
+  }
+
+  match last_slash(trimmed) {
+    Some(idx) => trimmed[idx + 1:].to_string()
+    None => trimmed
+  }
+}
+
+///|
+pub fn parent_dir(path : String) -> String {
+  let trimmed = if path.has_suffix("/") {
+    path[:path.length() - 1].to_string()
+  } else {
+    path
+  }
+
+  match last_slash(trimmed) {
+    Some(idx) => trimmed[:idx].to_string()
+    None => ""
+  }
+}
+
+///|
+pub fn last_slash(s : String) -> Int? {
+  loop s.length() - 1 {
+    i => if i < 0 { break None } else if s[i].unsafe_to_char() == '/' {
+      break Some(i)
+    } else {
+      continue i - 1
+    }
+  }
+}
+
+///|
+pub fn parse_leading_int(s : String) -> Int {
+  s
+  .iter()
+  .take_while(fn(c) { c >= '0' && c <= '9' })
+  .fold(init=0, fn(acc, c) { acc * 10 + (c.to_int() - '0'.to_int()) })
+}
+
+///|
 pub fn detect_project(
   cwd : String,
   files : Array[String],

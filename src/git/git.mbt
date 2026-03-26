@@ -102,7 +102,7 @@ fn find_repo_root(cwd : String) -> String? {
       } else if @fs.path_exists("\{dir}/.git") {
         break Some(dir)
       } else {
-        match last_slash(dir) {
+        match @exec.last_slash(dir) {
           Some(idx) =>
             if idx == 0 {
               break None
@@ -113,18 +113,6 @@ fn find_repo_root(cwd : String) -> String? {
         }
       }
   }
-}
-
-///|
-fn last_slash(s : String) -> Int? {
-  let init : (Int?, Int) = (None, 0)
-
-  s
-  .iter()
-  .fold(init~, fn(acc, ch) {
-    let (result, i) = acc
-    (if ch == '/' { Some(i) } else { result }, i + 1)
-  }).0
 }
 
 ///|

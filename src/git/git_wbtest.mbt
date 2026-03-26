@@ -78,9 +78,9 @@ test "count_status: renamed" {
 
 ///|
 test "last_slash: basic" {
-  assert_eq(last_slash("/home/user"), Some(5))
-  assert_eq(last_slash("/"), Some(0))
-  assert_eq(last_slash("noslash"), None)
+  assert_eq(@exec.last_slash("/home/user"), Some(5))
+  assert_eq(@exec.last_slash("/"), Some(0))
+  assert_eq(@exec.last_slash("noslash"), None)
 }
 
 ///|

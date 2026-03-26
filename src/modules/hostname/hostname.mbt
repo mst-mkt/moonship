@@ -71,11 +71,9 @@ pub impl @ms.PromptModule for HostnameModule with execute(
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
 
-  let is_ssh = ["SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY"]
-    .iter()
-    .any(fn(v) { not(@sys.get_env_var(v).unwrap_or("").is_empty()) })
-  let env_detected = self.detect_env_vars.iter().any(fn(var) {
-    not(@sys.get_env_var(var).unwrap_or("").is_empty())
+  let is_ssh = @exec.is_ssh_session()
+  let env_detected = self.detect_env_vars.iter().any(fn(env_name) {
+    not(@sys.get_env_var(env_name).unwrap_or("").is_empty())
   })
 
   guard not(self.ssh_only) || is_ssh || env_detected else {

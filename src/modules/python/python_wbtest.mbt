@@ -165,42 +165,42 @@ test "parse_python_version: empty" {
 
 ///|
 test "basename: simple path" {
-  assert_eq(basename("/home/user/project/.venv"), ".venv")
+  assert_eq(@exec.basename("/home/user/project/.venv"), ".venv")
 }
 
 ///|
 test "basename: trailing slash" {
-  assert_eq(basename("/home/user/project/.venv/"), ".venv")
+  assert_eq(@exec.basename("/home/user/project/.venv/"), ".venv")
 }
 
 ///|
 test "basename: no slash" {
-  assert_eq(basename("venv"), "venv")
+  assert_eq(@exec.basename("venv"), "venv")
 }
 
 ///|
 test "basename: empty" {
-  assert_eq(basename(""), "")
+  assert_eq(@exec.basename(""), "")
 }
 
 ///|
 test "parent_dir: simple path" {
-  assert_eq(parent_dir("/home/user/project/.venv"), "/home/user/project")
+  assert_eq(@exec.parent_dir("/home/user/project/.venv"), "/home/user/project")
 }
 
 ///|
 test "parent_dir: trailing slash" {
-  assert_eq(parent_dir("/home/user/project/.venv/"), "/home/user/project")
+  assert_eq(@exec.parent_dir("/home/user/project/.venv/"), "/home/user/project")
 }
 
 ///|
 test "parent_dir: no slash" {
-  assert_eq(parent_dir("venv"), "")
+  assert_eq(@exec.parent_dir("venv"), "")
 }
 
 ///|
 test "parent_dir: root level" {
-  assert_eq(parent_dir("/venv"), "")
+  assert_eq(@exec.parent_dir("/venv"), "")
 }
 
 ///|

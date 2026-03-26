@@ -1,6 +1,7 @@
 import {
   "moonbitlang/async/process" @process,
   "moonbitlang/x/fs" @fs,
+  "moonbitlang/x/sys" @sys,
 }
 
 options(

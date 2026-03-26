@@ -183,53 +183,13 @@ fn get_virtualenv_name(generic_venv_names : Array[String]) -> String {
     return ""
   }
 
-  let name = basename(venv_path)
+  let name = @exec.basename(venv_path)
 
   if generic_venv_names.contains(name) {
-    return basename(parent_dir(venv_path))
+    return @exec.basename(@exec.parent_dir(venv_path))
   }
 
   name
-}
-
-///|
-fn basename(path : String) -> String {
-  let trimmed = if path.has_suffix("/") {
-    path[:path.length() - 1].to_string()
-  } else {
-    path
-  }
-
-  match last_slash(trimmed) {
-    Some(idx) => trimmed[idx + 1:].to_string()
-    None => trimmed
-  }
-}
-
-///|
-fn parent_dir(path : String) -> String {
-  let trimmed = if path.has_suffix("/") {
-    path[:path.length() - 1].to_string()
-  } else {
-    path
-  }
-
-  match last_slash(trimmed) {
-    Some(idx) => trimmed[:idx].to_string()
-    None => ""
-  }
-}
-
-///|
-fn last_slash(s : String) -> Int? {
-  let init : (Int?, Int) = (None, 0)
-
-  s
-  .iter()
-  .fold(init~, fn(acc, ch) {
-    let (result, i) = acc
-    (if ch == '/' { Some(i) } else { result }, i + 1)
-  }).0
 }
 
 ///|

@@ -1,6 +1,7 @@
 import {
   "mizchi/libgit2" @libgit2,
   "moonbitlang/x/fs" @fs,
+  "mst-mkt/moonship/exec" @exec,
 }
 
 options(
