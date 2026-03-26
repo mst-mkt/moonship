@@ -5,6 +5,7 @@ pub struct CmdDurationModule {
   format : String
   style : String
   min_time : Int
+  show_milliseconds : Bool
 }
 
 ///|
@@ -15,6 +16,7 @@ pub fn CmdDurationModule::default() -> CmdDurationModule {
     format: "took [$duration]($style) ",
     style: "yellow bold",
     min_time: 2000,
+    show_milliseconds: false,
   }
 }
 
@@ -29,6 +31,9 @@ pub fn CmdDurationModule::from_table(
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     min_time: table.get_int("min_time").unwrap_or(d.min_time),
+    show_milliseconds: table
+    .get_bool("show_milliseconds")
+    .unwrap_or(d.show_milliseconds),
   }
 }
 
@@ -62,7 +67,7 @@ pub impl @ms.PromptModule for CmdDurationModule with execute(
     return Skipped("duration below min_time")
   }
 
-  let duration = format_duration(ctx.cmd_duration)
+  let duration = format_duration(ctx.cmd_duration, self.show_milliseconds)
   let vars : Map[String, String] = { "duration": duration, "style": self.style }
   let segments = @ms.format_string(
     self.format,
@@ -74,22 +79,29 @@ pub impl @ms.PromptModule for CmdDurationModule with execute(
 }
 
 ///|
-fn format_duration(ms : Int) -> String {
+fn format_duration(ms : Int, show_milliseconds : Bool) -> String {
   if ms < 1000 {
     return "\{ms}ms"
   }
 
   let total_secs = ms / 1000
+  let remainder_ms = ms % 1000
   let hours = total_secs / 3600
   let minutes = total_secs % 3600 / 60
   let seconds = total_secs % 60
 
-  if hours > 0 {
+  let base = if hours > 0 {
     "\{hours}h\{minutes}m\{seconds}s"
   } else if minutes > 0 {
     "\{minutes}m\{seconds}s"
   } else {
     "\{seconds}s"
+  }
+
+  if show_milliseconds && remainder_ms > 0 {
+    "\{base}\{remainder_ms}ms"
+  } else {
+    base
   }
 }
 
@@ -110,6 +122,11 @@ pub fn CmdDurationModule::schema() -> @config.ModuleSchema {
         name: "min_time",
         field_type: @config.FInt,
         default_value: d.min_time.to_string(),
+      },
+      {
+        name: "show_milliseconds",
+        field_type: @config.FBool,
+        default_value: d.show_milliseconds.to_string(),
       },
     ],
   }

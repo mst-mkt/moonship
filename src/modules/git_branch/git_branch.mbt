@@ -115,7 +115,12 @@ fn GitBranchModule::render_branch(
     guard not(commit_hash.is_empty()) else {
       return Skipped("detached HEAD with no commit")
     }
-    "(\{commit_hash})"
+    let short_hash = if commit_hash.length() > 7 {
+      commit_hash[:7].to_string()
+    } else {
+      commit_hash
+    }
+    "(\{short_hash})"
   } else {
     raw_branch
   }

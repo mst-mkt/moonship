@@ -43,10 +43,7 @@ pub fn RepoHandle::get_branch(self : RepoHandle) -> (String, Bool, String) {
     None => ("", true)
   }
 
-  let commit_hash = match self.repo.head_id() {
-    Some(id) => if id.length() >= 7 { id[:7].to_string() } else { id }
-    None => ""
-  }
+  let commit_hash = self.repo.head_id().unwrap_or("")
 
   (branch, is_detached, commit_hash)
 }

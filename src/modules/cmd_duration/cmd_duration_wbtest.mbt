@@ -8,28 +8,35 @@ async test "name" {
 
 ///|
 async test "format_duration: milliseconds" {
-  assert_eq(format_duration(500), "500ms")
+  assert_eq(format_duration(500, false), "500ms")
 }
 
 ///|
 async test "format_duration: seconds" {
-  assert_eq(format_duration(5000), "5s")
+  assert_eq(format_duration(5000, false), "5s")
 }
 
 ///|
 async test "format_duration: minutes and seconds" {
-  assert_eq(format_duration(90000), "1m30s")
+  assert_eq(format_duration(90000, false), "1m30s")
 }
 
 ///|
 async test "format_duration: hours" {
-  assert_eq(format_duration(3661000), "1h1m1s")
+  assert_eq(format_duration(3661000, false), "1h1m1s")
 }
 
 ///|
 async test "format_duration: exact boundary" {
-  assert_eq(format_duration(1000), "1s")
-  assert_eq(format_duration(999), "999ms")
+  assert_eq(format_duration(1000, false), "1s")
+  assert_eq(format_duration(999, false), "999ms")
+}
+
+///|
+async test "format_duration: show_milliseconds" {
+  assert_eq(format_duration(5500, true), "5s500ms")
+  assert_eq(format_duration(5000, true), "5s")
+  assert_eq(format_duration(90500, true), "1m30s500ms")
 }
 
 // --- execute ---
