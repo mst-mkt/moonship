@@ -87,28 +87,30 @@ fn has_version_key(line : String) -> Bool {
 fn extract_value_after_separator(line : String) -> String {
   [":=", "=", ":"]
   .iter()
-  .find_first(fn(sep) { line.find(sep) is Some(_) })
-  .map(fn(sep) {
-    match line.find(sep) {
-      Some(idx) => strip_quotes(line[idx + sep.length():].to_string())
-      None => ""
-    }
+  .filter_map(fn(sep) {
+    line
+    .find(sep)
+    .map(fn(idx) { strip_quotes(line[idx + sep.length():].to_string()) })
   })
+  .find_first(fn(_) { true })
   .unwrap_or("")
 }
 
 ///|
 fn strip_quotes(s : String) -> String {
-  let buf = StringBuilder::new()
-
-  for ch in s {
+  s
+  .iter()
+  .filter(fn(ch) {
     match ch {
-      '"' | '\'' | ' ' | '\t' | ',' => ()
-      _ => buf.write_char(ch)
+      '"' | '\'' | ' ' | '\t' | ',' => false
+      _ => true
     }
-  }
-
-  buf.to_string()
+  })
+  .fold(init=StringBuilder::new(), fn(buf, ch) {
+    buf.write_char(ch)
+    buf
+  })
+  .to_string()
 }
 
 ///|
