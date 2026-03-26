@@ -76,6 +76,21 @@ test "render_with_fill: zero remaining width" {
 }
 
 ///|
+test "render: prev_fg resolved across segments" {
+  let output = ModuleOutput::new([
+    Segment::new("A", style=@terminal.Style::default().with_fg(@terminal.Red)),
+    Segment::new(
+      "B",
+      style=@terminal.Style::default().with_bg(@terminal.PrevFg),
+    ),
+  ])
+  let result = output.render()
+
+  // Second segment should have bg:red (ANSI 41) from prev segment's fg:red
+  assert_true(result.contains("41"))
+}
+
+///|
 test "render_with_fill: multiple fills share remaining width" {
   let output = ModuleOutput::new([
     Segment::new("A"),

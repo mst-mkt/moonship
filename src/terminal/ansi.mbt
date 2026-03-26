@@ -1,7 +1,7 @@
 ///|
 fn color_base_code(c : Color) -> Int? {
   match c {
-    Default | Ansi256(_) | Hex(_) => None
+    Default | Ansi256(_) | Hex(_) | PrevFg | PrevBg => None
     Black => Some(0)
     Red => Some(1)
     Green => Some(2)
@@ -27,7 +27,7 @@ fn color_to_code(c : Color, is_fg : Bool) -> String? {
   let ext = if is_fg { "38" } else { "48" }
 
   match c {
-    Default => None
+    Default | PrevFg | PrevBg => None
     Ansi256(n) => Some("\{ext};5;\{n}")
     Hex(rgb) => {
       let r = (rgb >> 16) & 0xFF
@@ -97,6 +97,8 @@ pub fn parse_color(name : String) -> Color {
     "bright-purple" | "brightpurple" => BrightPurple
     "bright-cyan" | "brightcyan" => BrightCyan
     "bright-white" | "brightwhite" => BrightWhite
+    "prev_fg" => PrevFg
+    "prev_bg" => PrevBg
     _ => parse_color_value(name)
   }
 }

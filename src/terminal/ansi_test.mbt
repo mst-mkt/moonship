@@ -262,3 +262,71 @@ test "stylize: fg + bg + multiple attrs" {
   assert_true(result.contains("32"))
   assert_true(result.contains("40"))
 }
+
+// --- prev_fg / prev_bg ---
+
+///|
+test "parse_color: prev_fg" {
+  assert_true(@terminal.parse_color("prev_fg") is PrevFg)
+}
+
+///|
+test "parse_color: prev_bg" {
+  assert_true(@terminal.parse_color("prev_bg") is PrevBg)
+}
+
+///|
+test "parse_style: bg:prev_fg" {
+  let style = @terminal.parse_style("bg:prev_fg")
+  assert_true(style.bg is PrevFg)
+}
+
+///|
+test "resolve_prev: fg from prev_fg" {
+  let style = @terminal.Style::default().with_fg(PrevFg)
+  let prev = @terminal.Style::default().with_fg(Red)
+  let resolved = style.resolve_prev(prev)
+  assert_true(resolved.fg is Red)
+}
+
+///|
+test "resolve_prev: bg from prev_bg" {
+  let style = @terminal.Style::default().with_bg(PrevBg)
+  let prev = @terminal.Style::default().with_bg(Blue)
+  let resolved = style.resolve_prev(prev)
+  assert_true(resolved.bg is Blue)
+}
+
+///|
+test "resolve_prev: bg from prev_fg (powerline)" {
+  let style = @terminal.Style::default().with_bg(PrevFg)
+  let prev = @terminal.Style::default().with_fg(Green)
+  let resolved = style.resolve_prev(prev)
+  assert_true(resolved.bg is Green)
+}
+
+///|
+test "resolve_prev: fg from prev_bg" {
+  let style = @terminal.Style::default().with_fg(PrevBg)
+  let prev = @terminal.Style::default().with_bg(Cyan)
+  let resolved = style.resolve_prev(prev)
+  assert_true(resolved.fg is Cyan)
+}
+
+///|
+test "resolve_prev: first segment defaults to no color" {
+  let style = @terminal.Style::default().with_fg(PrevFg).with_bg(PrevBg)
+  let prev = @terminal.Style::default()
+  let resolved = style.resolve_prev(prev)
+  assert_true(resolved.fg is Default)
+  assert_true(resolved.bg is Default)
+}
+
+///|
+test "resolve_prev: no prev colors unchanged" {
+  let style = @terminal.Style::default().with_fg(Red).with_bg(Blue)
+  let prev = @terminal.Style::default().with_fg(Green)
+  let resolved = style.resolve_prev(prev)
+  assert_true(resolved.fg is Red)
+  assert_true(resolved.bg is Blue)
+}

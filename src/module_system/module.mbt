@@ -34,11 +34,16 @@ pub fn ModuleOutput::new(segments : Array[Segment]) -> ModuleOutput {
 
 ///|
 pub fn ModuleOutput::render(self : ModuleOutput) -> String {
-  self.segments
-  .iter()
-  .map(fn(seg) { @terminal.stylize(seg.text, seg.style) })
-  .collect()
-  .join("")
+  let buf = StringBuilder::new()
+  let prev = Ref::new(@terminal.Style::default())
+
+  for seg in self.segments {
+    let resolved = seg.style.resolve_prev(prev.val)
+    buf.write_string(@terminal.stylize(seg.text, resolved))
+    prev.val = resolved
+  }
+
+  buf.to_string()
 }
 
 ///|
@@ -64,18 +69,23 @@ pub fn ModuleOutput::render_with_fill(
   }
   let fill_width = remaining / fill_count
 
-  self.segments
-  .iter()
-  .map(fn(seg) {
+  let buf = StringBuilder::new()
+  let prev = Ref::new(@terminal.Style::default())
+
+  for seg in self.segments {
+    let resolved = seg.style.resolve_prev(prev.val)
+
     if seg.is_fill {
       let expanded = repeat_to_width(seg.text, fill_width)
-      @terminal.stylize(expanded, seg.style)
+      buf.write_string(@terminal.stylize(expanded, resolved))
     } else {
-      @terminal.stylize(seg.text, seg.style)
+      buf.write_string(@terminal.stylize(seg.text, resolved))
     }
-  })
-  .collect()
-  .join("")
+
+    prev.val = resolved
+  }
+
+  buf.to_string()
 }
 
 ///|

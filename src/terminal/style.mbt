@@ -19,6 +19,8 @@ pub(all) enum Color {
   BrightWhite
   Ansi256(Int)
   Hex(Int) // 0xRRGGBB
+  PrevFg
+  PrevBg
 }
 
 ///|
@@ -99,4 +101,21 @@ pub fn Style::with_hidden(self : Style) -> Style {
 ///|
 pub fn Style::with_strikethrough(self : Style) -> Style {
   { ..self, strikethrough: true }
+}
+
+///|
+pub fn Style::resolve_prev(self : Style, prev : Style) -> Style {
+  let fg = match self.fg {
+    PrevFg => prev.fg
+    PrevBg => prev.bg
+    other => other
+  }
+
+  let bg = match self.bg {
+    PrevFg => prev.fg
+    PrevBg => prev.bg
+    other => other
+  }
+
+  { ..self, fg, bg }
 }
