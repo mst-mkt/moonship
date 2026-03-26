@@ -6,6 +6,8 @@ pub struct UsernameModule {
   style_root : String
   style_user : String
   show_always : Bool
+  detect_env_vars : Array[String]
+  aliases : Map[String, String]
 }
 
 ///|
@@ -17,6 +19,8 @@ pub fn UsernameModule::default() -> UsernameModule {
     style_root: "red bold",
     style_user: "yellow bold",
     show_always: false,
+    detect_env_vars: [],
+    aliases: {},
   }
 }
 
@@ -32,6 +36,10 @@ pub fn UsernameModule::from_table(
     style_root: table.get_string("style_root").unwrap_or(d.style_root),
     style_user: table.get_string("style_user").unwrap_or(d.style_user),
     show_always: table.get_bool("show_always").unwrap_or(d.show_always),
+    detect_env_vars: table
+    .get_string_array("detect_env_vars")
+    .unwrap_or(d.detect_env_vars),
+    aliases: table.get_string_map("aliases"),
   }
 }
 
@@ -65,13 +73,17 @@ pub impl @ms.PromptModule for UsernameModule with execute(
 
   let is_root = user == "root"
   let is_ssh = is_ssh_session()
+  let env_detected = self.detect_env_vars.iter().any(fn(var) {
+    not(@sys.get_env_var(var).unwrap_or("").is_empty())
+  })
 
-  guard self.show_always || is_root || is_ssh else {
+  guard self.show_always || is_root || is_ssh || env_detected else {
     return Skipped("not root or SSH")
   }
 
+  let display_user = self.aliases.get(user).unwrap_or(user)
   let style_str = if is_root { self.style_root } else { self.style_user }
-  let vars : Map[String, String] = { "user": user, "style": style_str }
+  let vars : Map[String, String] = { "user": display_user, "style": style_str }
   let segments = @ms.format_string(
     self.format,
     vars,

@@ -7,6 +7,8 @@ pub struct HostnameModule {
   ssh_only : Bool
   trim_at : String
   ssh_symbol : String
+  detect_env_vars : Array[String]
+  aliases : Map[String, String]
 }
 
 ///|
@@ -19,6 +21,8 @@ pub fn HostnameModule::default() -> HostnameModule {
     ssh_only: true,
     trim_at: ".",
     ssh_symbol: "🌐 ",
+    detect_env_vars: [],
+    aliases: {},
   }
 }
 
@@ -35,6 +39,10 @@ pub fn HostnameModule::from_table(
     ssh_only: table.get_bool("ssh_only").unwrap_or(d.ssh_only),
     trim_at: table.get_string("trim_at").unwrap_or(d.trim_at),
     ssh_symbol: table.get_string("ssh_symbol").unwrap_or(d.ssh_symbol),
+    detect_env_vars: table
+    .get_string_array("detect_env_vars")
+    .unwrap_or(d.detect_env_vars),
+    aliases: table.get_string_map("aliases"),
   }
 }
 
@@ -63,8 +71,14 @@ pub impl @ms.PromptModule for HostnameModule with execute(
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
 
-  let is_ssh = not(@sys.get_env_var("SSH_CONNECTION").unwrap_or("").is_empty())
-  guard not(self.ssh_only) || is_ssh else {
+  let is_ssh = ["SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY"]
+    .iter()
+    .any(fn(v) { not(@sys.get_env_var(v).unwrap_or("").is_empty()) })
+  let env_detected = self.detect_env_vars.iter().any(fn(var) {
+    not(@sys.get_env_var(var).unwrap_or("").is_empty())
+  })
+
+  guard not(self.ssh_only) || is_ssh || env_detected else {
     return Skipped("not in SSH session")
   }
 
@@ -77,11 +91,13 @@ pub impl @ms.PromptModule for HostnameModule with execute(
     }
   }
 
-  let hostname = trim_hostname(raw, self.trim_at)
+  let trimmed = trim_hostname(raw, self.trim_at)
+  let hostname = self.aliases.get(trimmed).unwrap_or(trimmed)
 
-  let vars : Map[String, String] = { "hostname": hostname, "style": self.style }
-  if is_ssh {
-    vars["ssh_symbol"] = self.ssh_symbol
+  let vars : Map[String, String] = {
+    "hostname": hostname,
+    "ssh_symbol": if is_ssh { self.ssh_symbol } else { "" },
+    "style": self.style,
   }
   let segments = @ms.format_string(
     self.format,

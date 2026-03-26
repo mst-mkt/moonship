@@ -69,6 +69,28 @@ pub fn ModuleTable::get_string_array(
 }
 
 ///|
+pub fn ModuleTable::get_string_map(
+  self : ModuleTable,
+  key : String,
+) -> Map[String, String] {
+  match self.0.get(key) {
+    Some(CTable(map_table)) =>
+      map_table
+      .iter()
+      .fold(init=(Map::new() : Map[String, String]), fn(acc, pair) {
+        match pair.1 {
+          CString(val) => {
+            acc[pair.0] = val
+            acc
+          }
+          _ => acc
+        }
+      })
+    _ => {}
+  }
+}
+
+///|
 pub struct Config {
   format : String
   right_format : String
