@@ -10,6 +10,7 @@ pub struct PythonModule {
   pyenv_version_name : Bool
   pyenv_prefix : String
   detect_env_vars : Array[String]
+  generic_venv_names : Array[String]
   detect_files : Array[String]
   detect_extensions : Array[String]
   detect_folders : Array[String]
@@ -28,6 +29,7 @@ pub fn PythonModule::default() -> PythonModule {
     pyenv_version_name: false,
     pyenv_prefix: "pyenv ",
     detect_env_vars: ["VIRTUAL_ENV"],
+    generic_venv_names: [".venv", "venv"],
     detect_files: [
       "requirements.txt", ".python-version", "pyproject.toml", "Pipfile", "tox.ini",
       "setup.py", "__init__.py",
@@ -59,6 +61,9 @@ pub fn PythonModule::from_table(table : @config.ModuleTable) -> PythonModule {
     detect_env_vars: table
     .get_string_array("detect_env_vars")
     .unwrap_or(d.detect_env_vars),
+    generic_venv_names: table
+    .get_string_array("generic_venv_names")
+    .unwrap_or(d.generic_venv_names),
     detect_files: table
     .get_string_array("detect_files")
     .unwrap_or(d.detect_files),
