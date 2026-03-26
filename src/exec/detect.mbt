@@ -24,7 +24,5 @@ pub fn detect_project(
 pub fn is_ssh_session() -> Bool {
   ["SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY"]
   .iter()
-  .any(fn(env_name) {
-    not(@sys.get_env_var(env_name).unwrap_or("").is_empty())
-  })
+  .any(fn(env_name) { not(@sys.get_env_var(env_name).unwrap_or("").is_empty()) })
 }
