@@ -353,16 +353,16 @@ async fn run_config(name : String, value : String) -> Unit {
         None => println("moonship: key '\{name}' not found")
       }
     } else if parts.length() == 2 {
-      let module = parts[0]
+      let mod_name = parts[0]
       let key = parts[1]
 
-      match config.get_raw_module(module) {
+      match config.get_raw_module(mod_name) {
         Some(table) =>
           match table.0.get(key) {
             Some(v) => println(config_value_display(v))
             None => println("moonship: key '\{name}' not found")
           }
-        None => println("moonship: module '\{module}' not found")
+        None => println("moonship: module '\{mod_name}' not found")
       }
     } else {
       println("moonship: invalid key '\{name}'")
