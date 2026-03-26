@@ -567,9 +567,8 @@ test "format_path: home is empty string no substitution" {
 }
 
 ///|
-test "format_path: truncation_length zero" {
-  // TODO: Starship treats 0 as "no limit", but moonship currently truncates to 0 components
-  assert_eq(format_path("/a/b/c", "", 0, false, None), "")
+test "format_path: truncation_length zero means no limit" {
+  assert_eq(format_path("/a/b/c", "", 0, false, None), "/a/b/c")
 }
 
 ///|

@@ -238,6 +238,8 @@ fn truncate_path(
   truncation_length : Int,
   truncation_symbol : String,
 ) -> String {
+  guard truncation_length > 0 else { return display }
+
   let parts = split_path(display)
 
   if parts.length() > truncation_length {
