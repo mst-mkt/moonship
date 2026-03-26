@@ -8,7 +8,12 @@ pub struct StatusModule {
   success_symbol : String
   not_executable_symbol : String
   not_found_symbol : String
+  sigint_symbol : String
+  signal_symbol : String
+  recognize_signal_code : Bool
   map_symbol : Bool
+  success_style : String
+  failure_style : String
   pipestatus : Bool
   pipestatus_separator : String
   pipestatus_format : String
@@ -26,7 +31,12 @@ pub fn StatusModule::default() -> StatusModule {
     success_symbol: "",
     not_executable_symbol: "🚫",
     not_found_symbol: "🔍",
+    sigint_symbol: "🧱",
+    signal_symbol: "⚡",
+    recognize_signal_code: true,
     map_symbol: false,
+    success_style: "",
+    failure_style: "",
     pipestatus: false,
     pipestatus_separator: "|",
     pipestatus_format: "\\[$pipestatus\\] => [$symbol$common_meaning$signal_name$maybe_int]($style) ",
@@ -52,7 +62,22 @@ pub fn StatusModule::from_table(table : @config.ModuleTable) -> StatusModule {
     not_found_symbol: table
     .get_string("not_found_symbol")
     .unwrap_or(d.not_found_symbol),
+    sigint_symbol: table
+    .get_string("sigint_symbol")
+    .unwrap_or(d.sigint_symbol),
+    signal_symbol: table
+    .get_string("signal_symbol")
+    .unwrap_or(d.signal_symbol),
+    recognize_signal_code: table
+    .get_bool("recognize_signal_code")
+    .unwrap_or(d.recognize_signal_code),
     map_symbol: table.get_bool("map_symbol").unwrap_or(d.map_symbol),
+    success_style: table
+    .get_string("success_style")
+    .unwrap_or(d.success_style),
+    failure_style: table
+    .get_string("failure_style")
+    .unwrap_or(d.failure_style),
     pipestatus: table.get_bool("pipestatus").unwrap_or(d.pipestatus),
     pipestatus_separator: table
     .get_string("pipestatus_separator")
@@ -132,12 +157,16 @@ fn StatusModule::build_status_vars(
 ) -> Map[String, String] {
   let status_str = status.to_string()
 
+  let is_signal = self.recognize_signal_code && status > 128
+
   let symbol = if status == 0 {
     self.success_symbol
   } else if self.map_symbol {
     match status {
       126 => self.not_executable_symbol
       127 => self.not_found_symbol
+      130 if is_signal => self.sigint_symbol
+      _ if is_signal => self.signal_symbol
       _ => self.symbol
     }
   } else {
@@ -152,7 +181,7 @@ fn StatusModule::build_status_vars(
     _ => ""
   }
 
-  let signal_name = if status > 128 {
+  let signal_name = if is_signal {
     match status - 128 {
       1 => "HUP"
       2 => "INT"
@@ -182,13 +211,19 @@ fn StatusModule::build_status_vars(
     "symbol": symbol,
     "common_meaning": common_meaning,
     "signal_name": signal_name,
-    "signal_number": if status > 128 {
+    "signal_number": if is_signal {
       (status - 128).to_string()
     } else {
       ""
     },
     "maybe_int": maybe_int,
-    "style": self.style,
+    "style": if status == 0 && not(self.success_style.is_empty()) {
+      self.success_style
+    } else if status != 0 && not(self.failure_style.is_empty()) {
+      self.failure_style
+    } else {
+      self.style
+    },
   }
 }
 
@@ -271,9 +306,34 @@ pub fn StatusModule::schema() -> @config.ModuleSchema {
         default_value: d.not_found_symbol,
       },
       {
+        name: "sigint_symbol",
+        field_type: @config.FString,
+        default_value: d.sigint_symbol,
+      },
+      {
+        name: "signal_symbol",
+        field_type: @config.FString,
+        default_value: d.signal_symbol,
+      },
+      {
+        name: "recognize_signal_code",
+        field_type: @config.FBool,
+        default_value: d.recognize_signal_code.to_string(),
+      },
+      {
         name: "map_symbol",
         field_type: @config.FBool,
         default_value: d.map_symbol.to_string(),
+      },
+      {
+        name: "success_style",
+        field_type: @config.FString,
+        default_value: d.success_style,
+      },
+      {
+        name: "failure_style",
+        field_type: @config.FString,
+        default_value: d.failure_style,
       },
       {
         name: "pipestatus",

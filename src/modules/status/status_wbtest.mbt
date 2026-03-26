@@ -258,6 +258,71 @@ async test "execute: pipestatus with map_symbol" {
 }
 
 ///|
+test "build_status_vars: sigint symbol for exit code 130" {
+  let m = { ..StatusModule::default(), map_symbol: true }
+  let vars = m.build_status_vars(130)
+  assert_eq(vars.get("symbol"), Some("🧱"))
+}
+
+///|
+test "build_status_vars: signal symbol for exit code 137 (KILL)" {
+  let m = { ..StatusModule::default(), map_symbol: true }
+  let vars = m.build_status_vars(137)
+  assert_eq(vars.get("symbol"), Some("⚡"))
+}
+
+///|
+test "build_status_vars: recognize_signal_code=false uses normal symbol" {
+  let m = {
+    ..StatusModule::default(),
+    map_symbol: true,
+    recognize_signal_code: false,
+  }
+  let vars = m.build_status_vars(130)
+  assert_eq(vars.get("symbol"), Some("❌"))
+}
+
+///|
+test "build_status_vars: success_style overrides style" {
+  let m = { ..StatusModule::default(), success_style: "bold green" }
+  let vars = m.build_status_vars(0)
+  assert_eq(vars.get("style"), Some("bold green"))
+}
+
+///|
+test "build_status_vars: failure_style overrides style" {
+  let m = { ..StatusModule::default(), failure_style: "bold yellow" }
+  let vars = m.build_status_vars(1)
+  assert_eq(vars.get("style"), Some("bold yellow"))
+}
+
+///|
+test "build_status_vars: recognize_signal_code=false clears signal_name" {
+  let m = {
+    ..StatusModule::default(),
+    recognize_signal_code: false,
+  }
+  let vars = m.build_status_vars(130)
+  assert_eq(vars.get("signal_name"), Some(""))
+  assert_eq(vars.get("signal_number"), Some(""))
+  assert_eq(vars.get("maybe_int"), Some("130"))
+}
+
+///|
+test "build_status_vars: failure_style on signal exit code" {
+  let m = { ..StatusModule::default(), failure_style: "bold magenta" }
+  let vars = m.build_status_vars(130)
+  assert_eq(vars.get("style"), Some("bold magenta"))
+}
+
+///|
+test "build_status_vars: no style override uses default" {
+  let m = StatusModule::default()
+  let vars = m.build_status_vars(1)
+  assert_eq(vars.get("style"), Some("bold red"))
+}
+
+///|
 test "hex_string" {
   assert_eq(hex_string(0), "0")
   assert_eq(hex_string(15), "F")
