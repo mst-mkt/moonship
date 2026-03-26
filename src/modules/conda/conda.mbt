@@ -68,6 +68,13 @@ pub impl @ms.PromptModule for CondaModule with execute(
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
 
+  if not(self.detect_env_vars.is_empty()) {
+    let env_match = self.detect_env_vars.iter().any(fn(name) {
+      not(@sys.get_env_var(name).unwrap_or("").is_empty())
+    })
+    guard env_match else { return Skipped("detect_env_vars not met") }
+  }
+
   let env = @sys.get_env_var("CONDA_DEFAULT_ENV").unwrap_or("")
   guard not(env.is_empty()) else { return Skipped("not in conda env") }
   guard not(self.ignore_base && env == "base") else {

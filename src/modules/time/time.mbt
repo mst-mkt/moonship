@@ -66,6 +66,10 @@ pub impl @ms.PromptModule for TimeModule with execute(
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
 
+  if not(in_time_range(self.time_range)) {
+    return Skipped("outside time_range")
+  }
+
   let fmt = if not(self.time_format.is_empty()) {
     self.time_format
   } else if self.use_12hr {
@@ -100,6 +104,27 @@ fn make_posix_tz(offset : String) -> String {
     "UTC+\{offset[1:].to_string()}"
   } else {
     "UTC-\{offset}"
+  }
+}
+
+///|
+async fn in_time_range(range : String) -> Bool {
+  guard range != "-" && not(range.is_empty()) else { return true }
+
+  let now = @exec.exec_cmd("date", ["+%H:%M"])
+  guard not(now.is_empty()) else { return true }
+
+  let parts = range.split("-").map(fn(s) { s.to_string() }).collect()
+  guard parts.length() == 2 else { return true }
+
+  let start = parts[0]
+  let end = parts[1]
+
+  if start <= end {
+    now >= start && now <= end
+  } else {
+    // Wraps midnight: e.g. "22:00-06:00"
+    now >= start || now <= end
   }
 }
 

@@ -24,3 +24,33 @@ async test "execute: enabled returns Output" {
   let result = m.execute(ctx)
   assert_true(result is Output(_))
 }
+
+// --- in_time_range ---
+
+///|
+async test "in_time_range: dash means always" {
+  assert_true(in_time_range("-"))
+}
+
+///|
+async test "in_time_range: empty means always" {
+  assert_true(in_time_range(""))
+}
+
+///|
+async test "in_time_range: normal range includes current time" {
+  // 00:00-23:59 should always include the current time
+  assert_true(in_time_range("00:00-23:59"))
+}
+
+///|
+async test "in_time_range: range that excludes all times" {
+  // No valid HH:MM string is >= "25:00", so this always returns false
+  assert_false(in_time_range("25:00-25:01"))
+}
+
+///|
+async test "in_time_range: invalid format returns true (permissive)" {
+  // Single value without dash should return true (guard falls through)
+  assert_true(in_time_range("12:00"))
+}

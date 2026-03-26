@@ -98,7 +98,17 @@ pub impl @ms.PromptModule for GitStatusModule with execute(
     return Skipped("not in git repository")
   }
 
-  let status = repo.get_status()
+  let status = if self.ignore_submodules {
+    parse_git_porcelain(
+      @exec.exec_cmd_full(
+        "git",
+        ["-C", ctx.cwd, "status", "--porcelain", "--ignore-submodules=dirty"],
+      ),
+      repo,
+    )
+  } else {
+    repo.get_status()
+  }
   let ahead_behind = @exec.exec_cmd(
     "git",
     ["-C", ctx.cwd, "rev-list", "--count", "--left-right", "@{upstream}...HEAD"],
@@ -191,6 +201,59 @@ fn build_status_string(counts : Array[(Int, String)]) -> String {
   .filter(fn(s) { not(s.is_empty()) })
   .collect()
   .join("")
+}
+
+///|
+fn parse_git_porcelain(
+  output : String,
+  repo : @git.RepoHandle,
+) -> @git.GitStatus {
+  let stashed = if @fs.path_exists("\{repo.repo_root()}/.git/refs/stash") ||
+    {
+      let packed = "\{repo.repo_root()}/.git/packed-refs"
+      @fs.path_exists(packed) &&
+        (@fs.read_file_to_string(packed) catch { _ => "" }).contains("refs/stash")
+    } {
+    1
+  } else {
+    0
+  }
+
+  output
+  .split("\n")
+  .fold(
+    init={
+      staged: 0,
+      modified: 0,
+      untracked: 0,
+      deleted: 0,
+      conflicted: 0,
+      renamed: 0,
+      typechanged: 0,
+      stashed,
+    },
+    fn(acc : @git.GitStatus, line) {
+      let s = line.to_string()
+      guard s.length() >= 2 else { return acc }
+
+      let x = s[0].unsafe_to_char()
+      let y = s[1].unsafe_to_char()
+
+      {
+        staged: acc.staged +
+          Bool::to_int(x == 'A' || x == 'M' || x == 'D' || x == 'R'),
+        modified: acc.modified + Bool::to_int(y == 'M'),
+        untracked: acc.untracked + Bool::to_int(x == '?' && y == '?'),
+        deleted: acc.deleted + Bool::to_int(x == 'D' || y == 'D'),
+        conflicted: acc.conflicted +
+          Bool::to_int(x == 'U' || y == 'U'),
+        renamed: acc.renamed + Bool::to_int(x == 'R'),
+        typechanged: acc.typechanged +
+          Bool::to_int(x == 'T' || y == 'T'),
+        stashed: acc.stashed,
+      }
+    },
+  )
 }
 
 ///|

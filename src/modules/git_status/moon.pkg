@@ -1,5 +1,6 @@
 import {
   "moonbitlang/core/strconv" @strconv,
+  "moonbitlang/x/fs" @fs,
   "mst-mkt/moonship/config" @config,
   "mst-mkt/moonship/context" @context,
   "mst-mkt/moonship/exec" @exec,

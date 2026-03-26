@@ -73,13 +73,21 @@ pub impl @ms.PromptModule for AwsModule with execute(
 
   let profile = get_aws_profile()
   let region = get_aws_region()
-  guard not(profile.is_empty()) || not(region.is_empty()) else {
+
+  guard self.force_display || not(profile.is_empty()) || not(region.is_empty()) else {
     return Skipped("no AWS profile or region")
   }
+
+  let expiration = @sys.get_env_var("AWS_SESSION_EXPIRATION").unwrap_or("")
 
   let vars : Map[String, String] = {
     "symbol": self.symbol,
     "style": self.style,
+  }
+
+  if not(expiration.is_empty()) {
+    vars["expiration"] = expiration
+    vars["expiration_symbol"] = self.expiration_symbol
   }
 
   if not(profile.is_empty()) {
