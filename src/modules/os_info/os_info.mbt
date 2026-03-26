@@ -4,6 +4,7 @@ pub struct OsModule {
   async_render : Bool
   format : String
   style : String
+  symbols : Map[String, String]
 }
 
 ///|
@@ -13,6 +14,7 @@ pub fn OsModule::default() -> OsModule {
     async_render: false,
     format: "[$symbol]($style)",
     style: "bold white",
+    symbols: {},
   }
 }
 
@@ -24,6 +26,7 @@ pub fn OsModule::from_table(table : @config.ModuleTable) -> OsModule {
     async_render: table.get_bool("async").unwrap_or(d.async_render),
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
+    symbols: parse_os_symbols(table),
   }
 }
 
@@ -55,7 +58,10 @@ pub impl @ms.PromptModule for OsModule with execute(
   let (name, version) = detect_os()
   guard not(name.is_empty()) else { return Skipped("OS not detected") }
 
-  let symbol = get_os_symbol(name)
+  let symbol = match self.symbols.get(name) {
+    Some(custom) => custom
+    None => get_os_symbol(name)
+  }
   let vars : Map[String, String] = {
     "symbol": symbol,
     "name": name,
@@ -120,6 +126,27 @@ async fn get_uname() -> String {
     output.to_lower()
   } else {
     ""
+  }
+}
+
+///|
+fn parse_os_symbols(table : @config.ModuleTable) -> Map[String, String] {
+  match table.0.get("symbols") {
+    Some(@config.CTable(sym_table)) =>
+      sym_table
+      .iter()
+      .fold(init=(Map::new() : Map[String, String]), fn(acc, pair) {
+        match pair.1 {
+          @config.CString(val) => {
+            // Starship uses PascalCase OS names, moonship uses lowercase
+            let key = pair.0.to_lower()
+            acc[key] = val
+            acc
+          }
+          _ => acc
+        }
+      })
+    _ => {}
   }
 }
 
