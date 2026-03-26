@@ -7,6 +7,7 @@ pub struct CustomModule {
   symbol : String
   command : String
   when : String
+  require_repo : Bool
   shell : String
   description : String
   detect_files : Array[String]
@@ -24,6 +25,7 @@ pub fn CustomModule::default() -> CustomModule {
     symbol: "",
     command: "",
     when: "",
+    require_repo: false,
     shell: "",
     description: "",
     detect_files: [],
@@ -43,6 +45,7 @@ pub fn CustomModule::from_table(table : @config.ModuleTable) -> CustomModule {
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
     command: table.get_string("command").unwrap_or(d.command),
     when: table.get_string("when").unwrap_or(d.when),
+    require_repo: table.get_bool("require_repo").unwrap_or(d.require_repo),
     shell: table.get_string("shell").unwrap_or(d.shell),
     description: table.get_string("description").unwrap_or(d.description),
     detect_files: table
@@ -83,6 +86,13 @@ pub impl @ms.PromptModule for CustomModule with execute(
   guard not(self.disabled) else { return Disabled }
   guard not(self.command.is_empty()) else {
     return Skipped("no command configured")
+  }
+
+  // Check require_repo
+  if self.require_repo {
+    guard ctx.get_repo() is Some(_) else {
+      return Skipped("not in a git repository")
+    }
   }
 
   // Check detect conditions

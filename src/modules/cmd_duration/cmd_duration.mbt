@@ -6,6 +6,8 @@ pub struct CmdDurationModule {
   style : String
   min_time : Int
   show_milliseconds : Bool
+  show_notifications : Bool
+  min_time_to_notify : Int
 }
 
 ///|
@@ -17,6 +19,8 @@ pub fn CmdDurationModule::default() -> CmdDurationModule {
     style: "yellow bold",
     min_time: 2000,
     show_milliseconds: false,
+    show_notifications: false,
+    min_time_to_notify: 45000,
   }
 }
 
@@ -34,6 +38,12 @@ pub fn CmdDurationModule::from_table(
     show_milliseconds: table
     .get_bool("show_milliseconds")
     .unwrap_or(d.show_milliseconds),
+    show_notifications: table
+    .get_bool("show_notifications")
+    .unwrap_or(d.show_notifications),
+    min_time_to_notify: table
+    .get_int("min_time_to_notify")
+    .unwrap_or(d.min_time_to_notify),
   }
 }
 

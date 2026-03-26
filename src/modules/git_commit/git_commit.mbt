@@ -8,6 +8,7 @@ pub struct GitCommitModule {
   commit_hash_length : Int
   tag_symbol : String
   tag_disabled : Bool
+  tag_max_candidates : Int
 }
 
 ///|
@@ -21,6 +22,7 @@ pub fn GitCommitModule::default() -> GitCommitModule {
     commit_hash_length: 7,
     tag_symbol: " 🏷  ",
     tag_disabled: true,
+    tag_max_candidates: 0,
   }
 }
 
@@ -40,6 +42,9 @@ pub fn GitCommitModule::from_table(
     .unwrap_or(d.commit_hash_length),
     tag_symbol: table.get_string("tag_symbol").unwrap_or(d.tag_symbol),
     tag_disabled: table.get_bool("tag_disabled").unwrap_or(d.tag_disabled),
+    tag_max_candidates: table
+    .get_int("tag_max_candidates")
+    .unwrap_or(d.tag_max_candidates),
   }
 }
 
@@ -85,10 +90,20 @@ pub impl @ms.PromptModule for GitCommitModule with execute(
   }
 
   let tag = if not(self.tag_disabled) {
-    let tag_name = @exec.exec_cmd(
-      "git",
-      ["-C", ctx.cwd, "describe", "--tags", "--exact-match", "HEAD"],
-    )
+    let tag_name = if self.tag_max_candidates > 0 {
+      @exec.exec_cmd(
+        "git",
+        [
+          "-C", ctx.cwd, "describe", "--tags",
+          "--candidates=\{self.tag_max_candidates}", "HEAD",
+        ],
+      )
+    } else {
+      @exec.exec_cmd(
+        "git",
+        ["-C", ctx.cwd, "describe", "--tags", "--exact-match", "HEAD"],
+      )
+    }
 
     if tag_name.is_empty() { "" } else { self.tag_symbol + tag_name }
   } else {

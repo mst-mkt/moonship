@@ -6,6 +6,7 @@ pub struct PixiModule {
   style : String
   symbol : String
   version_format : String
+  pixi_binary : String
   show_default_environment : Bool
   detect_files : Array[String]
   detect_extensions : Array[String]
@@ -21,6 +22,7 @@ pub fn PixiModule::default() -> PixiModule {
     style: "yellow bold",
     symbol: "🧚 ",
     version_format: "v${raw}",
+    pixi_binary: "pixi",
     show_default_environment: true,
     detect_files: ["pixi.toml", "pixi.lock"],
     detect_extensions: [],
@@ -40,6 +42,9 @@ pub fn PixiModule::from_table(table : @config.ModuleTable) -> PixiModule {
     version_format: table
     .get_string("version_format")
     .unwrap_or(d.version_format),
+    pixi_binary: table
+    .get_string("pixi_binary")
+    .unwrap_or(d.pixi_binary),
     show_default_environment: table
     .get_bool("show_default_environment")
     .unwrap_or(d.show_default_environment),
@@ -88,7 +93,7 @@ pub impl @ms.PromptModule for PixiModule with execute(
     return Skipped("no Pixi project detected")
   }
 
-  let version = @exec.exec_cmd("pixi", ["--version"])
+  let version = @exec.exec_cmd(self.pixi_binary, ["--version"])
   let vars : Map[String, String] = {
     "symbol": self.symbol,
     "style": self.style,

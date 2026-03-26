@@ -126,6 +126,21 @@ async test "execute: custom shell" {
 }
 
 ///|
+async test "execute: require_repo skips when not in repo" {
+  let config = @config.Config::from_toml(
+    (
+      #|[custom]
+      #|command = "echo test"
+      #|require_repo = true
+    ),
+  )
+  let m = CustomModule::from_config(config)
+  let ctx = @context.Context::new(cwd="/tmp", config~)
+
+  assert_true(m.execute(ctx) is Skipped(_))
+}
+
+///|
 test "from_table: all fields parsed" {
   let config = @config.Config::from_toml(
     (
