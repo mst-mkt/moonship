@@ -5,6 +5,12 @@ pub struct KubernetesModule {
   format : String
   style : String
   symbol : String
+  context_aliases : Map[String, String]
+  user_aliases : Map[String, String]
+  detect_env_vars : Array[String]
+  detect_files : Array[String]
+  detect_extensions : Array[String]
+  detect_folders : Array[String]
 }
 
 ///|
@@ -15,6 +21,12 @@ pub fn KubernetesModule::default() -> KubernetesModule {
     format: "[$symbol$context( \\($namespace\\))]($style) in ",
     style: "cyan bold",
     symbol: "☸ ",
+    context_aliases: {},
+    user_aliases: {},
+    detect_env_vars: [],
+    detect_files: [],
+    detect_extensions: [],
+    detect_folders: [],
   }
 }
 
@@ -29,6 +41,20 @@ pub fn KubernetesModule::from_table(
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    context_aliases: table.get_string_map("context_aliases"),
+    user_aliases: table.get_string_map("user_aliases"),
+    detect_env_vars: table
+    .get_string_array("detect_env_vars")
+    .unwrap_or(d.detect_env_vars),
+    detect_files: table
+    .get_string_array("detect_files")
+    .unwrap_or(d.detect_files),
+    detect_extensions: table
+    .get_string_array("detect_extensions")
+    .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
   }
 }
 
@@ -59,6 +85,28 @@ pub impl @ms.PromptModule for KubernetesModule with execute(
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
 
+  // Check detect conditions if any are configured
+  let has_detect = not(self.detect_files.is_empty()) ||
+    not(self.detect_extensions.is_empty()) ||
+    not(self.detect_folders.is_empty()) ||
+    not(self.detect_env_vars.is_empty())
+
+  if has_detect {
+    let file_match = @exec.detect_project(
+      ctx.cwd,
+      self.detect_files,
+      self.detect_extensions,
+      folders=self.detect_folders,
+    )
+    let env_match = self.detect_env_vars.iter().any(fn(name) {
+      not(@sys.get_env_var(name).unwrap_or("").is_empty())
+    })
+
+    guard file_match || env_match else {
+      return Skipped("detection conditions not met")
+    }
+  }
+
   let kubeconfig_paths = get_kubeconfig_paths(ctx.home_dir)
   guard not(kubeconfig_paths.is_empty()) else {
     return Skipped("no kubeconfig path")
@@ -87,14 +135,29 @@ pub impl @ms.PromptModule for KubernetesModule with execute(
     return Skipped("no current context")
   }
 
+  let display_context = self.context_aliases
+    .get(current_context)
+    .unwrap_or(current_context)
+
+  let user = get_context_user(kubeconfig_paths, current_context)
+  let display_user = if user.is_empty() {
+    ""
+  } else {
+    self.user_aliases.get(user).unwrap_or(user)
+  }
+
   let vars : Map[String, String] = {
-    "context": current_context,
+    "context": display_context,
     "symbol": self.symbol,
     "style": self.style,
   }
 
   if not(ns.is_empty()) {
     vars["namespace"] = ns
+  }
+
+  if not(display_user.is_empty()) {
+    vars["user"] = display_user
   }
 
   let segments = @ms.format_string(
@@ -155,6 +218,36 @@ fn get_context_namespace(doc : @yaml.Yaml, context_name : String) -> String {
     }
   })
   .unwrap_or("")
+}
+
+///|
+fn get_context_user(
+  kubeconfig_paths : Array[String],
+  context_name : String,
+) -> String {
+  for path in kubeconfig_paths {
+    let content = @fs.read_file_to_string(path) catch { _ => continue }
+    let docs = @yaml.Yaml::load_from_string(content) catch { _ => continue }
+    guard docs.length() > 0 else { continue }
+
+    let doc = docs[0]
+    guard doc is Map(m) else { continue }
+    guard m.get("contexts") is Some(Array(contexts)) else { continue }
+
+    for ctx in contexts {
+      guard ctx is Map(ctx_map) else { continue }
+      guard ctx_map.get("name") is Some(String(name)) else { continue }
+      guard name == context_name else { continue }
+      guard ctx_map.get("context") is Some(Map(inner)) else { continue }
+
+      match inner.get("user") {
+        Some(String(u)) => return u
+        _ => ()
+      }
+    }
+  }
+
+  ""
 }
 
 ///|
