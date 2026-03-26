@@ -54,17 +54,10 @@ pub fn ModuleOutput::render_with_fill(
 
   let non_fill_width = self.segments
     .iter()
-    .fold(init=0, fn(acc, seg) {
-      if seg.is_fill {
-        acc
-      } else {
-        acc + visible_width(seg.text)
-      }
-    })
+    .filter(fn(seg) { not(seg.is_fill) })
+    .fold(init=0, fn(acc, seg) { acc + visible_width(seg.text) })
 
-  let fill_count = self.segments
-    .iter()
-    .fold(init=0, fn(acc, seg) { if seg.is_fill { acc + 1 } else { acc } })
+  let fill_count = self.segments.iter().filter(fn(seg) { seg.is_fill }).count()
 
   let remaining = if terminal_width > non_fill_width {
     terminal_width - non_fill_width
@@ -93,39 +86,35 @@ pub fn ModuleOutput::render_with_fill(
 
 ///|
 fn visible_width(s : String) -> Int {
-  let len = s.length()
+  s
+  .iter()
+  .fold(init=(0, false), fn(state, ch) {
+    let (width, in_escape) = state
 
-  loop (0, 0, false) {
-    (i, width, in_escape) => {
-      if i >= len {
-        break width
-      }
-
-      let ch = s[i].unsafe_to_char()
-      if in_escape {
-        if ch == 'm' {
-          continue (i + 1, width, false)
-        } else {
-          continue (i + 1, width, true)
-        }
-      } else if ch == '\u001b' {
-        continue (i + 1, width, true)
-      } else {
-        continue (i + 1, width + 1, false)
-      }
+    if in_escape {
+      (width, ch != 'm')
+    } else if ch == '\u001b' {
+      (width, true)
+    } else {
+      (width + 1, false)
     }
-  }
+  }).0
 }
 
 ///|
 fn repeat_to_width(symbol : String, width : Int) -> String {
   guard width > 0 && not(symbol.is_empty()) else { return "" }
 
-  let sym_len = symbol.length()
+  let full_repeats = width / symbol.length()
+  let remainder = width % symbol.length()
   let buf = StringBuilder::new()
 
-  for i = 0; i < width; i = i + 1 {
-    buf.write_char(symbol[i % sym_len].unsafe_to_char())
+  for _ in 0..<full_repeats {
+    buf.write_string(symbol)
+  }
+
+  if remainder > 0 {
+    buf.write_string(symbol[:remainder].to_string())
   }
 
   buf.to_string()

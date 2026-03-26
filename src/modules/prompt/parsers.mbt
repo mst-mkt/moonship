@@ -150,15 +150,5 @@ fn find_file_with_extension(dir : String, ext : String) -> String {
 
 ///|
 fn find_char_from(s : String, target : Char, start : Int) -> Int? {
-  let len = s.length()
-
-  loop start {
-    i if i >= len => break None
-    i =>
-      if s[i].unsafe_to_char() == target {
-        break Some(i)
-      } else {
-        continue i + 1
-      }
-  }
+  s[start:].to_string().find(target.to_string()).map(fn(i) { i + start })
 }

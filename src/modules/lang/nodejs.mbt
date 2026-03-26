@@ -116,47 +116,34 @@ pub impl @ms.PromptModule for NodejsModule with execute(
 
 ///|
 fn get_engines_version(cwd : String) -> String {
-  let path = cwd + "/package.json"
-  let content = @fs.read_file_to_string(path) catch { _ => return "" }
-
-  let engines_key = "\"engines\""
-  match content.find(engines_key) {
-    None => ""
-    Some(idx) => {
-      let after = content[idx + engines_key.length():].to_string()
-
-      let node_key = "\"node\""
-      match after.find(node_key) {
-        None => ""
-        Some(n_idx) => {
-          let after_node = after[n_idx + node_key.length():].to_string()
-          extract_json_string(after_node)
-        }
-      }
-    }
+  let content = @fs.read_file_to_string(cwd + "/package.json") catch {
+    _ => return ""
   }
+
+  guard content.find("\"engines\"") is Some(idx) else { return "" }
+
+  let after_engines = content[idx + "\"engines\"".length():].to_string()
+
+  guard after_engines.find("\"node\"") is Some(n_idx) else { return "" }
+
+  let after_node = after_engines[n_idx + "\"node\"".length():].to_string()
+
+  extract_json_value(after_node)
 }
 
 ///|
-fn extract_json_string(s : String) -> String {
-  let colon = match s.find(":") {
-    Some(p) => p
-    None => return ""
-  }
+fn extract_json_value(s : String) -> String {
+  guard s.find(":") is Some(colon) else { return "" }
 
   let after_colon = s[colon + 1:].to_string()
-  let quote_start = match after_colon.find("\"") {
-    Some(p) => p
-    None => return ""
-  }
 
-  let after_quote = after_colon[quote_start + 1:].to_string()
-  let quote_end = match after_quote.find("\"") {
-    Some(p) => p
-    None => return ""
-  }
+  guard after_colon.find("\"") is Some(q_start) else { return "" }
 
-  after_quote[:quote_end].to_string()
+  let after_quote = after_colon[q_start + 1:].to_string()
+
+  guard after_quote.find("\"") is Some(q_end) else { return "" }
+
+  after_quote[:q_end].to_string()
 }
 
 ///|
@@ -212,25 +199,23 @@ fn trim_spaces(s : String) -> String {
 ///|
 fn parse_semver(s : String) -> (Int, Int, Int) {
   let parts = s.split(".").map(fn(p) { p.to_string() }).collect()
-  let major = if parts.length() >= 1 { parse_int_simple(parts[0]) } else { 0 }
-  let minor = if parts.length() >= 2 { parse_int_simple(parts[1]) } else { 0 }
-  let patch = if parts.length() >= 3 { parse_int_simple(parts[2]) } else { 0 }
+  let major = if parts.length() >= 1 {
+    @exec.parse_leading_int(parts[0])
+  } else {
+    0
+  }
+  let minor = if parts.length() >= 2 {
+    @exec.parse_leading_int(parts[1])
+  } else {
+    0
+  }
+  let patch = if parts.length() >= 3 {
+    @exec.parse_leading_int(parts[2])
+  } else {
+    0
+  }
 
   (major, minor, patch)
-}
-
-///|
-fn parse_int_simple(s : String) -> Int {
-  s
-  .iter()
-  .fold(init=(0, true), fn(acc, c) {
-    let (result, active) = acc
-    if active && c >= '0' && c <= '9' {
-      (result * 10 + (c.to_int() - '0'.to_int()), true)
-    } else {
-      (result, false)
-    }
-  }).0
 }
 
 ///|
