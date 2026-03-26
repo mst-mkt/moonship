@@ -1,4 +1,36 @@
 ///|
+struct LazyRepo {
+  cwd : String
+  mut repo : @git.RepoHandle?
+  mut resolved : Bool
+}
+
+///|
+fn LazyRepo::new(cwd : String) -> LazyRepo {
+  { cwd, repo: None, resolved: false }
+}
+
+///|
+fn LazyRepo::get(self : LazyRepo) -> @git.RepoHandle? {
+  if self.resolved {
+    return self.repo
+  }
+
+  self.resolved = true
+  self.repo = @git.open_repo(self.cwd)
+  self.repo
+}
+
+///|
+fn LazyRepo::close(self : LazyRepo) -> Unit {
+  if self.repo is Some(repo) {
+    repo.close()
+    self.repo = None
+    self.resolved = false
+  }
+}
+
+///|
 pub struct Context {
   cwd : String
   logical_dir : String
@@ -12,8 +44,7 @@ pub struct Context {
   shlvl : Int
   config : @config.Config
   palette : Map[String, String]
-  mut git_repo : @git.RepoHandle?
-  mut git_resolved : Bool
+  lazy_repo : LazyRepo
 }
 
 ///|
@@ -47,27 +78,16 @@ pub fn Context::new(
     shlvl,
     config,
     palette: config.get_active_palette(),
-    git_repo: None,
-    git_resolved: false,
+    lazy_repo: LazyRepo::new(cwd),
   }
 }
 
 ///|
 pub fn Context::get_repo(self : Context) -> @git.RepoHandle? {
-  if self.git_resolved {
-    return self.git_repo
-  }
-
-  self.git_resolved = true
-  self.git_repo = @git.open_repo(self.cwd)
-  self.git_repo
+  self.lazy_repo.get()
 }
 
 ///|
 pub fn Context::close_repo(self : Context) -> Unit {
-  if self.git_repo is Some(repo) {
-    repo.close()
-    self.git_repo = None
-    self.git_resolved = false
-  }
+  self.lazy_repo.close()
 }

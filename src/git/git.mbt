@@ -140,18 +140,23 @@ fn extract_branch_name(head_ref : String) -> String {
 }
 
 ///|
+/// libgit2 GIT_STATUS_INDEX_RENAMED
 let git_status_index_renamed = 8
 
 ///|
+/// libgit2 GIT_STATUS_INDEX_TYPECHANGE
 let git_status_index_typechange = 16
 
 ///|
+/// libgit2 GIT_STATUS_WT_RENAMED
 let git_status_wt_renamed = 2048
 
 ///|
+/// libgit2 GIT_STATUS_WT_TYPECHANGE
 let git_status_wt_typechange = 4096
 
 ///|
+/// libgit2 GIT_STATUS_CONFLICTED
 let git_status_conflicted = 32768
 
 ///|

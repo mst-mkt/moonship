@@ -140,15 +140,22 @@ fn run_module_list() -> Unit {
 }
 
 ///|
+struct ModuleTimingEntry {
+  name : String
+  elapsed_ms : Int64
+  rendered_output : String
+}
+
+///|
 async fn collect_module_entries(
   ctx : @context.Context,
   modules : Map[String, &@ms.PromptModule],
   skip_name? : (String) -> Bool = fn(_) { false },
   should_include~ : (Int64, String) -> Bool,
-) -> Array[(String, Int64, String)] {
+) -> Array[ModuleTimingEntry] {
   let format = expand_all(ctx.config.format, modules)
   let module_names = @ms.extract_module_names(format)
-  let entries : Array[(String, Int64, String)] = []
+  let entries : Array[ModuleTimingEntry] = []
 
   for name in module_names {
     guard not(skip_name(name)) else { continue }
@@ -164,7 +171,7 @@ async fn collect_module_entries(
     }
 
     if should_include(elapsed, output) {
-      entries.push((name, elapsed, output))
+      entries.push({ name, elapsed_ms: elapsed, rendered_output: output })
     }
   }
 
@@ -186,24 +193,25 @@ async fn run_timings(pa : PromptArgs) -> Unit {
     elapsed > 0L || not(output.is_empty())
   })
 
-  entries.sort_by(fn(a, b) { b.1.compare(a.1) })
+  entries.sort_by(fn(a, b) { b.elapsed_ms.compare(a.elapsed_ms) })
 
-  let max_name = max_length(entries.iter().map(fn(e) { e.0 }))
-  let max_dur = max_length(entries.iter().map(fn(e) { format_duration(e.1) }))
+  let max_name = max_length(entries.iter().map(fn(e) { e.name }))
+  let max_dur = max_length(
+    entries.iter().map(fn(e) { format_duration(e.elapsed_ms) }),
+  )
 
   println("")
   println(" Here are the timings of modules in your prompt (>=1ms or output):")
   entries.each(fn(entry) {
-    let (name, ms, output) = entry
-    let dur = format_duration(ms)
+    let dur = format_duration(entry.elapsed_ms)
 
-    let async_marker = match modules.get(name) {
+    let async_marker = match modules.get(entry.name) {
       Some(m) if m.is_async() => " [async]"
       _ => ""
     }
 
     println(
-      " \{pad_right(name, max_name)}  -  \{pad_left(dur, max_dur)}  -   \"\{output}\"\{async_marker}",
+      " \{pad_right(entry.name, max_name)}  -  \{pad_left(dur, max_dur)}  -   \"\{entry.rendered_output}\"\{async_marker}",
     )
   })
 }
@@ -224,24 +232,21 @@ async fn run_explain(pa : PromptArgs) -> Unit {
 
   let max_val_width = entries
     .iter()
-    .fold(init=0, fn(max, e) {
-      let w = e.2.length() + format_duration(e.1).length() + 6
-      if w > max {
-        w
-      } else {
-        max
-      }
+    .fold(init=0, fn(acc, e) {
+      @cmp.maximum(
+        acc,
+        e.rendered_output.length() + format_duration(e.elapsed_ms).length() + 6,
+      )
     })
 
   println("")
   println(" Here's a breakdown of your prompt:")
   entries.each(fn(entry) {
-    let (name, ms, output) = entry
-    let dur = format_duration(ms)
-    let val_part = " \"\{output}\" (\{dur})"
+    let dur = format_duration(entry.elapsed_ms)
+    let val_part = " \"\{entry.rendered_output}\" (\{dur})"
     let padding = pad_right("", max_val_width - val_part.length() + 3)
 
-    println("\{val_part}\{padding}-  \{module_description(name)}")
+    println("\{val_part}\{padding}-  \{module_description(entry.name)}")
   })
 }
 
