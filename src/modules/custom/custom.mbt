@@ -6,6 +6,12 @@ pub struct CustomModule {
   style : String
   symbol : String
   command : String
+  when : String
+  shell : String
+  description : String
+  detect_files : Array[String]
+  detect_extensions : Array[String]
+  detect_folders : Array[String]
 }
 
 ///|
@@ -17,6 +23,12 @@ pub fn CustomModule::default() -> CustomModule {
     style: "green bold",
     symbol: "",
     command: "",
+    when: "",
+    shell: "",
+    description: "",
+    detect_files: [],
+    detect_extensions: [],
+    detect_folders: [],
   }
 }
 
@@ -30,6 +42,18 @@ pub fn CustomModule::from_table(table : @config.ModuleTable) -> CustomModule {
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
     command: table.get_string("command").unwrap_or(d.command),
+    when: table.get_string("when").unwrap_or(d.when),
+    shell: table.get_string("shell").unwrap_or(d.shell),
+    description: table.get_string("description").unwrap_or(d.description),
+    detect_files: table
+    .get_string_array("detect_files")
+    .unwrap_or(d.detect_files),
+    detect_extensions: table
+    .get_string_array("detect_extensions")
+    .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
   }
 }
 
@@ -54,14 +78,39 @@ pub impl @ms.PromptModule for CustomModule with is_async(self) -> Bool {
 ///|
 pub impl @ms.PromptModule for CustomModule with execute(
   self,
-  _ctx : @context.Context,
+  ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
   guard not(self.command.is_empty()) else {
     return Skipped("no command configured")
   }
 
-  let output = @exec.exec_cmd("sh", ["-c", self.command])
+  // Check detect conditions
+  let has_detect = not(self.detect_files.is_empty()) ||
+    not(self.detect_extensions.is_empty()) ||
+    not(self.detect_folders.is_empty())
+
+  if has_detect {
+    guard @exec.detect_project(
+      ctx.cwd,
+      self.detect_files,
+      self.detect_extensions,
+      folders=self.detect_folders,
+    ) else {
+      return Skipped("detection conditions not met")
+    }
+  }
+
+  let shell_cmd = if self.shell.is_empty() { "sh" } else { self.shell }
+
+  // Check `when` condition (exit code 0 = pass)
+  if not(self.when.is_empty()) {
+    let status = @exec.exec_cmd_status(shell_cmd, ["-c", self.when])
+    guard status == 0 else {
+      return Skipped("when condition not met")
+    }
+  }
+  let output = @exec.exec_cmd(shell_cmd, ["-c", self.command])
   guard not(output.is_empty()) else {
     return Skipped("command produced no output")
   }

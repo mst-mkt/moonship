@@ -42,6 +42,12 @@ fn first_line(s : String) -> String {
 }
 
 ///|
+pub async fn exec_cmd_status(cmd : String, args : Array[String]) -> Int {
+  let (status, _) = @process.collect_stdout(cmd, args[:]) catch { _ => return -1 }
+  status
+}
+
+///|
 pub fn add_v_prefix(s : String) -> String {
   if s.is_empty() || s.has_prefix("v") || s.has_prefix("V") {
     s
