@@ -15,7 +15,7 @@ async test "build_status_string: all types" {
     (1, "!"),
     (3, "?"),
   ])
-  assert_eq(result, "⇡+!?")
+  assert_eq(result, "⇡+2!?3")
 }
 
 ///|
@@ -36,8 +36,8 @@ async test "build_status_string: count=1 symbol only" {
 }
 
 ///|
-async test "build_status_string: count>1 symbol only" {
-  assert_eq(build_status_string([(5, "+")]), "+")
+async test "build_status_string: count>1 shows count" {
+  assert_eq(build_status_string([(5, "+")]), "+5")
 }
 
 // --- render_status unit tests ---

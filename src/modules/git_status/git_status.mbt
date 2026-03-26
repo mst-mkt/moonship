@@ -186,7 +186,9 @@ fn GitStatusModule::render_status(
 
 ///|
 fn format_count(count : Int, symbol : String) -> String {
-  if count > 0 {
+  if count > 1 {
+    symbol + count.to_string()
+  } else if count == 1 {
     symbol
   } else {
     ""
