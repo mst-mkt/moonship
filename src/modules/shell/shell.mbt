@@ -61,24 +61,18 @@ pub fn ShellModule::from_table(table : @config.ModuleTable) -> ShellModule {
     pwsh_indicator: table
     .get_string("pwsh_indicator")
     .unwrap_or(d.pwsh_indicator),
-    ion_indicator: table
-    .get_string("ion_indicator")
-    .unwrap_or(d.ion_indicator),
+    ion_indicator: table.get_string("ion_indicator").unwrap_or(d.ion_indicator),
     elvish_indicator: table
     .get_string("elvish_indicator")
     .unwrap_or(d.elvish_indicator),
     tcsh_indicator: table
     .get_string("tcsh_indicator")
     .unwrap_or(d.tcsh_indicator),
-    nu_indicator: table
-    .get_string("nu_indicator")
-    .unwrap_or(d.nu_indicator),
+    nu_indicator: table.get_string("nu_indicator").unwrap_or(d.nu_indicator),
     xonsh_indicator: table
     .get_string("xonsh_indicator")
     .unwrap_or(d.xonsh_indicator),
-    cmd_indicator: table
-    .get_string("cmd_indicator")
-    .unwrap_or(d.cmd_indicator),
+    cmd_indicator: table.get_string("cmd_indicator").unwrap_or(d.cmd_indicator),
     unknown_indicator: table
     .get_string("unknown_indicator")
     .unwrap_or(d.unknown_indicator),

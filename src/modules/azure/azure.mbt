@@ -79,8 +79,8 @@ pub impl @ms.PromptModule for AzureModule with execute(
 
   let vars : Map[String, String] = {
     "subscription": self.subscription_aliases
-      .get(subscription)
-      .unwrap_or(subscription),
+    .get(subscription)
+    .unwrap_or(subscription),
     "symbol": self.symbol,
     "style": self.style,
   }

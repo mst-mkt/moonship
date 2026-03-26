@@ -156,7 +156,9 @@ test "get_context_user: extracts user" {
   )
 
   assert_eq(get_context_user([path], "prod"), "admin@prod")
-  @fs.remove_file(path) catch { _ => () }
+  @fs.remove_file(path) catch {
+    _ => ()
+  }
 }
 
 ///|
@@ -174,7 +176,9 @@ test "get_context_user: no user field" {
   )
 
   assert_eq(get_context_user([path], "prod"), "")
-  @fs.remove_file(path) catch { _ => () }
+  @fs.remove_file(path) catch {
+    _ => ()
+  }
 }
 
 // --- execute integration tests ---
@@ -206,7 +210,9 @@ async test "execute: renders context from kubeconfig" {
 
   guard m.execute(ctx) is Output(out) else {
     @sys.unset_env_var("KUBECONFIG")
-    @fs.remove_file(kubeconfig) catch { _ => () }
+    @fs.remove_file(kubeconfig) catch {
+      _ => ()
+    }
     fail("expected Output")
     return
   }
@@ -216,7 +222,9 @@ async test "execute: renders context from kubeconfig" {
   assert_true(rendered.contains("default"))
 
   @sys.unset_env_var("KUBECONFIG")
-  @fs.remove_file(kubeconfig) catch { _ => () }
+  @fs.remove_file(kubeconfig) catch {
+    _ => ()
+  }
 }
 
 ///|
@@ -248,7 +256,9 @@ async test "execute: context_aliases replaces context in output" {
 
   guard m.execute(ctx) is Output(out) else {
     @sys.unset_env_var("KUBECONFIG")
-    @fs.remove_file(kubeconfig) catch { _ => () }
+    @fs.remove_file(kubeconfig) catch {
+      _ => ()
+    }
     fail("expected Output")
     return
   }
@@ -259,7 +269,9 @@ async test "execute: context_aliases replaces context in output" {
   assert_false(rendered.contains("arn:aws"))
 
   @sys.unset_env_var("KUBECONFIG")
-  @fs.remove_file(kubeconfig) catch { _ => () }
+  @fs.remove_file(kubeconfig) catch {
+    _ => ()
+  }
 }
 
 ///|
@@ -290,7 +302,9 @@ async test "execute: detect_files skips when no matching file" {
   assert_true(m.execute(ctx) is Skipped(_))
 
   @sys.unset_env_var("KUBECONFIG")
-  @fs.remove_file(kubeconfig) catch { _ => () }
+  @fs.remove_file(kubeconfig) catch {
+    _ => ()
+  }
 }
 
 ///|
@@ -322,7 +336,9 @@ async test "execute: no detect conditions shows unconditionally" {
   assert_true(m.execute(ctx) is Output(_))
 
   @sys.unset_env_var("KUBECONFIG")
-  @fs.remove_file(kubeconfig) catch { _ => () }
+  @fs.remove_file(kubeconfig) catch {
+    _ => ()
+  }
 }
 
 ///|
@@ -379,7 +395,9 @@ async test "execute: per-context config overrides symbol and alias" {
 
   guard m.execute(ctx) is Output(out) else {
     @sys.unset_env_var("KUBECONFIG")
-    @fs.remove_file(kubeconfig) catch { _ => () }
+    @fs.remove_file(kubeconfig) catch {
+      _ => ()
+    }
     fail("expected Output")
     return
   }
@@ -390,7 +408,9 @@ async test "execute: per-context config overrides symbol and alias" {
   assert_false(rendered.contains("☸"))
 
   @sys.unset_env_var("KUBECONFIG")
-  @fs.remove_file(kubeconfig) catch { _ => () }
+  @fs.remove_file(kubeconfig) catch {
+    _ => ()
+  }
 }
 
 ///|
@@ -408,5 +428,7 @@ test "get_context_user: no matching context" {
   )
 
   assert_eq(get_context_user([path], "staging"), "")
-  @fs.remove_file(path) catch { _ => () }
+  @fs.remove_file(path) catch {
+    _ => ()
+  }
 }

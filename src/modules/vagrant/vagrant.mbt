@@ -74,7 +74,12 @@ pub impl @ms.PromptModule for VagrantModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no Vagrant project detected")
   }
 

@@ -275,10 +275,7 @@ async test "execute: truncation applied" {
 
 ///|
 async test "execute: use_logical_path displays logical_dir" {
-  let ctx = @context.Context::new(
-    cwd="/real/path",
-    logical_dir="/virtual/path",
-  )
+  let ctx = @context.Context::new(cwd="/real/path", logical_dir="/virtual/path")
   let m = DirectoryModule::default()
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
 
@@ -313,9 +310,7 @@ async test "execute: use_logical_path=false displays cwd" {
 ///|
 test "build_repo_root_parts: basic" {
   let (before, root, after) = build_repo_root_parts(
-    "/home/user/repos/myproject/src/lib",
-    "/home/user/repos/myproject",
-    "/home/user",
+    "/home/user/repos/myproject/src/lib", "/home/user/repos/myproject", "/home/user",
     "~",
   )
   assert_eq(before, "~/repos/")
@@ -326,10 +321,7 @@ test "build_repo_root_parts: basic" {
 ///|
 test "build_repo_root_parts: at repo root" {
   let (before, root, after) = build_repo_root_parts(
-    "/home/user/myproject",
-    "/home/user/myproject",
-    "/home/user",
-    "~",
+    "/home/user/myproject", "/home/user/myproject", "/home/user", "~",
   )
   assert_eq(before, "~/")
   assert_eq(root, "myproject")
@@ -339,10 +331,7 @@ test "build_repo_root_parts: at repo root" {
 ///|
 test "build_repo_root_parts: no home match" {
   let (before, root, after) = build_repo_root_parts(
-    "/opt/repos/project/src",
-    "/opt/repos/project",
-    "/home/user",
-    "~",
+    "/opt/repos/project/src", "/opt/repos/project", "/home/user", "~",
   )
   assert_eq(before, "/opt/repos/")
   assert_eq(root, "project")
@@ -352,10 +341,7 @@ test "build_repo_root_parts: no home match" {
 ///|
 test "build_repo_root_parts: cwd not under repo_root" {
   let (before, root, after) = build_repo_root_parts(
-    "/other/path",
-    "/home/user/project",
-    "/home/user",
-    "~",
+    "/other/path", "/home/user/project", "/home/user", "~",
   )
   assert_eq(before, "")
   assert_eq(root, "")
@@ -397,10 +383,7 @@ async test "execute: before_repo_root_style falls back to style" {
   assert_eq(m.before_repo_root_style, "")
 
   let path = @env.current_dir().unwrap_or(".")
-  let ctx = @context.Context::new(
-    cwd=path + "/src/modules",
-    config~,
-  )
+  let ctx = @context.Context::new(cwd=path + "/src/modules", config~)
   guard m.execute(ctx) is Output(out) else { fail("expected Output") }
 
   let rendered = out.render()
@@ -509,19 +492,18 @@ test "format_path: with fish_style" {
 
 ///|
 test "apply_substitutions: basic" {
-  let result = apply_substitutions(
-    "~/Documents/project",
-    [("~/Documents", "docs")],
-  )
+  let result = apply_substitutions("~/Documents/project", [
+    ("~/Documents", "docs"),
+  ])
   assert_eq(result, "docs/project")
 }
 
 ///|
 test "apply_substitutions: multiple" {
-  let result = apply_substitutions(
-    "~/repos/myproject",
-    [("~/repos", "R"), ("myproject", "MP")],
-  )
+  let result = apply_substitutions("~/repos/myproject", [
+    ("~/repos", "R"),
+    ("myproject", "MP"),
+  ])
   assert_eq(result, "R/MP")
 }
 
@@ -539,14 +521,9 @@ test "apply_substitutions: empty list" {
 ///|
 test "format_path: with substitutions" {
   assert_eq(
-    format_path(
-      "/home/user/Documents/project",
-      "/home/user",
-      3,
-      false,
-      None,
-      substitutions=[("~/Documents", "docs")],
-    ),
+    format_path("/home/user/Documents/project", "/home/user", 3, false, None, substitutions=[
+      ("~/Documents", "docs"),
+    ]),
     "docs/project",
   )
 }

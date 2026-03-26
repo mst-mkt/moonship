@@ -114,14 +114,22 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
   guard not(self.disabled) else { return Disabled }
 
   let repo_root = ctx.get_repo().map(fn(repo) { repo.repo_root() })
-  let display_dir = if self.use_logical_path { ctx.logical_dir } else { ctx.cwd }
+  let display_dir = if self.use_logical_path {
+    ctx.logical_dir
+  } else {
+    ctx.cwd
+  }
   let is_read_only = not(is_writable(ctx.cwd))
   let read_only_val = if is_read_only { self.read_only } else { "" }
 
   let (format, vars) = match repo_root {
-    Some(root) if not(self.repo_root_style.is_empty()) && display_dir.has_prefix(root) => {
+    Some(root) if not(self.repo_root_style.is_empty()) &&
+      display_dir.has_prefix(root) => {
       let (raw_before, raw_root, raw_after) = build_repo_root_parts(
-        display_dir, root, ctx.home_dir, self.home_symbol,
+        display_dir,
+        root,
+        ctx.home_dir,
+        self.home_symbol,
       )
       // Note: substitutions are applied per-part, not to the full joined path.
       // Patterns spanning part boundaries won't match (minor Starship divergence).
@@ -197,7 +205,9 @@ fn format_path(
   }
 
   let substituted = apply_substitutions(display, substitutions)
-  let truncated = truncate_path(substituted, truncation_length, truncation_symbol)
+  let truncated = truncate_path(
+    substituted, truncation_length, truncation_symbol,
+  )
 
   if fish_style > 0 && substitutions.is_empty() {
     apply_fish_style(truncated, fish_style)

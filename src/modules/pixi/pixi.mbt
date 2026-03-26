@@ -42,9 +42,7 @@ pub fn PixiModule::from_table(table : @config.ModuleTable) -> PixiModule {
     version_format: table
     .get_string("version_format")
     .unwrap_or(d.version_format),
-    pixi_binary: table
-    .get_string("pixi_binary")
-    .unwrap_or(d.pixi_binary),
+    pixi_binary: table.get_string("pixi_binary").unwrap_or(d.pixi_binary),
     show_default_environment: table
     .get_bool("show_default_environment")
     .unwrap_or(d.show_default_environment),
@@ -89,7 +87,12 @@ pub impl @ms.PromptModule for PixiModule with execute(
   let has_env = not(env_name.is_empty())
 
   guard has_env ||
-    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
+    @exec.detect_project(
+      ctx.cwd,
+      self.detect_files,
+      self.detect_extensions,
+      folders=self.detect_folders,
+    ) else {
     return Skipped("no Pixi project detected")
   }
 

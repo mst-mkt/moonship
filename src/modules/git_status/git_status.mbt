@@ -100,19 +100,26 @@ pub impl @ms.PromptModule for GitStatusModule with execute(
 
   let status = if self.ignore_submodules {
     parse_git_porcelain(
-      @exec.exec_cmd_full(
-        "git",
-        ["-C", ctx.cwd, "status", "--porcelain", "--ignore-submodules=dirty"],
-      ),
+      @exec.exec_cmd_full("git", [
+        "-C",
+        ctx.cwd,
+        "status",
+        "--porcelain",
+        "--ignore-submodules=dirty",
+      ]),
       repo,
     )
   } else {
     repo.get_status()
   }
-  let ahead_behind = @exec.exec_cmd(
-    "git",
-    ["-C", ctx.cwd, "rev-list", "--count", "--left-right", "@{upstream}...HEAD"],
-  )
+  let ahead_behind = @exec.exec_cmd("git", [
+    "-C",
+    ctx.cwd,
+    "rev-list",
+    "--count",
+    "--left-right",
+    "@{upstream}...HEAD",
+  ])
 
   let (ahead_count, behind_count) = parse_ahead_behind(ahead_behind)
   self.render_status(status, ahead_count, behind_count)
@@ -160,8 +167,16 @@ fn GitStatusModule::render_status(
     "renamed": format_count(status.renamed, self.renamed),
     "typechanged": format_count(status.typechanged, self.typechanged),
     "stashed": format_count(status.stashed, self.stashed),
-    "ahead": if ahead_count > 0 { self.ahead } else { "" },
-    "behind": if behind_count > 0 { self.behind } else { "" },
+    "ahead": if ahead_count > 0 {
+      self.ahead
+    } else {
+      ""
+    },
+    "behind": if behind_count > 0 {
+      self.behind
+    } else {
+      ""
+    },
     "up_to_date": if ahead_count == 0 && behind_count == 0 {
       self.up_to_date
     } else {
@@ -211,11 +226,11 @@ fn parse_git_porcelain(
   repo : @git.RepoHandle,
 ) -> @git.GitStatus {
   let stashed = if @fs.path_exists("\{repo.repo_root()}/.git/refs/stash") ||
-    {
+    ({
       let packed = "\{repo.repo_root()}/.git/packed-refs"
       @fs.path_exists(packed) &&
-        (@fs.read_file_to_string(packed) catch { _ => "" }).contains("refs/stash")
-    } {
+      (@fs.read_file_to_string(packed) catch { _ => "" }).contains("refs/stash")
+    }) {
     1
   } else {
     0
@@ -243,15 +258,13 @@ fn parse_git_porcelain(
 
       {
         staged: acc.staged +
-          Bool::to_int(x == 'A' || x == 'M' || x == 'D' || x == 'R'),
+        Bool::to_int(x == 'A' || x == 'M' || x == 'D' || x == 'R'),
         modified: acc.modified + Bool::to_int(y == 'M'),
         untracked: acc.untracked + Bool::to_int(x == '?' && y == '?'),
         deleted: acc.deleted + Bool::to_int(x == 'D' || y == 'D'),
-        conflicted: acc.conflicted +
-          Bool::to_int(x == 'U' || y == 'U'),
+        conflicted: acc.conflicted + Bool::to_int(x == 'U' || y == 'U'),
         renamed: acc.renamed + Bool::to_int(x == 'R'),
-        typechanged: acc.typechanged +
-          Bool::to_int(x == 'T' || y == 'T'),
+        typechanged: acc.typechanged + Bool::to_int(x == 'T' || y == 'T'),
         stashed: acc.stashed,
       }
     },

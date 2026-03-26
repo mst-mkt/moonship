@@ -146,9 +146,9 @@ pub impl @ms.PromptModule for KubernetesModule with execute(
       self.detect_extensions,
       folders=self.detect_folders,
     )
-    let env_match = self.detect_env_vars.iter().any(fn(name) {
-      not(@sys.get_env_var(name).unwrap_or("").is_empty())
-    })
+    let env_match = self.detect_env_vars
+      .iter()
+      .any(fn(name) { not(@sys.get_env_var(name).unwrap_or("").is_empty()) })
 
     guard file_match || env_match else {
       return Skipped("detection conditions not met")
@@ -186,10 +186,12 @@ pub impl @ms.PromptModule for KubernetesModule with execute(
   let user = get_context_user(kubeconfig_paths, current_context)
 
   // Find matching per-context config (exact match on context_pattern)
-  let ctx_config = self.contexts.iter().find_first(fn(c) {
-    c.context_pattern == current_context &&
+  let ctx_config = self.contexts
+    .iter()
+    .find_first(fn(c) {
+      c.context_pattern == current_context &&
       (c.user_pattern.is_empty() || c.user_pattern == user)
-  })
+    })
 
   let display_context = match ctx_config {
     Some(c) if not(c.context_alias.is_empty()) => c.context_alias

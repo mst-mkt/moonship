@@ -39,9 +39,7 @@ pub fn SolidityModule::from_table(
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
-    compiler: table
-    .get_string_array("compiler")
-    .unwrap_or(d.compiler),
+    compiler: table.get_string_array("compiler").unwrap_or(d.compiler),
     version_format: table
     .get_string("version_format")
     .unwrap_or(d.version_format),
@@ -81,7 +79,12 @@ pub impl @ms.PromptModule for SolidityModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
+  guard @exec.detect_project(
+    ctx.cwd,
+    self.detect_files,
+    self.detect_extensions,
+    folders=self.detect_folders,
+  ) else {
     return Skipped("no Solidity project detected")
   }
 

@@ -60,18 +60,14 @@ test "count_status: with deleted" {
 
 ///|
 test "count_status: conflicted" {
-  let flags = [
-    @libgit2.StatusFlags::new(git_status_conflicted),
-  ]
+  let flags = [@libgit2.StatusFlags::new(git_status_conflicted)]
   let result = count_status(flags)
   assert_eq(result.conflicted, 1)
 }
 
 ///|
 test "count_status: renamed" {
-  let flags = [
-    @libgit2.StatusFlags::new(git_status_index_renamed),
-  ]
+  let flags = [@libgit2.StatusFlags::new(git_status_index_renamed)]
   let result = count_status(flags)
   assert_eq(result.renamed, 1)
 }

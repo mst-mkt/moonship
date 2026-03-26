@@ -98,7 +98,9 @@ pub impl @ms.PromptModule for GitBranchModule with execute(
 
   let (raw_branch, is_detached, commit_hash) = repo.get_branch()
   let (remote_name, remote_branch) = repo.get_remote_branch(raw_branch)
-  self.render_branch(raw_branch, is_detached, commit_hash, remote_name, remote_branch)
+  self.render_branch(
+    raw_branch, is_detached, commit_hash, remote_name, remote_branch,
+  )
 }
 
 ///|
@@ -140,8 +142,16 @@ fn GitBranchModule::render_branch(
 
   let vars : Map[String, String] = {
     "branch": display_branch,
-    "remote_name": if show_remote { remote_name } else { "" },
-    "remote_branch": if show_remote { remote_branch } else { "" },
+    "remote_name": if show_remote {
+      remote_name
+    } else {
+      ""
+    },
+    "remote_branch": if show_remote {
+      remote_branch
+    } else {
+      ""
+    },
     "symbol": self.symbol,
     "style": self.style,
   }

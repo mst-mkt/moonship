@@ -32,7 +32,11 @@ pub fn Context::new(
 ) -> Context {
   {
     cwd,
-    logical_dir: if logical_dir.is_empty() { cwd } else { logical_dir },
+    logical_dir: if logical_dir.is_empty() {
+      cwd
+    } else {
+      logical_dir
+    },
     home_dir,
     status,
     pipestatus,

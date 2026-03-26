@@ -40,9 +40,7 @@ pub fn AwsModule::from_table(table : @config.ModuleTable) -> AwsModule {
     expiration_symbol: table
     .get_string("expiration_symbol")
     .unwrap_or(d.expiration_symbol),
-    force_display: table
-    .get_bool("force_display")
-    .unwrap_or(d.force_display),
+    force_display: table.get_bool("force_display").unwrap_or(d.force_display),
   }
 }
 

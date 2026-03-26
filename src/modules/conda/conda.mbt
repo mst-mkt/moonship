@@ -69,9 +69,9 @@ pub impl @ms.PromptModule for CondaModule with execute(
   guard not(self.disabled) else { return Disabled }
 
   if not(self.detect_env_vars.is_empty()) {
-    let env_match = self.detect_env_vars.iter().any(fn(name) {
-      not(@sys.get_env_var(name).unwrap_or("").is_empty())
-    })
+    let env_match = self.detect_env_vars
+      .iter()
+      .any(fn(name) { not(@sys.get_env_var(name).unwrap_or("").is_empty()) })
     guard env_match else { return Skipped("detect_env_vars not met") }
   }
 

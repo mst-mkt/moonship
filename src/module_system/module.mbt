@@ -15,10 +15,7 @@ pub fn Segment::new(
 }
 
 ///|
-pub fn Segment::fill(
-  symbol : String,
-  style : @terminal.Style,
-) -> Segment {
+pub fn Segment::fill(symbol : String, style : @terminal.Style) -> Segment {
   { text: symbol, style, is_fill: true }
 }
 
@@ -36,14 +33,15 @@ pub fn ModuleOutput::new(segments : Array[Segment]) -> ModuleOutput {
 pub fn ModuleOutput::render(self : ModuleOutput) -> String {
   self.segments
   .iter()
-  .fold(init=(StringBuilder::new(), @terminal.Style::default()), fn(state, seg) {
+  .fold(init=(StringBuilder::new(), @terminal.Style::default()), fn(
+    state,
+    seg,
+  ) {
     let (buf, prev) = state
     let resolved = seg.style.resolve_prev(prev)
     buf.write_string(@terminal.stylize(seg.text, resolved))
     (buf, resolved)
-  })
-  .0
-  .to_string()
+  }).0.to_string()
 }
 
 ///|
@@ -54,13 +52,19 @@ pub fn ModuleOutput::render_with_fill(
   let has_fill = self.segments.iter().any(fn(seg) { seg.is_fill })
   guard has_fill else { return self.render() }
 
-  let non_fill_width = self.segments.iter().fold(init=0, fn(acc, seg) {
-    if seg.is_fill { acc } else { acc + visible_width(seg.text) }
-  })
+  let non_fill_width = self.segments
+    .iter()
+    .fold(init=0, fn(acc, seg) {
+      if seg.is_fill {
+        acc
+      } else {
+        acc + visible_width(seg.text)
+      }
+    })
 
-  let fill_count = self.segments.iter().fold(init=0, fn(acc, seg) {
-    if seg.is_fill { acc + 1 } else { acc }
-  })
+  let fill_count = self.segments
+    .iter()
+    .fold(init=0, fn(acc, seg) { if seg.is_fill { acc + 1 } else { acc } })
 
   let remaining = if terminal_width > non_fill_width {
     terminal_width - non_fill_width
@@ -71,7 +75,10 @@ pub fn ModuleOutput::render_with_fill(
 
   self.segments
   .iter()
-  .fold(init=(StringBuilder::new(), @terminal.Style::default()), fn(state, seg) {
+  .fold(init=(StringBuilder::new(), @terminal.Style::default()), fn(
+    state,
+    seg,
+  ) {
     let (buf, prev) = state
     let resolved = seg.style.resolve_prev(prev)
     let text = if seg.is_fill {
@@ -81,9 +88,7 @@ pub fn ModuleOutput::render_with_fill(
     }
     buf.write_string(@terminal.stylize(text, resolved))
     (buf, resolved)
-  })
-  .0
-  .to_string()
+  }).0.to_string()
 }
 
 ///|

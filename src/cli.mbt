@@ -72,12 +72,7 @@ fn parse_args(args : Array[String]) -> Command {
       Toggle(name, key)
     }
     "bug-report" => BugReport
-    "completions" =>
-      if args.length() > 1 {
-        Completions(args[1])
-      } else {
-        Help
-      }
+    "completions" => if args.length() > 1 { Completions(args[1]) } else { Help }
     "session" => Session
     "time" => Time
     "print-config" => {

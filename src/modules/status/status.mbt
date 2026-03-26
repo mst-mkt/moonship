@@ -62,22 +62,14 @@ pub fn StatusModule::from_table(table : @config.ModuleTable) -> StatusModule {
     not_found_symbol: table
     .get_string("not_found_symbol")
     .unwrap_or(d.not_found_symbol),
-    sigint_symbol: table
-    .get_string("sigint_symbol")
-    .unwrap_or(d.sigint_symbol),
-    signal_symbol: table
-    .get_string("signal_symbol")
-    .unwrap_or(d.signal_symbol),
+    sigint_symbol: table.get_string("sigint_symbol").unwrap_or(d.sigint_symbol),
+    signal_symbol: table.get_string("signal_symbol").unwrap_or(d.signal_symbol),
     recognize_signal_code: table
     .get_bool("recognize_signal_code")
     .unwrap_or(d.recognize_signal_code),
     map_symbol: table.get_bool("map_symbol").unwrap_or(d.map_symbol),
-    success_style: table
-    .get_string("success_style")
-    .unwrap_or(d.success_style),
-    failure_style: table
-    .get_string("failure_style")
-    .unwrap_or(d.failure_style),
+    success_style: table.get_string("success_style").unwrap_or(d.success_style),
+    failure_style: table.get_string("failure_style").unwrap_or(d.failure_style),
     pipestatus: table.get_bool("pipestatus").unwrap_or(d.pipestatus),
     pipestatus_separator: table
     .get_string("pipestatus_separator")
@@ -120,16 +112,14 @@ pub impl @ms.PromptModule for StatusModule with execute(
   let any_pipe_failed = has_pipestatus &&
     ctx.pipestatus.iter().any(fn(s) { s != "0" })
 
-  guard ctx.status != 0 || not(self.success_symbol.is_empty()) || any_pipe_failed else {
+  guard ctx.status != 0 ||
+    not(self.success_symbol.is_empty()) ||
+    any_pipe_failed else {
     return Skipped("success exit code")
   }
   let status_vars = self.build_status_vars(ctx.status)
 
-  let format = if has_pipestatus {
-    self.pipestatus_format
-  } else {
-    self.format
-  }
+  let format = if has_pipestatus { self.pipestatus_format } else { self.format }
 
   let vars = if has_pipestatus {
     let pipestatus_str = self.render_pipestatus(ctx.pipestatus)
@@ -141,11 +131,7 @@ pub impl @ms.PromptModule for StatusModule with execute(
     status_vars
   }
 
-  let segments = @ms.format_string(
-    format,
-    vars,
-    @terminal.Style::default(),
-  )
+  let segments = @ms.format_string(format, vars, @terminal.Style::default())
 
   Output(@ms.ModuleOutput::new(segments))
 }
@@ -242,7 +228,11 @@ fn StatusModule::render_pipestatus(
   .map(fn(s) {
     let code = @strconv.parse_int(s) catch { _ => 0 }
     let vars = self.build_status_vars(code)
-    let rendered = @ms.format_string(seg_format, vars, @terminal.Style::default())
+    let rendered = @ms.format_string(
+      seg_format,
+      vars,
+      @terminal.Style::default(),
+    )
     @ms.ModuleOutput::new(rendered).render()
   })
   .join(self.pipestatus_separator)

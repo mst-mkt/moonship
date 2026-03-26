@@ -59,9 +59,7 @@ pub fn RepoHandle::get_remote_branch(
     .config_get("branch.\{branch}.remote")
     .unwrap_or("")
 
-  let merge_ref = self.repo
-    .config_get("branch.\{branch}.merge")
-    .unwrap_or("")
+  let merge_ref = self.repo.config_get("branch.\{branch}.merge").unwrap_or("")
 
   let refs_heads = "refs/heads/"
   let remote_branch = if merge_ref.has_prefix(refs_heads) {
@@ -90,7 +88,7 @@ pub fn RepoHandle::get_status(self : RepoHandle) -> GitStatus {
   let base = count_status(self.repo.status_flags())
   let stashed = if has_stash(self.root) { 1 } else { 0 }
 
-  { ..base, stashed }
+  { ..base, stashed, }
 }
 
 ///|
@@ -124,7 +122,9 @@ fn has_stash(root : String) -> Bool {
   let packed_refs_path = "\{root}/.git/packed-refs"
   guard @fs.path_exists(packed_refs_path) else { return false }
 
-  let content = @fs.read_file_to_string(packed_refs_path) catch { _ => return false }
+  let content = @fs.read_file_to_string(packed_refs_path) catch {
+    _ => return false
+  }
   content.contains("refs/stash")
 }
 
@@ -177,18 +177,16 @@ fn count_status(flags : Array[@libgit2.StatusFlags]) -> GitStatus {
         untracked: acc.untracked + Bool::to_int(f.is_new()),
         deleted: acc.deleted + Bool::to_int(f.is_deleted()),
         conflicted: acc.conflicted +
-          Bool::to_int(bits.land(git_status_conflicted) != 0),
+        Bool::to_int(bits.land(git_status_conflicted) != 0),
         renamed: acc.renamed +
-          Bool::to_int(
-            bits.land(git_status_index_renamed.lor(git_status_wt_renamed)) != 0,
-          ),
+        Bool::to_int(
+          bits.land(git_status_index_renamed.lor(git_status_wt_renamed)) != 0,
+        ),
         typechanged: acc.typechanged +
-          Bool::to_int(
-            bits.land(
-              git_status_index_typechange.lor(git_status_wt_typechange),
-            ) !=
-            0,
-          ),
+        Bool::to_int(
+          bits.land(git_status_index_typechange.lor(git_status_wt_typechange)) !=
+          0,
+        ),
         stashed: 0,
       }
     },

@@ -269,10 +269,19 @@ async test "render_prompt: custom format" {
 
 ///|
 test "module_description: known modules" {
-  assert_eq(module_description("character"), "A character beside where the text is entered in your terminal")
+  assert_eq(
+    module_description("character"),
+    "A character beside where the text is entered in your terminal",
+  )
   assert_eq(module_description("directory"), "The current working directory")
-  assert_eq(module_description("git_status"), "Symbol representing the state of the repo")
-  assert_eq(module_description("rust"), "The currently installed version of Rust")
+  assert_eq(
+    module_description("git_status"),
+    "Symbol representing the state of the repo",
+  )
+  assert_eq(
+    module_description("rust"),
+    "The currently installed version of Rust",
+  )
 }
 
 ///|

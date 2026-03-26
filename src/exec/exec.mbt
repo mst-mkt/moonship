@@ -43,7 +43,9 @@ fn first_line(s : String) -> String {
 
 ///|
 pub async fn exec_cmd_status(cmd : String, args : Array[String]) -> Int {
-  let (status, _) = @process.collect_stdout(cmd, args[:]) catch { _ => return -1 }
+  let (status, _) = @process.collect_stdout(cmd, args[:]) catch {
+    _ => return -1
+  }
   status
 }
 
@@ -178,11 +180,14 @@ pub fn parent_dir(path : String) -> String {
 ///|
 pub fn last_slash(s : String) -> Int? {
   loop s.length() - 1 {
-    i => if i < 0 { break None } else if s[i].unsafe_to_char() == '/' {
-      break Some(i)
-    } else {
-      continue i - 1
-    }
+    i =>
+      if i < 0 {
+        break None
+      } else if s[i].unsafe_to_char() == '/' {
+        break Some(i)
+      } else {
+        continue i - 1
+      }
   }
 }
 

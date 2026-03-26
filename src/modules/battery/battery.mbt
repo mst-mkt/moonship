@@ -30,7 +30,14 @@ pub fn BatteryModule::default() -> BatteryModule {
     discharging_symbol: "󰂃 ",
     unknown_symbol: "󰂑 ",
     empty_symbol: "󰂎 ",
-    display: [{ threshold: 10, style: "red bold", charging_symbol: "", discharging_symbol: "" }],
+    display: [
+      {
+        threshold: 10,
+        style: "red bold",
+        charging_symbol: "",
+        discharging_symbol: "",
+      },
+    ],
   }
 }
 

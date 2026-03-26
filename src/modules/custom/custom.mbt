@@ -65,9 +65,7 @@ pub fn CustomModule::from_table(table : @config.ModuleTable) -> CustomModule {
     .unwrap_or(d.detect_folders),
     os: table.get_string("os").unwrap_or(d.os),
     use_stdin: table.get_bool("use_stdin").unwrap_or(d.use_stdin),
-    ignore_timeout: table
-    .get_bool("ignore_timeout")
-    .unwrap_or(d.ignore_timeout),
+    ignore_timeout: table.get_bool("ignore_timeout").unwrap_or(d.ignore_timeout),
   }
 }
 
@@ -132,9 +130,7 @@ pub impl @ms.PromptModule for CustomModule with execute(
   // Check `when` condition (exit code 0 = pass)
   if not(self.when.is_empty()) {
     let status = @exec.exec_cmd_status(shell_cmd, ["-c", self.when])
-    guard status == 0 else {
-      return Skipped("when condition not met")
-    }
+    guard status == 0 else { return Skipped("when condition not met") }
   }
   let output = @exec.exec_cmd(shell_cmd, ["-c", self.command])
   guard not(output.is_empty()) else {

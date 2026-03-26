@@ -85,7 +85,8 @@ fn run_session() -> Unit {
   let charset_len = charset.length().reinterpret_as_uint()
   let now = @async.now().reinterpret_as_uint64()
   let seed = Bytes::makei(32, fn(i) {
-    ((now >> ((i % 8) * 8)) ^ (i.reinterpret_as_uint().to_uint64() * 0x9E3779B97F4A7C15UL)).to_byte()
+    ((now >> (i % 8 * 8)) ^
+    (i.reinterpret_as_uint().to_uint64() * 0x9E3779B97F4A7C15UL)).to_byte()
   })
 
   let rng = @random.Rand::chacha8(seed~)
@@ -142,7 +143,7 @@ fn run_module_list() -> Unit {
 async fn collect_module_entries(
   ctx : @context.Context,
   modules : Map[String, &@ms.PromptModule],
-  skip_name~ : (String) -> Bool = fn(_) { false },
+  skip_name? : (String) -> Bool = fn(_) { false },
   should_include~ : (Int64, String) -> Bool,
 ) -> Array[(String, Int64, String)] {
   let format = expand_all(ctx.config.format, modules)
@@ -178,11 +179,12 @@ async fn run_timings(pa : PromptArgs) -> Unit {
   @terminal.set_active_palette(ctx.palette)
   let modules = build_modules(ctx.config)
 
-  let entries = collect_module_entries(
-    ctx,
-    modules,
-    should_include=fn(elapsed, output) { elapsed > 0L || not(output.is_empty()) },
-  )
+  let entries = collect_module_entries(ctx, modules, should_include=fn(
+    elapsed,
+    output,
+  ) {
+    elapsed > 0L || not(output.is_empty())
+  })
 
   entries.sort_by(fn(a, b) { b.1.compare(a.1) })
 
@@ -220,10 +222,16 @@ async fn run_explain(pa : PromptArgs) -> Unit {
     should_include=fn(_elapsed, output) { not(output.is_empty()) },
   )
 
-  let max_val_width = entries.iter().fold(init=0, fn(max, e) {
-    let w = e.2.length() + format_duration(e.1).length() + 6
-    if w > max { w } else { max }
-  })
+  let max_val_width = entries
+    .iter()
+    .fold(init=0, fn(max, e) {
+      let w = e.2.length() + format_duration(e.1).length() + 6
+      if w > max {
+        w
+      } else {
+        max
+      }
+    })
 
   println("")
   println(" Here's a breakdown of your prompt:")
@@ -296,7 +304,11 @@ async fn run_config(name : String, value : String) -> Unit {
 
         let dir = "\{home}/.config/moonship"
         let found = find_config_file(dir)
-        if found.is_empty() { "\{dir}/moonship.toml" } else { found }
+        if found.is_empty() {
+          "\{dir}/moonship.toml"
+        } else {
+          found
+        }
       }
     }
 
@@ -331,9 +343,9 @@ async fn run_config(name : String, value : String) -> Unit {
             .join("\n"),
           )
         _ =>
-          config.get_raw_module(key).map(fn(table) {
-            module_to_toml_string(key, table)
-          })
+          config
+          .get_raw_module(key)
+          .map(fn(table) { module_to_toml_string(key, table) })
       }
 
       match result {
@@ -370,28 +382,17 @@ fn run_toggle(module_name : String, key : String) -> Unit {
       match table.0.get(key) {
         Some(@config.CBool(current)) => {
           let new_val = not(current)
-          println(
-            "Toggled \{module_name}.\{key}: \{current} -> \{new_val}",
-          )
-          println(
-            "Note: To persist this change, add to your config file:",
-          )
+          println("Toggled \{module_name}.\{key}: \{current} -> \{new_val}")
+          println("Note: To persist this change, add to your config file:")
           println("  [\{module_name}]")
           println("  \{key} = \{new_val}")
         }
         Some(_) =>
-          println(
-            "moonship: '\{module_name}.\{key}' is not a boolean value",
-          )
+          println("moonship: '\{module_name}.\{key}' is not a boolean value")
         None =>
-          println(
-            "moonship: key '\{key}' not found in module '\{module_name}'",
-          )
+          println("moonship: key '\{key}' not found in module '\{module_name}'")
       }
-    None =>
-      println(
-        "moonship: module '\{module_name}' not found in config",
-      )
+    None => println("moonship: module '\{module_name}' not found in config")
   }
 }
 
@@ -441,7 +442,11 @@ async fn run_bug_report() -> Unit {
 
   let os_info = {
     let out = @exec.exec_cmd("uname", ["-srm"])
-    if out.is_empty() { "unknown" } else { out }
+    if out.is_empty() {
+      "unknown"
+    } else {
+      out
+    }
   }
 
   let config_path = {
@@ -461,7 +466,9 @@ async fn run_bug_report() -> Unit {
   let config_contents = if config_path.is_empty() || config_path == "(none)" {
     "(no config file found)"
   } else {
-    @fs.read_file_to_string(config_path) catch { _ => "(could not read)" }
+    @fs.read_file_to_string(config_path) catch {
+      _ => "(could not read)"
+    }
   }
 
   println(
@@ -503,44 +510,22 @@ fn run_completions(shell_name : String) -> Unit {
 ///|
 fn generate_zsh_completions() -> String {
   [
-    "#compdef moonship",
-    "",
-    "_moonship() {",
-    "  local -a commands",
-    "  commands=(",
-    "    'prompt:Generate prompt string'",
-    "    'timings:Show module execution times'",
-    "    'explain:Explain active modules'",
-    "    'module:Run a single module'",
-    "    'init:Print shell init script'",
-    "    'cache:Cache operations'",
-    "    'completions:Generate shell completions'",
-    "    'session:Generate random session key'",
-    "    'time:Print current time in ms'",
-    "    'print-config:Print active configuration'",
-    "    'schema:Print JSON Schema for config'",
-    "    'version:Print version'",
-    "    'help:Print help'",
-    "  )",
-    "",
-    "  _describe 'command' commands",
-    "}",
-    "",
-    "_moonship",
+    "#compdef moonship", "", "_moonship() {", "  local -a commands", "  commands=(",
+    "    'prompt:Generate prompt string'", "    'timings:Show module execution times'",
+    "    'explain:Explain active modules'", "    'module:Run a single module'", "    'init:Print shell init script'",
+    "    'cache:Cache operations'", "    'completions:Generate shell completions'",
+    "    'session:Generate random session key'", "    'time:Print current time in ms'",
+    "    'print-config:Print active configuration'", "    'schema:Print JSON Schema for config'",
+    "    'version:Print version'", "    'help:Print help'", "  )", "", "  _describe 'command' commands",
+    "}", "", "_moonship",
   ].join("\n")
 }
 
 ///|
 fn generate_bash_completions() -> String {
   [
-    "_moonship() {",
-    "  local cur=\"${COMP_WORDS[COMP_CWORD]}\"",
-    "  local commands=\"prompt timings explain module init cache completions session time print-config schema version help\"",
-    "",
-    "  COMPREPLY=( $(compgen -W \"$commands\" -- \"$cur\") )",
-    "}",
-    "",
-    "complete -F _moonship moonship",
+    "_moonship() {", "  local cur=\"${COMP_WORDS[COMP_CWORD]}\"", "  local commands=\"prompt timings explain module init cache completions session time print-config schema version help\"",
+    "", "  COMPREPLY=( $(compgen -W \"$commands\" -- \"$cur\") )", "}", "", "complete -F _moonship moonship",
   ].join("\n")
 }
 

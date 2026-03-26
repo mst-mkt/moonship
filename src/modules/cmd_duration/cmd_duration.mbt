@@ -80,10 +80,10 @@ pub impl @ms.PromptModule for CmdDurationModule with execute(
   // Send desktop notification if enabled
   if self.show_notifications && ctx.cmd_duration >= self.min_time_to_notify {
     ignore(
-      @exec.exec_cmd(
-        "notify-send",
-        ["Command finished", "Took \{format_duration(ctx.cmd_duration, false)}"],
-      ),
+      @exec.exec_cmd("notify-send", [
+        "Command finished",
+        "Took \{format_duration(ctx.cmd_duration, false)}",
+      ]),
     )
   }
 

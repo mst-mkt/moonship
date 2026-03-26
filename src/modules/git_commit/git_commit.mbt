@@ -91,21 +91,30 @@ pub impl @ms.PromptModule for GitCommitModule with execute(
 
   let tag = if not(self.tag_disabled) {
     let tag_name = if self.tag_max_candidates > 0 {
-      @exec.exec_cmd(
-        "git",
-        [
-          "-C", ctx.cwd, "describe", "--tags",
-          "--candidates=\{self.tag_max_candidates}", "HEAD",
-        ],
-      )
+      @exec.exec_cmd("git", [
+        "-C",
+        ctx.cwd,
+        "describe",
+        "--tags",
+        "--candidates=\{self.tag_max_candidates}",
+        "HEAD",
+      ])
     } else {
-      @exec.exec_cmd(
-        "git",
-        ["-C", ctx.cwd, "describe", "--tags", "--exact-match", "HEAD"],
-      )
+      @exec.exec_cmd("git", [
+        "-C",
+        ctx.cwd,
+        "describe",
+        "--tags",
+        "--exact-match",
+        "HEAD",
+      ])
     }
 
-    if tag_name.is_empty() { "" } else { self.tag_symbol + tag_name }
+    if tag_name.is_empty() {
+      ""
+    } else {
+      self.tag_symbol + tag_name
+    }
   } else {
     ""
   }

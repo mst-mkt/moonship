@@ -82,7 +82,12 @@ pub impl @ms.PromptModule for RubyModule with execute(
   let has_env = not(@sys.get_env_var("RUBY_VERSION").unwrap_or("").is_empty()) ||
     not(@sys.get_env_var("RBENV_VERSION").unwrap_or("").is_empty())
   guard has_env ||
-    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
+    @exec.detect_project(
+      ctx.cwd,
+      self.detect_files,
+      self.detect_extensions,
+      folders=self.detect_folders,
+    ) else {
     return Skipped("no Ruby project detected")
   }
 

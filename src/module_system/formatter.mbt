@@ -132,13 +132,15 @@ pub fn evaluate_segments(
       }
       Styled(content_nodes, style_spec) => {
         let style = @terminal.parse_style(style_spec, palette~)
-        evaluate_segments(content_nodes, segment_vars, style, palette~)
-          .iter()
+        evaluate_segments(content_nodes, segment_vars, style, palette~).iter()
       }
       Conditional(content_nodes) =>
         if has_any_segment_var(content_nodes, segment_vars) {
           evaluate_segments(
-            content_nodes, segment_vars, default_style, palette~,
+            content_nodes,
+            segment_vars,
+            default_style,
+            palette~,
           ).iter()
         } else {
           Iter::empty()
@@ -157,7 +159,10 @@ pub fn compose_segments(
 ) -> ModuleOutput {
   let ast = parse_format(template)
   let segs = evaluate_segments(
-    ast, segment_vars, @terminal.Style::default(), palette~,
+    ast,
+    segment_vars,
+    @terminal.Style::default(),
+    palette~,
   )
   ModuleOutput::new(segs)
 }

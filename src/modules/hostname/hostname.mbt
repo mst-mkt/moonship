@@ -72,9 +72,11 @@ pub impl @ms.PromptModule for HostnameModule with execute(
   guard not(self.disabled) else { return Disabled }
 
   let is_ssh = @exec.is_ssh_session()
-  let env_detected = self.detect_env_vars.iter().any(fn(env_name) {
-    not(@sys.get_env_var(env_name).unwrap_or("").is_empty())
-  })
+  let env_detected = self.detect_env_vars
+    .iter()
+    .any(fn(env_name) {
+      not(@sys.get_env_var(env_name).unwrap_or("").is_empty())
+    })
 
   guard not(self.ssh_only) || is_ssh || env_detected else {
     return Skipped("not in SSH session")
@@ -94,7 +96,11 @@ pub impl @ms.PromptModule for HostnameModule with execute(
 
   let vars : Map[String, String] = {
     "hostname": hostname,
-    "ssh_symbol": if is_ssh { self.ssh_symbol } else { "" },
+    "ssh_symbol": if is_ssh {
+      self.ssh_symbol
+    } else {
+      ""
+    },
     "style": self.style,
   }
   let segments = @ms.format_string(

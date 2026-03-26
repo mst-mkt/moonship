@@ -67,9 +67,7 @@ pub impl @ms.PromptModule for JobsModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard ctx.jobs >= self.threshold else {
-    return Skipped("below threshold")
-  }
+  guard ctx.jobs >= self.threshold else { return Skipped("below threshold") }
 
   let number = if ctx.jobs >= self.number_threshold {
     ctx.jobs.to_string()
@@ -77,11 +75,7 @@ pub impl @ms.PromptModule for JobsModule with execute(
     ""
   }
 
-  let symbol = if ctx.jobs >= self.symbol_threshold {
-    self.symbol
-  } else {
-    ""
-  }
+  let symbol = if ctx.jobs >= self.symbol_threshold { self.symbol } else { "" }
 
   let vars : Map[String, String] = {
     "symbol": symbol,

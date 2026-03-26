@@ -100,11 +100,16 @@ pub impl @ms.PromptModule for PythonModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  let has_env = self.detect_env_vars.iter().any(fn(env_var) {
-    not(@sys.get_env_var(env_var).unwrap_or("").is_empty())
-  })
+  let has_env = self.detect_env_vars
+    .iter()
+    .any(fn(env_var) { not(@sys.get_env_var(env_var).unwrap_or("").is_empty()) })
   guard has_env ||
-    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
+    @exec.detect_project(
+      ctx.cwd,
+      self.detect_files,
+      self.detect_extensions,
+      folders=self.detect_folders,
+    ) else {
     return Skipped("no Python project detected")
   }
 

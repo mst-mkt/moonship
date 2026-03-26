@@ -43,7 +43,8 @@ async test "render_branch: truncation" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  guard m.render_branch("feature/long-branch-name", false, "", "", "") is Output(out) else {
+  guard m.render_branch("feature/long-branch-name", false, "", "", "")
+    is Output(out) else {
     fail("expected Output")
   }
 
@@ -158,7 +159,9 @@ async test "render_branch: remote_branch shown when differs from local" {
   )
   let m = GitBranchModule::from_config(config)
   guard m.render_branch("main", false, "", "origin", "upstream-main")
-    is Output(out) else { fail("expected Output") }
+    is Output(out) else {
+    fail("expected Output")
+  }
 
   let rendered = out.render()
   assert_true(rendered.contains("main"))
@@ -174,8 +177,9 @@ async test "render_branch: remote_branch hidden when same as local" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  guard m.render_branch("main", false, "", "origin", "main")
-    is Output(out) else { fail("expected Output") }
+  guard m.render_branch("main", false, "", "origin", "main") is Output(out) else {
+    fail("expected Output")
+  }
 
   let rendered = out.render()
   assert_true(rendered.contains("main"))
@@ -192,8 +196,9 @@ async test "render_branch: always_show_remote forces remote display" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  guard m.render_branch("main", false, "", "origin", "main")
-    is Output(out) else { fail("expected Output") }
+  guard m.render_branch("main", false, "", "origin", "main") is Output(out) else {
+    fail("expected Output")
+  }
 
   let rendered = out.render()
   assert_true(rendered.contains(":main"))
@@ -202,8 +207,9 @@ async test "render_branch: always_show_remote forces remote display" {
 ///|
 async test "render_branch: no remote tracking" {
   let m = GitBranchModule::default()
-  guard m.render_branch("feature", false, "", "", "")
-    is Output(out) else { fail("expected Output") }
+  guard m.render_branch("feature", false, "", "", "") is Output(out) else {
+    fail("expected Output")
+  }
 
   let rendered = out.render()
   assert_true(rendered.contains("feature"))
@@ -219,8 +225,9 @@ async test "render_branch: remote_name in vars" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  guard m.render_branch("main", false, "", "origin", "main")
-    is Output(out) else { fail("expected Output") }
+  guard m.render_branch("main", false, "", "origin", "main") is Output(out) else {
+    fail("expected Output")
+  }
 
   let rendered = out.render()
   assert_true(rendered.contains("origin"))
@@ -236,8 +243,9 @@ async test "render_branch: always_show_remote with no tracking" {
     ),
   )
   let m = GitBranchModule::from_config(config)
-  guard m.render_branch("main", false, "", "", "")
-    is Output(out) else { fail("expected Output") }
+  guard m.render_branch("main", false, "", "", "") is Output(out) else {
+    fail("expected Output")
+  }
 
   let rendered = out.render()
   assert_true(rendered.contains("main"))

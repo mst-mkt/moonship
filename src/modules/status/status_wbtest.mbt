@@ -298,10 +298,7 @@ test "build_status_vars: failure_style overrides style" {
 
 ///|
 test "build_status_vars: recognize_signal_code=false clears signal_name" {
-  let m = {
-    ..StatusModule::default(),
-    recognize_signal_code: false,
-  }
+  let m = { ..StatusModule::default(), recognize_signal_code: false }
   let vars = m.build_status_vars(130)
   assert_eq(vars.get("signal_name"), Some(""))
   assert_eq(vars.get("signal_number"), Some(""))

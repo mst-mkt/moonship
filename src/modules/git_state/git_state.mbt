@@ -46,9 +46,7 @@ pub fn GitStateModule::from_table(
     cherry_pick: table.get_string("cherry_pick").unwrap_or(d.cherry_pick),
     bisect: table.get_string("bisect").unwrap_or(d.bisect),
     am: table.get_string("am").unwrap_or(d.am),
-    am_or_rebase: table
-    .get_string("am_or_rebase")
-    .unwrap_or(d.am_or_rebase),
+    am_or_rebase: table.get_string("am_or_rebase").unwrap_or(d.am_or_rebase),
   }
 }
 

@@ -73,9 +73,11 @@ pub impl @ms.PromptModule for UsernameModule with execute(
 
   let is_root = user == "root"
   let is_ssh = @exec.is_ssh_session()
-  let env_detected = self.detect_env_vars.iter().any(fn(env_name) {
-    not(@sys.get_env_var(env_name).unwrap_or("").is_empty())
-  })
+  let env_detected = self.detect_env_vars
+    .iter()
+    .any(fn(env_name) {
+      not(@sys.get_env_var(env_name).unwrap_or("").is_empty())
+    })
 
   guard self.show_always || is_root || is_ssh || env_detected else {
     return Skipped("not root or SSH")

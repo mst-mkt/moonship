@@ -60,7 +60,11 @@ pub fn ModuleTable::get_string_array(
         })
         .collect()
 
-      if strings.length() == arr.length() { Some(strings) } else { None }
+      if strings.length() == arr.length() {
+        Some(strings)
+      } else {
+        None
+      }
     }
     _ => None
   }
@@ -167,7 +171,9 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
     .unwrap_or(d.command_timeout)
   let cache_ttl = t.get_int("cache_ttl").unwrap_or(d.cache_ttl)
   let add_newline = t.get_bool("add_newline").unwrap_or(d.add_newline)
-  let follow_symlinks = t.get_bool("follow_symlinks").unwrap_or(d.follow_symlinks)
+  let follow_symlinks = t
+    .get_bool("follow_symlinks")
+    .unwrap_or(d.follow_symlinks)
   let palette = t.get_string("palette").unwrap_or(d.palette)
   let palettes = parse_palettes(table)
 
@@ -238,8 +244,7 @@ pub fn Config::to_toml(self : Config) -> String {
       keys.sort()
       keys.each(fn(key) {
         match colors.get(key) {
-          Some(val) =>
-            buf.write_string("\{key} = \{escape_string(val)}\n")
+          Some(val) => buf.write_string("\{key} = \{escape_string(val)}\n")
           None => ()
         }
       })
@@ -341,39 +346,30 @@ pub fn Config::get_active_palette(self : Config) -> Map[String, String] {
 fn parse_palettes(
   table : Map[String, ConfigValue],
 ) -> Map[String, Map[String, String]] {
-  guard table.get("palettes") is Some(CTable(palettes_table)) else {
-    return {}
-  }
+  guard table.get("palettes") is Some(CTable(palettes_table)) else { return {} }
 
   palettes_table
   .iter()
-  .fold(
-    init=(Map::new() : Map[String, Map[String, String]]),
-    fn(acc, pair) {
-      let (name, value) = pair
-      guard value is CTable(palette_table) else { return acc }
+  .fold(init=(Map::new() : Map[String, Map[String, String]]), fn(acc, pair) {
+    let (name, value) = pair
+    guard value is CTable(palette_table) else { return acc }
 
-      let colors : Map[String, String] = palette_table
-        .iter()
-        .fold(init=Map::new(), fn(m, kv) {
-          guard kv.1 is CString(color_val) else { return m }
-          m[kv.0] = color_val
-          m
-        })
+    let colors : Map[String, String] = palette_table
+      .iter()
+      .fold(init=Map::new(), fn(m, kv) {
+        guard kv.1 is CString(color_val) else { return m }
+        m[kv.0] = color_val
+        m
+      })
 
-      acc[name] = colors
-      acc
-    },
-  )
+    acc[name] = colors
+    acc
+  })
 }
 
 ///|
-fn parse_profiles(
-  table : Map[String, ConfigValue],
-) -> Map[String, String] {
-  guard table.get("profiles") is Some(CTable(profiles_table)) else {
-    return {}
-  }
+fn parse_profiles(table : Map[String, ConfigValue]) -> Map[String, String] {
+  guard table.get("profiles") is Some(CTable(profiles_table)) else { return {} }
 
   profiles_table
   .iter()

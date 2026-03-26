@@ -89,7 +89,12 @@ pub impl @ms.PromptModule for DirenvModule with execute(
 
   let has_env = not(@sys.get_env_var("DIRENV_FILE").unwrap_or("").is_empty())
   guard has_env ||
-    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
+    @exec.detect_project(
+      ctx.cwd,
+      self.detect_files,
+      self.detect_extensions,
+      folders=self.detect_folders,
+    ) else {
     return Skipped("no direnv detected")
   }
 

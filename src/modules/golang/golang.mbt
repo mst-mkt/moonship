@@ -142,7 +142,9 @@ fn get_go_mod_version(cwd : String) -> String {
   .split("\n")
   .map(fn(s) { s.to_string() })
   .find_first(fn(s) { s.has_prefix("go ") })
-  .map(fn(s) { s["go ".length():].to_string().trim(chars=" \t\r\n").to_string() })
+  .map(fn(s) {
+    s["go ".length():].to_string().trim(chars=" \t\r\n").to_string()
+  })
   .unwrap_or("")
 }
 

@@ -82,12 +82,7 @@ async test "render_status: modified only" {
 ///|
 async test "render_status: all types present" {
   let m = GitStatusModule::default()
-  let status = {
-    ..empty_git_status,
-    staged: 2,
-    modified: 3,
-    untracked: 1,
-  }
+  let status = { ..empty_git_status, staged: 2, modified: 3, untracked: 1 }
   guard m.render_status(status, 0, 0) is Output(out) else {
     fail("expected Output")
   }

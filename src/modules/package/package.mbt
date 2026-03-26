@@ -89,7 +89,10 @@ fn is_private_package(cwd : String) -> Bool {
 
   let content = @fs.read_file_to_string(path) catch { _ => return false }
   content.contains("\"private\"") &&
-    (content.contains("\"private\": true") || content.contains("\"private\":true"))
+  (
+    content.contains("\"private\": true") ||
+    content.contains("\"private\":true")
+  )
 }
 
 ///|
