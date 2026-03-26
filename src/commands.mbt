@@ -1,21 +1,31 @@
 ///|
+async fn finalize_prompt(
+  ctx : @context.Context,
+  raw : String,
+  shell : String,
+  cache_key? : (String, Int)? = None,
+) -> Unit {
+  ctx.close_repo()
+  println(@shell.wrap_for_shell(shell, raw))
+
+  if cache_key is Some((cwd, status)) {
+    @cache.write_prompt(cwd, status, raw)
+  }
+}
+
+///|
 async fn run_prompt(pa : PromptArgs) -> Unit {
   let shell = @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("")
   let ctx = build_context(pa)
   emit_warnings(ctx.config.warnings)
   @terminal.set_active_palette(ctx.palette)
 
-  // Handle --right and --continuation
   match pa.target {
     Right => {
-      if ctx.config.right_format.is_empty() {
-        return
-      }
+      guard not(ctx.config.right_format.is_empty()) else { return }
       let modules = build_modules(ctx.config)
       let raw = render_prompt(ctx, modules, format=ctx.config.right_format)
-      ctx.close_repo()
-      println(@shell.wrap_for_shell(shell, raw))
-      return
+      return finalize_prompt(ctx, raw, shell)
     }
     Continuation => {
       let raw = render_continuation(ctx.config.continuation_prompt)
@@ -27,16 +37,13 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
       let prefix = if ctx.config.add_newline { "\n" } else { "" }
       let modules = build_modules(ctx.config)
       let raw = prefix + render_prompt(ctx, modules, format~)
-      ctx.close_repo()
-      println(@shell.wrap_for_shell(shell, raw))
-      return
+      return finalize_prompt(ctx, raw, shell)
     }
     Main => ()
   }
 
   let use_cache = (shell == "zsh" || shell == "fish") && pa.keymap.is_empty()
 
-  // Cache hit: return immediately (sync path only)
   if use_cache && not(pa.is_async) {
     if @cache.read_prompt(ctx.cwd, pa.status, ctx.config.cache_ttl)
       is Some(cached) {
@@ -49,34 +56,23 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
   let modules = build_modules(ctx.config)
   let has_async = modules.values().any(fn(m) { m.is_async() })
 
-  if pa.is_async {
-    let raw = prefix + render_prompt(ctx, modules)
-    ctx.close_repo()
-    println(@shell.wrap_for_shell(shell, raw))
-
-    if use_cache {
-      @cache.write_prompt(ctx.cwd, pa.status, raw)
-    }
-
-    if shell == "fish" {
-      notify_parent() |> ignore
-    }
-  } else if has_async {
-    let raw = prefix + render_prompt(
-      ctx,
-      modules,
-      should_run=fn(m) { not(m.is_async()) },
-    )
-    ctx.close_repo()
-    println(@shell.wrap_for_shell(shell, raw))
+  let raw = if not(pa.is_async) && has_async {
+    prefix + render_prompt(ctx, modules, should_run=fn(m) { not(m.is_async()) })
   } else {
-    let raw = prefix + render_prompt(ctx, modules)
-    ctx.close_repo()
-    println(@shell.wrap_for_shell(shell, raw))
+    prefix + render_prompt(ctx, modules)
+  }
 
-    if use_cache {
-      @cache.write_prompt(ctx.cwd, pa.status, raw)
-    }
+  let cache_key : (String, Int)? = if use_cache &&
+    (pa.is_async || not(has_async)) {
+    Some((ctx.cwd, pa.status))
+  } else {
+    None
+  }
+
+  finalize_prompt(ctx, raw, shell, cache_key~)
+
+  if pa.is_async && shell == "fish" {
+    notify_parent() |> ignore
   }
 }
 
@@ -143,17 +139,18 @@ fn run_module_list() -> Unit {
 }
 
 ///|
-async fn run_timings(pa : PromptArgs) -> Unit {
-  let ctx = build_context(pa)
-  emit_warnings(ctx.config.warnings)
-  @terminal.set_active_palette(ctx.palette)
-  let modules = build_modules(ctx.config)
+async fn collect_module_entries(
+  ctx : @context.Context,
+  modules : Map[String, &@ms.PromptModule],
+  skip_name~ : (String) -> Bool = fn(_) { false },
+  should_include~ : (Int64, String) -> Bool,
+) -> Array[(String, Int64, String)] {
   let format = expand_all(ctx.config.format, modules)
   let module_names = @ms.extract_module_names(format)
-
   let entries : Array[(String, Int64, String)] = []
 
   for name in module_names {
+    guard not(skip_name(name)) else { continue }
     guard modules.get(name) is Some(m) else { continue }
 
     let start = @async.now()
@@ -165,12 +162,27 @@ async fn run_timings(pa : PromptArgs) -> Unit {
       Skipped(_) | Disabled => ""
     }
 
-    if elapsed > 0L || not(output.is_empty()) {
+    if should_include(elapsed, output) {
       entries.push((name, elapsed, output))
     }
   }
 
   ctx.close_repo()
+  entries
+}
+
+///|
+async fn run_timings(pa : PromptArgs) -> Unit {
+  let ctx = build_context(pa)
+  emit_warnings(ctx.config.warnings)
+  @terminal.set_active_palette(ctx.palette)
+  let modules = build_modules(ctx.config)
+
+  let entries = collect_module_entries(
+    ctx,
+    modules,
+    should_include=fn(elapsed, output) { elapsed > 0L || not(output.is_empty()) },
+  )
 
   entries.sort_by(fn(a, b) { b.1.compare(a.1) })
 
@@ -200,30 +212,13 @@ async fn run_explain(pa : PromptArgs) -> Unit {
   emit_warnings(ctx.config.warnings)
   @terminal.set_active_palette(ctx.palette)
   let modules = build_modules(ctx.config)
-  let format = expand_all(ctx.config.format, modules)
-  let module_names = @ms.extract_module_names(format)
 
-  let entries : Array[(String, Int64, String)] = []
-
-  for name in module_names {
-    guard name != "line_break" else { continue }
-    guard modules.get(name) is Some(m) else { continue }
-
-    let start = @async.now()
-    let result = m.execute(ctx)
-    let elapsed = @async.now() - start
-
-    let output = match result {
-      Output(out) => out.render().replace(old="\n", new="\\n")
-      Skipped(_) | Disabled => ""
-    }
-
-    if not(output.is_empty()) {
-      entries.push((name, elapsed, output))
-    }
-  }
-
-  ctx.close_repo()
+  let entries = collect_module_entries(
+    ctx,
+    modules,
+    skip_name=fn(name) { name == "line_break" },
+    should_include=fn(_elapsed, output) { not(output.is_empty()) },
+  )
 
   let max_val_width = entries.iter().fold(init=0, fn(max, e) {
     let w = e.2.length() + format_duration(e.1).length() + 6
