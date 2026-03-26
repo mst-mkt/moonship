@@ -15,7 +15,6 @@ import {
   "moonbitlang/x/fs" @fs,
   "mst-mkt/moonship/config" @config,
   "mst-mkt/moonship/context" @context,
-  "mst-mkt/moonship/test_util" @test_util,
 } for "wbtest"
 
 options(

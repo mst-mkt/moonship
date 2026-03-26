@@ -1,9 +1,7 @@
 import {
   "bobzhang/toml" @toml,
-  "moonbitlang/core/env" @env,
   "moonbitlang/core/strconv" @strconv,
   "moonbitlang/x/fs" @fs,
-  "moonbitlang/x/sys" @sys,
   "mst-mkt/moonship/config" @config,
   "mst-mkt/moonship/context" @context,
   "mst-mkt/moonship/exec" @exec,
