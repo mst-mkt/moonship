@@ -6,6 +6,7 @@ pub struct CondaModule {
   style : String
   symbol : String
   truncation_length : Int
+  detect_env_vars : Array[String]
   ignore_base : Bool
 }
 
@@ -18,6 +19,7 @@ pub fn CondaModule::default() -> CondaModule {
     style: "green bold",
     symbol: "🅒 ",
     truncation_length: 2147483647,
+    detect_env_vars: [],
     ignore_base: true,
   }
 }
@@ -31,6 +33,9 @@ pub fn CondaModule::from_table(table : @config.ModuleTable) -> CondaModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    detect_env_vars: table
+    .get_string_array("detect_env_vars")
+    .unwrap_or(d.detect_env_vars),
     truncation_length: table
     .get_int("truncation_length")
     .unwrap_or(d.truncation_length),

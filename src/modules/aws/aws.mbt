@@ -7,6 +7,8 @@ pub struct AwsModule {
   symbol : String
   region_aliases : Map[String, String]
   profile_aliases : Map[String, String]
+  expiration_symbol : String
+  force_display : Bool
 }
 
 ///|
@@ -19,6 +21,8 @@ pub fn AwsModule::default() -> AwsModule {
     symbol: "☁️  ",
     region_aliases: {},
     profile_aliases: {},
+    expiration_symbol: "X",
+    force_display: false,
   }
 }
 
@@ -33,6 +37,12 @@ pub fn AwsModule::from_table(table : @config.ModuleTable) -> AwsModule {
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
     region_aliases: table.get_string_map("region_aliases"),
     profile_aliases: table.get_string_map("profile_aliases"),
+    expiration_symbol: table
+    .get_string("expiration_symbol")
+    .unwrap_or(d.expiration_symbol),
+    force_display: table
+    .get_bool("force_display")
+    .unwrap_or(d.force_display),
   }
 }
 

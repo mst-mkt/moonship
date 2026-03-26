@@ -7,6 +7,7 @@ pub struct GcloudModule {
   symbol : String
   region_aliases : Map[String, String]
   project_aliases : Map[String, String]
+  detect_env_vars : Array[String]
 }
 
 ///|
@@ -19,6 +20,7 @@ pub fn GcloudModule::default() -> GcloudModule {
     symbol: "☁️  ",
     region_aliases: {},
     project_aliases: {},
+    detect_env_vars: [],
   }
 }
 
@@ -33,6 +35,9 @@ pub fn GcloudModule::from_table(table : @config.ModuleTable) -> GcloudModule {
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
     region_aliases: table.get_string_map("region_aliases"),
     project_aliases: table.get_string_map("project_aliases"),
+    detect_env_vars: table
+    .get_string_array("detect_env_vars")
+    .unwrap_or(d.detect_env_vars),
   }
 }
 
