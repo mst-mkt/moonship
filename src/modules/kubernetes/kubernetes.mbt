@@ -11,6 +11,17 @@ pub struct KubernetesModule {
   detect_files : Array[String]
   detect_extensions : Array[String]
   detect_folders : Array[String]
+  contexts : Array[KubernetesContextConfig]
+}
+
+///|
+pub(all) struct KubernetesContextConfig {
+  context_pattern : String
+  user_pattern : String
+  symbol : String
+  style : String
+  context_alias : String
+  user_alias : String
 }
 
 ///|
@@ -27,6 +38,7 @@ pub fn KubernetesModule::default() -> KubernetesModule {
     detect_files: [],
     detect_extensions: [],
     detect_folders: [],
+    contexts: [],
   }
 }
 
@@ -55,6 +67,42 @@ pub fn KubernetesModule::from_table(
     detect_folders: table
     .get_string_array("detect_folders")
     .unwrap_or(d.detect_folders),
+    contexts: parse_contexts(table),
+  }
+}
+
+///|
+fn parse_contexts(
+  table : @config.ModuleTable,
+) -> Array[KubernetesContextConfig] {
+  match table.0.get("contexts") {
+    Some(@config.CArray(arr)) =>
+      arr
+      .iter()
+      .filter_map(fn(item) {
+        guard item is @config.CTable(ctx_table) else { return None }
+
+        let get = fn(key : String) -> String {
+          match ctx_table.get(key) {
+            Some(@config.CString(s)) => s
+            _ => ""
+          }
+        }
+
+        let pattern = get("context_pattern")
+        guard not(pattern.is_empty()) else { return None }
+
+        Some({
+          context_pattern: pattern,
+          user_pattern: get("user_pattern"),
+          symbol: get("symbol"),
+          style: get("style"),
+          context_alias: get("context_alias"),
+          user_alias: get("user_alias"),
+        })
+      })
+      .collect()
+    _ => []
   }
 }
 
@@ -135,21 +183,42 @@ pub impl @ms.PromptModule for KubernetesModule with execute(
     return Skipped("no current context")
   }
 
-  let display_context = self.context_aliases
-    .get(current_context)
-    .unwrap_or(current_context)
-
   let user = get_context_user(kubeconfig_paths, current_context)
+
+  // Find matching per-context config (exact match on context_pattern)
+  let ctx_config = self.contexts.iter().find_first(fn(c) {
+    c.context_pattern == current_context &&
+      (c.user_pattern.is_empty() || c.user_pattern == user)
+  })
+
+  let display_context = match ctx_config {
+    Some(c) if not(c.context_alias.is_empty()) => c.context_alias
+    _ => self.context_aliases.get(current_context).unwrap_or(current_context)
+  }
+
   let display_user = if user.is_empty() {
     ""
   } else {
-    self.user_aliases.get(user).unwrap_or(user)
+    match ctx_config {
+      Some(c) if not(c.user_alias.is_empty()) => c.user_alias
+      _ => self.user_aliases.get(user).unwrap_or(user)
+    }
+  }
+
+  let symbol = match ctx_config {
+    Some(c) if not(c.symbol.is_empty()) => c.symbol
+    _ => self.symbol
+  }
+
+  let style = match ctx_config {
+    Some(c) if not(c.style.is_empty()) => c.style
+    _ => self.style
   }
 
   let vars : Map[String, String] = {
     "context": display_context,
-    "symbol": self.symbol,
-    "style": self.style,
+    "symbol": symbol,
+    "style": style,
   }
 
   if not(ns.is_empty()) {

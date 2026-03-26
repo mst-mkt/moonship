@@ -326,6 +326,74 @@ async test "execute: no detect conditions shows unconditionally" {
 }
 
 ///|
+test "parse_contexts: from TOML" {
+  let config = @config.Config::from_toml(
+    (
+      #|[kubernetes]
+      #|disabled = false
+      #|
+      #|[[kubernetes.contexts]]
+      #|context_pattern = "prod"
+      #|symbol = "🔴 "
+      #|style = "bold red"
+      #|context_alias = "production"
+    ),
+  )
+  let m = KubernetesModule::from_config(config)
+
+  assert_eq(m.contexts.length(), 1)
+  assert_eq(m.contexts[0].context_pattern, "prod")
+  assert_eq(m.contexts[0].symbol, "🔴 ")
+  assert_eq(m.contexts[0].style, "bold red")
+  assert_eq(m.contexts[0].context_alias, "production")
+}
+
+///|
+async test "execute: per-context config overrides symbol and alias" {
+  let kubeconfig = "/tmp/moonship-test-k8s-ctx-config"
+  @fs.write_string_to_file(
+    kubeconfig,
+    (
+      #|current-context: prod
+      #|contexts:
+      #|  - name: prod
+      #|    context:
+      #|      cluster: prod-cluster
+    ),
+  )
+
+  @sys.set_env_var("KUBECONFIG", kubeconfig)
+  let config = @config.Config::from_toml(
+    (
+      #|[kubernetes]
+      #|disabled = false
+      #|
+      #|[[kubernetes.contexts]]
+      #|context_pattern = "prod"
+      #|symbol = "🔴 "
+      #|context_alias = "PROD"
+    ),
+  )
+  let m = KubernetesModule::from_config(config)
+  let ctx = @context.Context::new(cwd="/tmp", config~)
+
+  guard m.execute(ctx) is Output(out) else {
+    @sys.unset_env_var("KUBECONFIG")
+    @fs.remove_file(kubeconfig) catch { _ => () }
+    fail("expected Output")
+    return
+  }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("PROD"))
+  assert_true(rendered.contains("🔴"))
+  assert_false(rendered.contains("☸"))
+
+  @sys.unset_env_var("KUBECONFIG")
+  @fs.remove_file(kubeconfig) catch { _ => () }
+}
+
+///|
 test "get_context_user: no matching context" {
   let path = "/tmp/moonship-test-k8s-nomatch"
   @fs.write_string_to_file(
