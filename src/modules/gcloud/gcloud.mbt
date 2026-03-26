@@ -5,6 +5,8 @@ pub struct GcloudModule {
   format : String
   style : String
   symbol : String
+  region_aliases : Map[String, String]
+  project_aliases : Map[String, String]
 }
 
 ///|
@@ -15,6 +17,8 @@ pub fn GcloudModule::default() -> GcloudModule {
     format: "on [$symbol$account(@$domain)(\\($region\\))]($style) ",
     style: "bold blue",
     symbol: "☁️  ",
+    region_aliases: {},
+    project_aliases: {},
   }
 }
 
@@ -27,6 +31,8 @@ pub fn GcloudModule::from_table(table : @config.ModuleTable) -> GcloudModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    region_aliases: table.get_string_map("region_aliases"),
+    project_aliases: table.get_string_map("project_aliases"),
   }
 }
 
@@ -86,11 +92,11 @@ pub impl @ms.PromptModule for GcloudModule with execute(
   }
 
   if not(project.is_empty()) {
-    vars["project"] = project
+    vars["project"] = self.project_aliases.get(project).unwrap_or(project)
   }
 
   if not(region.is_empty()) {
-    vars["region"] = region
+    vars["region"] = self.region_aliases.get(region).unwrap_or(region)
   }
 
   let segments = @ms.format_string(

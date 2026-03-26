@@ -5,6 +5,8 @@ pub struct AwsModule {
   format : String
   style : String
   symbol : String
+  region_aliases : Map[String, String]
+  profile_aliases : Map[String, String]
 }
 
 ///|
@@ -15,6 +17,8 @@ pub fn AwsModule::default() -> AwsModule {
     format: "on [$symbol($profile )(\\($region\\) )]($style)",
     style: "bold yellow",
     symbol: "☁️  ",
+    region_aliases: {},
+    profile_aliases: {},
   }
 }
 
@@ -27,6 +31,8 @@ pub fn AwsModule::from_table(table : @config.ModuleTable) -> AwsModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    region_aliases: table.get_string_map("region_aliases"),
+    profile_aliases: table.get_string_map("profile_aliases"),
   }
 }
 
@@ -67,11 +73,11 @@ pub impl @ms.PromptModule for AwsModule with execute(
   }
 
   if not(profile.is_empty()) {
-    vars["profile"] = profile
+    vars["profile"] = self.profile_aliases.get(profile).unwrap_or(profile)
   }
 
   if not(region.is_empty()) {
-    vars["region"] = region
+    vars["region"] = self.region_aliases.get(region).unwrap_or(region)
   }
 
   let segments = @ms.format_string(

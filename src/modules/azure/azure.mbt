@@ -5,6 +5,7 @@ pub struct AzureModule {
   format : String
   style : String
   symbol : String
+  subscription_aliases : Map[String, String]
 }
 
 ///|
@@ -15,6 +16,7 @@ pub fn AzureModule::default() -> AzureModule {
     format: "on [$symbol($subscription)]($style) ",
     style: "blue bold",
     symbol: "󰠅 ",
+    subscription_aliases: {},
   }
 }
 
@@ -27,6 +29,7 @@ pub fn AzureModule::from_table(table : @config.ModuleTable) -> AzureModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    subscription_aliases: table.get_string_map("subscription_aliases"),
   }
 }
 
@@ -75,7 +78,9 @@ pub impl @ms.PromptModule for AzureModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "subscription": subscription,
+    "subscription": self.subscription_aliases
+      .get(subscription)
+      .unwrap_or(subscription),
     "symbol": self.symbol,
     "style": self.style,
   }
