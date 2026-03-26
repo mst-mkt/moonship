@@ -7,6 +7,14 @@ pub struct ShellModule {
   bash_indicator : String
   fish_indicator : String
   zsh_indicator : String
+  powershell_indicator : String
+  pwsh_indicator : String
+  ion_indicator : String
+  elvish_indicator : String
+  tcsh_indicator : String
+  nu_indicator : String
+  xonsh_indicator : String
+  cmd_indicator : String
   unknown_indicator : String
 }
 
@@ -20,6 +28,14 @@ pub fn ShellModule::default() -> ShellModule {
     bash_indicator: "bsh",
     fish_indicator: "fsh",
     zsh_indicator: "zsh",
+    powershell_indicator: "psh",
+    pwsh_indicator: "psh",
+    ion_indicator: "ion",
+    elvish_indicator: "esh",
+    tcsh_indicator: "tsh",
+    nu_indicator: "nu",
+    xonsh_indicator: "xsh",
+    cmd_indicator: "cmd",
     unknown_indicator: "",
   }
 }
@@ -39,6 +55,30 @@ pub fn ShellModule::from_table(table : @config.ModuleTable) -> ShellModule {
     .get_string("fish_indicator")
     .unwrap_or(d.fish_indicator),
     zsh_indicator: table.get_string("zsh_indicator").unwrap_or(d.zsh_indicator),
+    powershell_indicator: table
+    .get_string("powershell_indicator")
+    .unwrap_or(d.powershell_indicator),
+    pwsh_indicator: table
+    .get_string("pwsh_indicator")
+    .unwrap_or(d.pwsh_indicator),
+    ion_indicator: table
+    .get_string("ion_indicator")
+    .unwrap_or(d.ion_indicator),
+    elvish_indicator: table
+    .get_string("elvish_indicator")
+    .unwrap_or(d.elvish_indicator),
+    tcsh_indicator: table
+    .get_string("tcsh_indicator")
+    .unwrap_or(d.tcsh_indicator),
+    nu_indicator: table
+    .get_string("nu_indicator")
+    .unwrap_or(d.nu_indicator),
+    xonsh_indicator: table
+    .get_string("xonsh_indicator")
+    .unwrap_or(d.xonsh_indicator),
+    cmd_indicator: table
+    .get_string("cmd_indicator")
+    .unwrap_or(d.cmd_indicator),
     unknown_indicator: table
     .get_string("unknown_indicator")
     .unwrap_or(d.unknown_indicator),
@@ -77,6 +117,14 @@ pub impl @ms.PromptModule for ShellModule with execute(
     "bash" => self.bash_indicator
     "fish" => self.fish_indicator
     "zsh" => self.zsh_indicator
+    "powershell" => self.powershell_indicator
+    "pwsh" => self.pwsh_indicator
+    "ion" => self.ion_indicator
+    "elvish" => self.elvish_indicator
+    "tcsh" => self.tcsh_indicator
+    "nu" => self.nu_indicator
+    "xonsh" => self.xonsh_indicator
+    "cmd" => self.cmd_indicator
     _ => self.unknown_indicator
   }
 
