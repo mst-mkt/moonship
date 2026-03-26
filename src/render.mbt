@@ -86,46 +86,26 @@ fn expand_all(
 ///|
 fn replace_var(s : String, var_name : String, replacement : String) -> String {
   let target = "$\{var_name}"
-  let buf = StringBuilder::new()
-  let len = s.length()
-  let target_len = target.length()
 
-  loop 0 {
-    i =>
-      if i >= len {
-        break buf.to_string()
-      } else if s[i].unsafe_to_char() == '$' && starts_with_at(s, i, target) {
-        let after = i + target_len
-        if after >= len || not(@ms.is_ident_char(s[after].unsafe_to_char())) {
-          buf.write_string(replacement)
-          continue after
-        } else {
-          buf.write_char(s[i].unsafe_to_char())
-          continue i + 1
-        }
+  guard s.contains(target) else { return s }
+
+  let parts = s.split(target).map(fn(v) { v.to_string() }).collect()
+
+  parts
+  .foldi(init=StringBuilder::new(), fn(i, buf, part) {
+    if i > 0 {
+      let next_is_ident = not(part.is_empty()) &&
+        @ms.is_ident_char(part[0].unsafe_to_char())
+
+      if next_is_ident {
+        buf.write_string(target)
       } else {
-        buf.write_char(s[i].unsafe_to_char())
-        continue i + 1
+        buf.write_string(replacement)
       }
-  }
-}
+    }
 
-///|
-fn starts_with_at(s : String, offset : Int, prefix : String) -> Bool {
-  let prefix_len = prefix.length()
-
-  if offset + prefix_len > s.length() {
-    return false
-  }
-
-  loop 0 {
-    j =>
-      if j >= prefix_len {
-        break true
-      } else if s[offset + j] != prefix[j] {
-        break false
-      } else {
-        continue j + 1
-      }
-  }
+    buf.write_string(part)
+    buf
+  })
+  .to_string()
 }

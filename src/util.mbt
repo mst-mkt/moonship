@@ -118,14 +118,7 @@ fn self_exe() -> String {
 
 ///|
 fn max_length(iter : Iter[String]) -> Int {
-  iter.fold(init=0, fn(max, s) {
-    let len = s.length()
-    if len > max {
-      len
-    } else {
-      max
-    }
-  })
+  iter.fold(init=0, fn(acc, s) { @cmp.maximum(acc, s.length()) })
 }
 
 ///|
@@ -141,22 +134,12 @@ fn format_duration(ms : Int64) -> String {
 fn pad_right(s : String, width : Int) -> String {
   guard s.length() < width else { return s }
 
-  let buf = StringBuilder::new()
-  buf.write_string(s)
-  for _ in 0..<(width - s.length()) {
-    buf.write_char(' ')
-  }
-  buf.to_string()
+  s + String::make(width - s.length(), ' ')
 }
 
 ///|
 fn pad_left(s : String, width : Int) -> String {
   guard s.length() < width else { return s }
 
-  let buf = StringBuilder::new()
-  for _ in 0..<(width - s.length()) {
-    buf.write_char(' ')
-  }
-  buf.write_string(s)
-  buf.to_string()
+  String::make(width - s.length(), ' ') + s
 }

@@ -214,43 +214,6 @@ async test "replace_var: partial match does not replace" {
   assert_eq(replace_var("$allison", "all", "XY"), "$allison")
 }
 
-// --- starts_with_at ---
-
-///|
-async test "starts_with_at: basic match" {
-  assert_true(starts_with_at("hello world", 0, "hello"))
-}
-
-///|
-async test "starts_with_at: match at offset" {
-  assert_true(starts_with_at("hello world", 6, "world"))
-}
-
-///|
-async test "starts_with_at: no match" {
-  assert_false(starts_with_at("hello world", 0, "world"))
-}
-
-///|
-async test "starts_with_at: offset at end" {
-  assert_false(starts_with_at("hello", 5, "x"))
-}
-
-///|
-async test "starts_with_at: empty prefix" {
-  assert_true(starts_with_at("hello", 0, ""))
-}
-
-///|
-async test "starts_with_at: prefix longer than remaining" {
-  assert_false(starts_with_at("hi", 1, "hello"))
-}
-
-///|
-async test "starts_with_at: exact match at offset" {
-  assert_true(starts_with_at("abcdef", 3, "def"))
-}
-
 ///|
 async test "render_continuation: styled text" {
   let output = render_continuation("[∙](bright-black) ")

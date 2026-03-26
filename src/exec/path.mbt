@@ -29,16 +29,12 @@ pub fn parent_dir(path : String) -> String {
 
 ///|
 pub fn last_slash(s : String) -> Int? {
-  loop s.length() - 1 {
-    i =>
-      if i < 0 {
-        break None
-      } else if s[i].unsafe_to_char() == '/' {
-        break Some(i)
-      } else {
-        continue i - 1
-      }
-  }
+  s
+  .iter()
+  .fold(init=((None : Int?), 0), fn(state, ch) {
+    let (last, i) = state
+    (if ch == '/' { Some(i) } else { last }, i + 1)
+  }).0
 }
 
 ///|

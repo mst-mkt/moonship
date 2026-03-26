@@ -1,6 +1,7 @@
 import {
   "Yoorkin/ArgParser" @ArgParser,
   "moonbitlang/async",
+  "moonbitlang/core/cmp" @cmp,
   "moonbitlang/async/stdio" @stdio,
   "moonbitlang/core/env" @env,
   "moonbitlang/core/random" @random,

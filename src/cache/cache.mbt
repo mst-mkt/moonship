@@ -85,28 +85,27 @@ fn hash_path(path : String) -> String {
 
 ///|
 fn ensure_dir(path : String) -> Unit {
-  if @fs.path_exists(path) {
-    return
-  }
+  guard not(@fs.path_exists(path)) else { return }
 
-  let parts = path.split("/").map(fn(v) { v.to_string() }).collect()
-  let buf = StringBuilder::new()
-
-  for part in parts {
-    if part.is_empty() {
-      buf.write_char('/')
-      continue
+  path
+  .split("/")
+  .map(fn(v) { v.to_string() })
+  .fold(init="", fn(current, part) {
+    let next = if part.is_empty() {
+      "/"
+    } else if current == "/" {
+      "/\{part}"
+    } else {
+      "\{current}/\{part}"
     }
 
-    buf.write_string(part)
-    let current = buf.to_string()
-
-    if not(@fs.path_exists(current)) {
-      @fs.create_dir(current) catch {
+    if not(@fs.path_exists(next)) {
+      @fs.create_dir(next) catch {
         _ => ()
       }
     }
 
-    buf.write_char('/')
-  }
+    next
+  })
+  |> ignore
 }
