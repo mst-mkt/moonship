@@ -36,7 +36,12 @@ async test "execute: detects Gemfile" {
   let m = RubyModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Ruby project detected"))
+  guard not(result is Skipped("no Ruby project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("💎"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -48,7 +53,12 @@ async test "execute: detects .ruby-version" {
   let m = RubyModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Ruby project detected"))
+  guard not(result is Skipped("no Ruby project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("💎"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -60,7 +70,12 @@ async test "execute: detects .rb extension" {
   let m = RubyModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Ruby project detected"))
+  guard not(result is Skipped("no Ruby project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("💎"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 

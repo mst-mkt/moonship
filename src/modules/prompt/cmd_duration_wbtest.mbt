@@ -39,6 +39,23 @@ async test "format_duration: show_milliseconds" {
   assert_eq(format_duration(90500, true), "1m30s500ms")
 }
 
+///|
+async test "format_duration: zero" {
+  assert_eq(format_duration(0, false), "0ms")
+}
+
+///|
+async test "format_duration: hour boundary" {
+  assert_eq(format_duration(3600000, false), "1h0m0s")
+  assert_eq(format_duration(3599999, false), "59m59s")
+}
+
+///|
+async test "format_duration: minute boundary" {
+  assert_eq(format_duration(60000, false), "1m0s")
+  assert_eq(format_duration(59999, false), "59s")
+}
+
 // --- execute ---
 
 ///|

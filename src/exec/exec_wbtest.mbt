@@ -291,3 +291,57 @@ test "format_version: single-part version" {
   assert_eq(format_version("42", "v${raw}"), "v42")
   assert_eq(format_version("42", "${major}"), "42")
 }
+
+// --- parse_leading_int ---
+
+///|
+test "parse_leading_int: basic" {
+  assert_eq(parse_leading_int("42abc"), 42)
+}
+
+///|
+test "parse_leading_int: no digits" {
+  assert_eq(parse_leading_int("abc"), 0)
+}
+
+///|
+test "parse_leading_int: empty" {
+  assert_eq(parse_leading_int(""), 0)
+}
+
+///|
+test "parse_leading_int: all digits" {
+  assert_eq(parse_leading_int("1234"), 1234)
+}
+
+///|
+test "parse_leading_int: zero" {
+  assert_eq(parse_leading_int("0"), 0)
+}
+
+// --- basename / parent_dir ---
+
+///|
+test "basename: root path" {
+  assert_eq(basename("/"), "")
+}
+
+///|
+test "parent_dir: empty path" {
+  assert_eq(parent_dir(""), "")
+}
+
+///|
+test "last_slash: no slash" {
+  assert_eq(last_slash("abc"), None)
+}
+
+///|
+test "last_slash: single slash" {
+  assert_eq(last_slash("/"), Some(0))
+}
+
+///|
+test "last_slash: multiple slashes" {
+  assert_eq(last_slash("/a/b/c"), Some(4))
+}

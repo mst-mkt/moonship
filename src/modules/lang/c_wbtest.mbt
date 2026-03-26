@@ -36,7 +36,12 @@ async test "execute: detects .c extension" {
   let m = CModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no C project detected"))
+  guard not(result is Skipped("no C project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("C "))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -48,6 +53,11 @@ async test "execute: detects .h extension" {
   let m = CModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no C project detected"))
+  guard not(result is Skipped("no C project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("C "))
+  }
   @test_util.remove_dir_recursive(path)
 }

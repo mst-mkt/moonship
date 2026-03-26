@@ -36,7 +36,12 @@ async test "execute: detects pubspec.yaml" {
   let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Dart project detected"))
+  guard not(result is Skipped("no Dart project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("🎯"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -48,7 +53,12 @@ async test "execute: detects pubspec.yml" {
   let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Dart project detected"))
+  guard not(result is Skipped("no Dart project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("🎯"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -60,7 +70,12 @@ async test "execute: detects pubspec.lock" {
   let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Dart project detected"))
+  guard not(result is Skipped("no Dart project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("🎯"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -72,7 +87,12 @@ async test "execute: detects .dart extension" {
   let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Dart project detected"))
+  guard not(result is Skipped("no Dart project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("🎯"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 

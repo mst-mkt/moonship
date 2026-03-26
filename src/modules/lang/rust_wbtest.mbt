@@ -28,24 +28,40 @@ async test "execute: no project returns Skipped" {
 }
 
 ///|
-async test "execute: detects Cargo.toml" {
+async test "execute: detects Cargo.toml and produces output with symbol" {
   let path = "/tmp/moonship-test-rust-cargo"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/Cargo.toml", "")
   let m = RustModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(not(m.execute(ctx) is Disabled))
+  let result = m.execute(ctx)
+
+  guard not(result is Disabled) else { fail("expected non-Disabled result") }
+
+  if result is Output(out) {
+    let rendered = out.render()
+    assert_true(rendered.contains("🦀"))
+  }
+
   @test_util.remove_dir_recursive(path)
 }
 
 ///|
-async test "execute: detects .rs extension" {
+async test "execute: detects .rs extension and produces output with symbol" {
   let path = "/tmp/moonship-test-rust-ext"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.rs", "")
   let m = RustModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(not(m.execute(ctx) is Disabled))
+  let result = m.execute(ctx)
+
+  guard not(result is Disabled) else { fail("expected non-Disabled result") }
+
+  if result is Output(out) {
+    let rendered = out.render()
+    assert_true(rendered.contains("🦀"))
+  }
+
   @test_util.remove_dir_recursive(path)
 }
 
@@ -68,4 +84,32 @@ test "parse_rustc_version: nightly" {
 ///|
 test "parse_rustc_version: empty" {
   assert_eq(parse_rustc_version(""), "")
+}
+
+///|
+test "parse_rustc_version: single word" {
+  assert_eq(parse_rustc_version("1.75.0"), "1.75.0")
+}
+
+///|
+test "parse_rustc_version: beta" {
+  assert_eq(
+    parse_rustc_version("rustc 1.76.0-beta.1 (abc123 2024-01-01)"),
+    "1.76.0-beta.1",
+  )
+}
+
+///|
+test "format_version: with default format" {
+  assert_eq(@exec.format_version("1.75.0", "v${raw}"), "v1.75.0")
+}
+
+///|
+test "format_version: with major.minor format" {
+  assert_eq(@exec.format_version("1.75.0", "v${major}.${minor}"), "v1.75")
+}
+
+///|
+test "format_version: empty version" {
+  assert_eq(@exec.format_version("", "v${raw}"), "")
 }

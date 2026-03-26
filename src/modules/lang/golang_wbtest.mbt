@@ -34,7 +34,11 @@ async test "execute: detects go.mod" {
   @fs.write_string_to_file(path + "/go.mod", "")
   let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(not(m.execute(ctx) is Disabled))
+  let result = m.execute(ctx)
+  guard not(result is Disabled) else { fail("expected non-Disabled") }
+  if result is Output(out) {
+    assert_true(out.render().contains("🐹"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -45,7 +49,11 @@ async test "execute: detects go.sum" {
   @fs.write_string_to_file(path + "/go.sum", "")
   let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(not(m.execute(ctx) is Disabled))
+  let result = m.execute(ctx)
+  guard not(result is Disabled) else { fail("expected non-Disabled") }
+  if result is Output(out) {
+    assert_true(out.render().contains("🐹"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -56,7 +64,11 @@ async test "execute: detects go.work" {
   @fs.write_string_to_file(path + "/go.work", "")
   let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(not(m.execute(ctx) is Disabled))
+  let result = m.execute(ctx)
+  guard not(result is Disabled) else { fail("expected non-Disabled") }
+  if result is Output(out) {
+    assert_true(out.render().contains("🐹"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -67,7 +79,11 @@ async test "execute: detects .go extension" {
   @fs.write_string_to_file(path + "/main.go", "")
   let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(not(m.execute(ctx) is Disabled))
+  let result = m.execute(ctx)
+  guard not(result is Disabled) else { fail("expected non-Disabled") }
+  if result is Output(out) {
+    assert_true(out.render().contains("🐹"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -78,7 +94,11 @@ async test "execute: detects Gopkg.yml" {
   @fs.write_string_to_file(path + "/Gopkg.yml", "")
   let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(not(m.execute(ctx) is Disabled))
+  let result = m.execute(ctx)
+  guard not(result is Disabled) else { fail("expected non-Disabled") }
+  if result is Output(out) {
+    assert_true(out.render().contains("🐹"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -89,7 +109,11 @@ async test "execute: detects .go-version" {
   @fs.write_string_to_file(path + "/.go-version", "")
   let m = GolangModule::default()
   let ctx = @context.Context::new(cwd=path)
-  assert_true(not(m.execute(ctx) is Disabled))
+  let result = m.execute(ctx)
+  guard not(result is Disabled) else { fail("expected non-Disabled") }
+  if result is Output(out) {
+    assert_true(out.render().contains("🐹"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
