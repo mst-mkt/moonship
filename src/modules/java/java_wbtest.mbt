@@ -20,88 +20,88 @@ async test "execute: disabled returns Disabled" {
 ///|
 async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-java-empty"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
   let m = JavaModule::default()
   assert_true(m.execute(ctx) is Skipped(_))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects pom.xml" {
   let path = "/tmp/moonship-test-java-pom"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/pom.xml", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects build.gradle.kts" {
   let path = "/tmp/moonship-test-java-gradle"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/build.gradle.kts", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects .java extension" {
   let path = "/tmp/moonship-test-java-ext"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/Main.java", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects build.sbt" {
   let path = "/tmp/moonship-test-java-sbt"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/build.sbt", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects .sdkmanrc" {
   let path = "/tmp/moonship-test-java-sdkman"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/.sdkmanrc", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects .java-version" {
   let path = "/tmp/moonship-test-java-version"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/.java-version", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects .jar extension" {
   let path = "/tmp/moonship-test-java-jar"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/app.jar", "")
   let m = JavaModule::default()
   let ctx = @context.Context::new(cwd=path)
   assert_true(m.execute(ctx) is Output(_) || m.execute(ctx) is Skipped(_))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -169,36 +169,4 @@ test "extract_version: empty after offset" {
   assert_eq(extract_version("abc", 3), "")
 }
 
-///|
-fn setup_dir(path : String) -> Unit {
-  remove_dir_recursive(path)
-  @fs.create_dir(path) catch {
-    _ => ()
-  }
-}
 
-///|
-fn remove_dir_recursive(path : String) -> Unit {
-  if not(@fs.path_exists(path)) {
-    return
-  }
-
-  let entries = @fs.read_dir(path) catch { _ => return }
-
-  for entry in entries {
-    let full = path + "/" + entry
-    let is_dir = @fs.is_dir(full) catch { _ => false }
-
-    if is_dir {
-      remove_dir_recursive(full)
-    } else {
-      @fs.remove_file(full) catch {
-        _ => ()
-      }
-    }
-  }
-
-  @fs.remove_dir(path) catch {
-    _ => ()
-  }
-}

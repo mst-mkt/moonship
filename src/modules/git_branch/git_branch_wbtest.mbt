@@ -295,7 +295,7 @@ async test "execute: real repo returns Output with branch" {
 ///|
 fn create_test_repo(path : String) -> @libgit2.Repository raise {
   // Clean up stale directory from previous failed runs
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 
   @libgit2.git_init() |> ignore
 
@@ -320,31 +320,6 @@ fn create_test_repo(path : String) -> @libgit2.Repository raise {
 fn cleanup_test_repo(repo : @libgit2.Repository, path : String) -> Unit {
   repo.close()
   @libgit2.git_shutdown()
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
-///|
-fn remove_dir_recursive(path : String) -> Unit {
-  if not(@fs.path_exists(path)) {
-    return
-  }
-
-  let entries = @fs.read_dir(path) catch { _ => return }
-
-  for entry in entries {
-    let full = path + "/" + entry
-    let is_dir = @fs.is_dir(full) catch { _ => false }
-
-    if is_dir {
-      remove_dir_recursive(full)
-    } else {
-      @fs.remove_file(full) catch {
-        _ => ()
-      }
-    }
-  }
-
-  @fs.remove_dir(path) catch {
-    _ => ()
-  }
-}

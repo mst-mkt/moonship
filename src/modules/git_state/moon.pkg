@@ -8,6 +8,7 @@ import {
 
 import {
   "moonbitlang/async",
+  "mst-mkt/moonship/test_util" @test_util,
 } for "wbtest"
 
 options(

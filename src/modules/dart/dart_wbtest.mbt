@@ -20,60 +20,60 @@ async test "execute: disabled returns Disabled" {
 ///|
 async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-dart-empty"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
   let m = DartModule::default()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects pubspec.yaml" {
   let path = "/tmp/moonship-test-dart-pubspec"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/pubspec.yaml", "")
   let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Dart project detected"))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects pubspec.yml" {
   let path = "/tmp/moonship-test-dart-yml"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/pubspec.yml", "")
   let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Dart project detected"))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects pubspec.lock" {
   let path = "/tmp/moonship-test-dart-lock"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/pubspec.lock", "")
   let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Dart project detected"))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
 async test "execute: detects .dart extension" {
   let path = "/tmp/moonship-test-dart-ext"
-  setup_dir(path)
+  @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.dart", "")
   let m = DartModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_false(result is Skipped("no Dart project detected"))
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -114,36 +114,4 @@ test "parse_dart_version: too few words" {
   assert_eq(parse_dart_version("Dart VM version:"), "")
 }
 
-///|
-fn setup_dir(path : String) -> Unit {
-  remove_dir_recursive(path)
-  @fs.create_dir(path) catch {
-    _ => ()
-  }
-}
 
-///|
-fn remove_dir_recursive(path : String) -> Unit {
-  if not(@fs.path_exists(path)) {
-    return
-  }
-
-  let entries = @fs.read_dir(path) catch { _ => return }
-
-  for entry in entries {
-    let full = path + "/" + entry
-    let is_dir = @fs.is_dir(full) catch { _ => false }
-
-    if is_dir {
-      remove_dir_recursive(full)
-    } else {
-      @fs.remove_file(full) catch {
-        _ => ()
-      }
-    }
-  }
-
-  @fs.remove_dir(path) catch {
-    _ => ()
-  }
-}

@@ -13,7 +13,7 @@ async test "detect_state: no state files returns empty" {
 
   assert_eq(detect_state(path + "/.git", GitStateModule::default()), "")
 
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -24,7 +24,7 @@ async test "detect_state: rebase-merge" {
 
   assert_eq(detect_state(path + "/.git", GitStateModule::default()), "REBASING")
 
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -35,7 +35,7 @@ async test "detect_state: rebase-apply (am)" {
 
   assert_eq(detect_state(path + "/.git", GitStateModule::default()), "AM")
 
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -50,7 +50,7 @@ async test "detect_state: rebase-apply with next (am_or_rebase)" {
     "AM/REBASE",
   )
 
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -61,7 +61,7 @@ async test "detect_state: MERGE_HEAD" {
 
   assert_eq(detect_state(path + "/.git", GitStateModule::default()), "MERGING")
 
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -75,7 +75,7 @@ async test "detect_state: CHERRY_PICK_HEAD" {
     "CHERRY-PICKING",
   )
 
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -89,7 +89,7 @@ async test "detect_state: REVERT_HEAD" {
     "REVERTING",
   )
 
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -103,7 +103,7 @@ async test "detect_state: BISECT_LOG" {
     "BISECTING",
   )
 
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 ///|
@@ -122,7 +122,7 @@ async test "detect_state: custom labels" {
 
   assert_eq(detect_state(path + "/.git", m), "マージ中")
 
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
 }
 
 // --- execute ---
@@ -151,7 +151,7 @@ async test "execute: not in git repo returns Skipped" {
 
 ///|
 fn setup_git_dir(path : String) -> Unit {
-  remove_dir_recursive(path)
+  @test_util.remove_dir_recursive(path)
   @fs.create_dir(path) catch {
     _ => ()
   }
@@ -160,28 +160,3 @@ fn setup_git_dir(path : String) -> Unit {
   }
 }
 
-///|
-fn remove_dir_recursive(path : String) -> Unit {
-  if not(@fs.path_exists(path)) {
-    return
-  }
-
-  let entries = @fs.read_dir(path) catch { _ => return }
-
-  for entry in entries {
-    let full = path + "/" + entry
-    let is_dir = @fs.is_dir(full) catch { _ => false }
-
-    if is_dir {
-      remove_dir_recursive(full)
-    } else {
-      @fs.remove_file(full) catch {
-        _ => ()
-      }
-    }
-  }
-
-  @fs.remove_dir(path) catch {
-    _ => ()
-  }
-}

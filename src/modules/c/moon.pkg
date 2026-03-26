@@ -9,6 +9,7 @@ import {
 import {
   "moonbitlang/async",
   "moonbitlang/x/fs" @fs,
+  "mst-mkt/moonship/test_util" @test_util,
 } for "wbtest"
 
 options(
