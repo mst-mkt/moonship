@@ -142,7 +142,7 @@ fn get_go_mod_version(cwd : String) -> String {
   .split("\n")
   .map(fn(s) { s.to_string() })
   .find_first(fn(s) { s.has_prefix("go ") })
-  .map(fn(s) { trim_ws(s["go ".length():].to_string()) })
+  .map(fn(s) { s["go ".length():].to_string().trim(chars=" \t\r\n").to_string() })
   .unwrap_or("")
 }
 
@@ -156,23 +156,23 @@ fn check_go_version(installed : String, required : String) -> Bool {
   let req_parts = required.split(".").map(fn(s) { s.to_string() }).collect()
 
   let inst_major = if inst_parts.length() >= 1 {
-    parse_int_go(inst_parts[0])
+    @exec.parse_leading_int(inst_parts[0])
   } else {
     0
   }
   let inst_minor = if inst_parts.length() >= 2 {
-    parse_int_go(inst_parts[1])
+    @exec.parse_leading_int(inst_parts[1])
   } else {
     0
   }
 
   let req_major = if req_parts.length() >= 1 {
-    parse_int_go(req_parts[0])
+    @exec.parse_leading_int(req_parts[0])
   } else {
     0
   }
   let req_minor = if req_parts.length() >= 2 {
-    parse_int_go(req_parts[1])
+    @exec.parse_leading_int(req_parts[1])
   } else {
     0
   }
@@ -182,25 +182,6 @@ fn check_go_version(installed : String, required : String) -> Bool {
   }
 
   inst_minor >= req_minor
-}
-
-///|
-fn parse_int_go(s : String) -> Int {
-  s
-  .iter()
-  .fold(init=(0, true), fn(acc, c) {
-    let (result, active) = acc
-    if active && c >= '0' && c <= '9' {
-      (result * 10 + (c.to_int() - '0'.to_int()), true)
-    } else {
-      (result, false)
-    }
-  }).0
-}
-
-///|
-fn trim_ws(s : String) -> String {
-  s.trim(chars=" \t\r\n").to_string()
 }
 
 ///|

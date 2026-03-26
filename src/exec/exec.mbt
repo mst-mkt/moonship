@@ -89,44 +89,24 @@ pub fn find_semver(output : String) -> String {
 
 ///|
 fn extract_semver(s : String) -> String {
-  if s.is_empty() {
-    return ""
-  }
+  guard s.iter().next() is Some('0'..='9') else { return "" }
 
-  let first = s[0].unsafe_to_char()
-  if not(first >= '0' && first <= '9') {
-    return ""
-  }
+  let (prefix, dots) = s
+    .iter()
+    .take_while(fn(c) { (c >= '0' && c <= '9') || c == '.' })
+    .fold(init=(StringBuilder::new(), 0), fn(acc, c) {
+      let (buf, dots) = acc
+      buf.write_char(c)
+      (buf, dots + Bool::to_int(c == '.'))
+    })
 
-  let buf = StringBuilder::new()
+  guard dots >= 2 else { return "" }
 
-  let dots = loop (0, 0) {
-    (i, dots) =>
-      if i >= s.length() {
-        break dots
-      } else {
-        let c = s[i].unsafe_to_char()
-        if c >= '0' && c <= '9' {
-          buf.write_char(c)
-          continue (i + 1, dots)
-        } else if c == '.' {
-          buf.write_char(c)
-          continue (i + 1, dots + 1)
-        } else {
-          break dots
-        }
-      }
-  }
-
-  if dots >= 2 {
-    let result = buf.to_string()
-    if result.has_suffix(".") {
-      result[:result.length() - 1].to_string()
-    } else {
-      result
-    }
+  let result = prefix.to_string()
+  if result.has_suffix(".") {
+    result[:result.length() - 1].to_string()
   } else {
-    ""
+    result
   }
 }
 

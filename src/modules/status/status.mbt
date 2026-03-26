@@ -250,30 +250,28 @@ fn StatusModule::render_pipestatus(
 
 ///|
 fn hex_string(n : Int) -> String {
-  let hex_chars = "0123456789ABCDEF"
   guard n != 0 else { return "0" }
 
+  let hex_chars = "0123456789ABCDEF"
   let abs_n = if n < 0 { -n } else { n }
-  let buf = StringBuilder::new()
-  let digits : Array[Char] = []
 
-  loop abs_n {
-    0 => ()
-    v => {
-      digits.push(hex_chars[v % 16].unsafe_to_char())
-      continue v / 16
+  let digits = loop (abs_n, []) {
+    (0, acc) => break acc
+    (v, acc) => {
+      acc.push(hex_chars[v % 16].unsafe_to_char())
+      continue (v / 16, acc)
     }
   }
 
-  if n < 0 {
-    buf.write_char('-')
-  }
-
-  for i = digits.length() - 1; i >= 0; i = i - 1 {
-    buf.write_char(digits[i])
-  }
-
-  buf.to_string()
+  let prefix = if n < 0 { "-" } else { "" }
+  prefix +
+  digits
+  .rev_iter()
+  .fold(init=StringBuilder::new(), fn(buf, c) {
+    buf.write_char(c)
+    buf
+  })
+  .to_string()
 }
 
 ///|

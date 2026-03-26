@@ -50,10 +50,7 @@ pub fn ModuleTable::get_string_array(
 ) -> Array[String]? {
   match self.0.get(key) {
     Some(CArray(arr)) => {
-      guard arr.iter().all(fn(item) { item is CString(_) }) else { return None }
-
-      Some(
-        arr
+      let strings : Array[String] = arr
         .iter()
         .filter_map(fn(item) {
           match item {
@@ -61,8 +58,9 @@ pub fn ModuleTable::get_string_array(
             _ => None
           }
         })
-        .collect(),
-      )
+        .collect()
+
+      if strings.length() == arr.length() { Some(strings) } else { None }
     }
     _ => None
   }
@@ -73,21 +71,18 @@ pub fn ModuleTable::get_string_map(
   self : ModuleTable,
   key : String,
 ) -> Map[String, String] {
-  match self.0.get(key) {
-    Some(CTable(map_table)) =>
-      map_table
-      .iter()
-      .fold(init=(Map::new() : Map[String, String]), fn(acc, pair) {
-        match pair.1 {
-          CString(val) => {
-            acc[pair.0] = val
-            acc
-          }
-          _ => acc
-        }
-      })
-    _ => {}
-  }
+  guard self.0.get(key) is Some(CTable(map_table)) else { return {} }
+
+  map_table
+  .iter()
+  .filter_map(fn(pair) {
+    guard pair.1 is CString(val) else { return None }
+    Some((pair.0, val))
+  })
+  .fold(init=(Map::new() : Map[String, String]), fn(acc, pair) {
+    acc[pair.0] = pair.1
+    acc
+  })
 }
 
 ///|
