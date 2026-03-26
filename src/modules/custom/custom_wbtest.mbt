@@ -141,6 +141,36 @@ async test "execute: require_repo skips when not in repo" {
 }
 
 ///|
+async test "execute: os=windows skips on linux" {
+  let config = @config.Config::from_toml(
+    (
+      #|[custom]
+      #|command = "echo test"
+      #|os = "windows"
+    ),
+  )
+  let m = CustomModule::from_config(config)
+  let ctx = @context.Context::new(cwd="/tmp", config~)
+
+  assert_true(m.execute(ctx) is Skipped(_))
+}
+
+///|
+async test "execute: os=linux runs on linux" {
+  let config = @config.Config::from_toml(
+    (
+      #|[custom]
+      #|command = "echo test"
+      #|os = "linux"
+    ),
+  )
+  let m = CustomModule::from_config(config)
+  let ctx = @context.Context::new(cwd="/tmp", config~)
+
+  assert_true(m.execute(ctx) is Output(_))
+}
+
+///|
 test "from_table: all fields parsed" {
   let config = @config.Config::from_toml(
     (

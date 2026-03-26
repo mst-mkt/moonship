@@ -99,6 +99,11 @@ pub impl @ms.PromptModule for CustomModule with execute(
     return Skipped("no command configured")
   }
 
+  // Check OS restriction
+  if not(self.os.is_empty()) && self.os != "linux" {
+    return Skipped("os mismatch")
+  }
+
   // Check require_repo
   if self.require_repo {
     guard ctx.get_repo() is Some(_) else {

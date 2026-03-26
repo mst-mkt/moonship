@@ -77,6 +77,16 @@ pub impl @ms.PromptModule for CmdDurationModule with execute(
     return Skipped("duration below min_time")
   }
 
+  // Send desktop notification if enabled
+  if self.show_notifications && ctx.cmd_duration >= self.min_time_to_notify {
+    ignore(
+      @exec.exec_cmd(
+        "notify-send",
+        ["Command finished", "Took \{format_duration(ctx.cmd_duration, false)}"],
+      ),
+    )
+  }
+
   let duration = format_duration(ctx.cmd_duration, self.show_milliseconds)
   let vars : Map[String, String] = { "duration": duration, "style": self.style }
   let segments = @ms.format_string(

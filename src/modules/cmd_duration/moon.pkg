@@ -1,4 +1,5 @@
 import {
+  "mst-mkt/moonship/exec" @exec,
   "mst-mkt/moonship/config" @config,
   "mst-mkt/moonship/context" @context,
   "mst-mkt/moonship/module_system" @ms,
