@@ -4,7 +4,7 @@ fn char_at(s : String, i : Int) -> Char {
 }
 
 ///|
-fn is_ident_char(c : Char) -> Bool {
+pub fn is_ident_char(c : Char) -> Bool {
   match c {
     'a'..='z' | 'A'..='Z' | '_' | '0'..='9' => true
     _ => false

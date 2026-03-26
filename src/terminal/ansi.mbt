@@ -82,7 +82,7 @@ pub fn parse_color(
   name : String,
   palette? : Map[String, String] = active_palette.val,
 ) -> Color {
-  let lower = to_lower(name)
+  let lower = name.to_lower()
   match lower {
     "black" => Black
     "red" => Red
@@ -177,7 +177,7 @@ fn apply_style_part(
   part : String,
   palette : Map[String, String],
 ) -> Style {
-  let lower = to_lower(part)
+  let lower = part.to_lower()
   match lower {
     "none" => Style::default()
     "bold" => style.with_bold()
@@ -204,19 +204,4 @@ fn apply_style_part(
         color => style.with_fg(color)
       }
   }
-}
-
-///|
-fn to_lower(s : String) -> String {
-  let buf = StringBuilder::new()
-
-  for ch in s {
-    if ch >= 'A' && ch <= 'Z' {
-      buf.write_char((ch.to_int() + 32).unsafe_to_char())
-    } else {
-      buf.write_char(ch)
-    }
-  }
-
-  buf.to_string()
 }

@@ -1,10 +1,15 @@
 ///|
-pub fn basename(path : String) -> String {
-  let trimmed = if path.has_suffix("/") {
+fn trim_trailing_slash(path : String) -> String {
+  if path.has_suffix("/") {
     path[:path.length() - 1].to_string()
   } else {
     path
   }
+}
+
+///|
+pub fn basename(path : String) -> String {
+  let trimmed = trim_trailing_slash(path)
 
   match last_slash(trimmed) {
     Some(idx) => trimmed[idx + 1:].to_string()
@@ -14,11 +19,7 @@ pub fn basename(path : String) -> String {
 
 ///|
 pub fn parent_dir(path : String) -> String {
-  let trimmed = if path.has_suffix("/") {
-    path[:path.length() - 1].to_string()
-  } else {
-    path
-  }
+  let trimmed = trim_trailing_slash(path)
 
   match last_slash(trimmed) {
     Some(idx) => trimmed[:idx].to_string()

@@ -96,7 +96,7 @@ fn replace_var(s : String, var_name : String, replacement : String) -> String {
         break buf.to_string()
       } else if s[i].unsafe_to_char() == '$' && starts_with_at(s, i, target) {
         let after = i + target_len
-        if after >= len || not(is_ident_char(s[after].unsafe_to_char())) {
+        if after >= len || not(@ms.is_ident_char(s[after].unsafe_to_char())) {
           buf.write_string(replacement)
           continue after
         } else {
@@ -127,13 +127,5 @@ fn starts_with_at(s : String, offset : Int, prefix : String) -> Bool {
       } else {
         continue j + 1
       }
-  }
-}
-
-///|
-fn is_ident_char(c : Char) -> Bool {
-  match c {
-    'a'..='z' | 'A'..='Z' | '_' | '0'..='9' => true
-    _ => false
   }
 }

@@ -413,9 +413,17 @@ fn module_to_toml_string(name : String, table : @config.ModuleTable) -> String {
 }
 
 ///|
-fn config_value_display(v : @config.ConfigValue) -> String {
+fn config_value_to_string(
+  v : @config.ConfigValue,
+  quote_strings~ : Bool,
+) -> String {
   match v {
-    @config.CString(s) => s
+    @config.CString(s) =>
+      if quote_strings {
+        @config.escape_string(s)
+      } else {
+        s
+      }
     @config.CInt(n) => n.to_string()
     @config.CBool(b) => b.to_string()
     @config.CFloat(f) => f.to_string()
@@ -424,14 +432,13 @@ fn config_value_display(v : @config.ConfigValue) -> String {
 }
 
 ///|
+fn config_value_display(v : @config.ConfigValue) -> String {
+  config_value_to_string(v, quote_strings=false)
+}
+
+///|
 fn config_value_literal(v : @config.ConfigValue) -> String {
-  match v {
-    @config.CString(s) => @config.escape_string(s)
-    @config.CInt(n) => n.to_string()
-    @config.CBool(b) => b.to_string()
-    @config.CFloat(f) => f.to_string()
-    _ => "..."
-  }
+  config_value_to_string(v, quote_strings=true)
 }
 
 ///|

@@ -25,32 +25,27 @@ pub fn Shell::to_string(self : Shell) -> String {
 }
 
 ///|
-fn escape_shell_single_quote(s : String) -> String {
-  let buf = StringBuilder::new()
-
-  for ch in s {
-    match ch {
-      '\'' => buf.write_string("'\\''")
-      _ => buf.write_char(ch)
+fn escape_chars(s : String, table : Array[(Char, String)]) -> String {
+  s
+  .iter()
+  .fold(init=StringBuilder::new(), fn(buf, ch) {
+    match table.iter().find_first(fn(pair) { pair.0 == ch }) {
+      Some(pair) => buf.write_string(pair.1)
+      None => buf.write_char(ch)
     }
-  }
+    buf
+  })
+  .to_string()
+}
 
-  buf.to_string()
+///|
+fn escape_shell_single_quote(s : String) -> String {
+  escape_chars(s, [('\'', "'\\''")])
 }
 
 ///|
 fn escape_fish_single_quote(s : String) -> String {
-  let buf = StringBuilder::new()
-
-  for ch in s {
-    match ch {
-      '\\' => buf.write_string("\\\\")
-      '\'' => buf.write_string("\\'")
-      _ => buf.write_char(ch)
-    }
-  }
-
-  buf.to_string()
+  escape_chars(s, [('\\', "\\\\"), ('\'', "\\'")])
 }
 
 ///|
