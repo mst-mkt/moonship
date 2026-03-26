@@ -9,6 +9,8 @@ pub struct GitStateModule {
   revert : String
   cherry_pick : String
   bisect : String
+  am : String
+  am_or_rebase : String
 }
 
 ///|
@@ -23,6 +25,8 @@ pub fn GitStateModule::default() -> GitStateModule {
     revert: "REVERTING",
     cherry_pick: "CHERRY-PICKING",
     bisect: "BISECTING",
+    am: "AM",
+    am_or_rebase: "AM/REBASE",
   }
 }
 
@@ -41,6 +45,10 @@ pub fn GitStateModule::from_table(
     revert: table.get_string("revert").unwrap_or(d.revert),
     cherry_pick: table.get_string("cherry_pick").unwrap_or(d.cherry_pick),
     bisect: table.get_string("bisect").unwrap_or(d.bisect),
+    am: table.get_string("am").unwrap_or(d.am),
+    am_or_rebase: table
+    .get_string("am_or_rebase")
+    .unwrap_or(d.am_or_rebase),
   }
 }
 
@@ -88,9 +96,18 @@ pub impl @ms.PromptModule for GitStateModule with execute(
 
 ///|
 fn detect_state(git_dir : String, config : GitStateModule) -> String {
-  if @fs.path_exists("\{git_dir}/rebase-merge") ||
-    @fs.path_exists("\{git_dir}/rebase-apply") {
+  let has_rebase_merge = @fs.path_exists("\{git_dir}/rebase-merge")
+  let has_rebase_apply = @fs.path_exists("\{git_dir}/rebase-apply")
+
+  if has_rebase_merge {
     return config.rebase
+  }
+  if has_rebase_apply {
+    let has_next = @fs.path_exists("\{git_dir}/rebase-apply/next")
+    if has_next {
+      return config.am_or_rebase
+    }
+    return config.am
   }
   if @fs.path_exists("\{git_dir}/MERGE_HEAD") {
     return config.merge
@@ -130,6 +147,12 @@ pub fn GitStateModule::schema() -> @config.ModuleSchema {
         default_value: d.cherry_pick,
       },
       { name: "bisect", field_type: @config.FString, default_value: d.bisect },
+      { name: "am", field_type: @config.FString, default_value: d.am },
+      {
+        name: "am_or_rebase",
+        field_type: @config.FString,
+        default_value: d.am_or_rebase,
+      },
     ],
   }
 }

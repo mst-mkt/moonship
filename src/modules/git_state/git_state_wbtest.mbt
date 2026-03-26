@@ -28,12 +28,27 @@ async test "detect_state: rebase-merge" {
 }
 
 ///|
-async test "detect_state: rebase-apply" {
+async test "detect_state: rebase-apply (am)" {
   let path = "/tmp/moonship-test-git-state-rebase-apply"
   setup_git_dir(path)
   @fs.create_dir(path + "/.git/rebase-apply") |> ignore
 
-  assert_eq(detect_state(path + "/.git", GitStateModule::default()), "REBASING")
+  assert_eq(detect_state(path + "/.git", GitStateModule::default()), "AM")
+
+  remove_dir_recursive(path)
+}
+
+///|
+async test "detect_state: rebase-apply with next (am_or_rebase)" {
+  let path = "/tmp/moonship-test-git-state-am-rebase"
+  setup_git_dir(path)
+  @fs.create_dir(path + "/.git/rebase-apply") |> ignore
+  @fs.write_string_to_file(path + "/.git/rebase-apply/next", "1")
+
+  assert_eq(
+    detect_state(path + "/.git", GitStateModule::default()),
+    "AM/REBASE",
+  )
 
   remove_dir_recursive(path)
 }

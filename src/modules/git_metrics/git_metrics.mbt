@@ -6,6 +6,7 @@ pub struct GitMetricsModule {
   added_style : String
   deleted_style : String
   only_nonzero_diffs : Bool
+  ignore_submodules : Bool
 }
 
 ///|
@@ -17,6 +18,7 @@ pub fn GitMetricsModule::default() -> GitMetricsModule {
     added_style: "bold green",
     deleted_style: "bold red",
     only_nonzero_diffs: true,
+    ignore_submodules: false,
   }
 }
 
@@ -34,6 +36,9 @@ pub fn GitMetricsModule::from_table(
     only_nonzero_diffs: table
     .get_bool("only_nonzero_diffs")
     .unwrap_or(d.only_nonzero_diffs),
+    ignore_submodules: table
+    .get_bool("ignore_submodules")
+    .unwrap_or(d.ignore_submodules),
   }
 }
 
