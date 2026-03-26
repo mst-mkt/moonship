@@ -8,6 +8,7 @@ pub struct DockerContextModule {
   only_with_files : Bool
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
 }
 
 ///|
@@ -24,6 +25,7 @@ pub fn DockerContextModule::default() -> DockerContextModule {
       "Dockerfile",
     ],
     detect_extensions: [],
+    detect_folders: [],
   }
 }
 
@@ -47,6 +49,9 @@ pub fn DockerContextModule::from_table(
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
   }
 }
 
@@ -82,6 +87,7 @@ pub impl @ms.PromptModule for DockerContextModule with execute(
       ctx.cwd,
       self.detect_files,
       self.detect_extensions,
+      folders=self.detect_folders,
     ) else {
       return Skipped("no Docker files detected")
     }

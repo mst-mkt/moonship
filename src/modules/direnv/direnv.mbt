@@ -12,6 +12,7 @@ pub struct DirenvModule {
   unloaded_msg : String
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
 }
 
 ///|
@@ -29,6 +30,7 @@ pub fn DirenvModule::default() -> DirenvModule {
     unloaded_msg: "not loaded",
     detect_files: [".envrc"],
     detect_extensions: [],
+    detect_folders: [],
   }
 }
 
@@ -54,6 +56,9 @@ pub fn DirenvModule::from_table(table : @config.ModuleTable) -> DirenvModule {
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
   }
 }
 
@@ -84,7 +89,7 @@ pub impl @ms.PromptModule for DirenvModule with execute(
 
   let has_env = not(@sys.get_env_var("DIRENV_FILE").unwrap_or("").is_empty())
   guard has_env ||
-    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no direnv detected")
   }
 

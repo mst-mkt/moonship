@@ -8,6 +8,7 @@ pub struct SolidityModule {
   version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
 }
 
 ///|
@@ -21,6 +22,7 @@ pub fn SolidityModule::default() -> SolidityModule {
     version_format: "v${raw}",
     detect_files: [],
     detect_extensions: [".sol"],
+    detect_folders: [],
   }
 }
 
@@ -44,6 +46,9 @@ pub fn SolidityModule::from_table(
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
   }
 }
 
@@ -71,7 +76,7 @@ pub impl @ms.PromptModule for SolidityModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no Solidity project detected")
   }
 

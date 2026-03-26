@@ -8,6 +8,7 @@ pub struct RubyModule {
   version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
 }
 
 ///|
@@ -21,6 +22,7 @@ pub fn RubyModule::default() -> RubyModule {
     version_format: "v${raw}",
     detect_files: ["Gemfile", ".ruby-version"],
     detect_extensions: [".rb"],
+    detect_folders: [],
   }
 }
 
@@ -42,6 +44,9 @@ pub fn RubyModule::from_table(table : @config.ModuleTable) -> RubyModule {
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
   }
 }
 
@@ -72,7 +77,7 @@ pub impl @ms.PromptModule for RubyModule with execute(
   let has_env = not(@sys.get_env_var("RUBY_VERSION").unwrap_or("").is_empty()) ||
     not(@sys.get_env_var("RBENV_VERSION").unwrap_or("").is_empty())
   guard has_env ||
-    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no Ruby project detected")
   }
 

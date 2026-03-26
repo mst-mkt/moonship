@@ -8,6 +8,7 @@ pub struct CModule {
   version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
   commands : Array[(String, String)]
 }
 
@@ -22,6 +23,7 @@ pub fn CModule::default() -> CModule {
     version_format: "v${raw}",
     detect_files: [],
     detect_extensions: [".c", ".h"],
+    detect_folders: [],
     commands: [
       ("cc", "--version"),
       ("gcc", "--version"),
@@ -48,6 +50,9 @@ pub fn CModule::from_table(table : @config.ModuleTable) -> CModule {
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
     commands: d.commands,
   }
 }
@@ -73,7 +78,7 @@ pub impl @ms.PromptModule for CModule with is_async(self) -> Bool {
 ///|
 pub impl @ms.PromptModule for CModule with execute(self, ctx : @context.Context) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no C project detected")
   }
 

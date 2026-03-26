@@ -8,6 +8,7 @@ pub struct PerlModule {
   version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
 }
 
 ///|
@@ -24,6 +25,7 @@ pub fn PerlModule::default() -> PerlModule {
       ".perl-version",
     ],
     detect_extensions: [".pl", ".pm", ".pod"],
+    detect_folders: [],
   }
 }
 
@@ -45,6 +47,9 @@ pub fn PerlModule::from_table(table : @config.ModuleTable) -> PerlModule {
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
   }
 }
 
@@ -72,7 +77,7 @@ pub impl @ms.PromptModule for PerlModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no Perl project detected")
   }
 

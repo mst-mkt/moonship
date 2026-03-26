@@ -5,8 +5,10 @@ pub struct FortranModule {
   format : String
   style : String
   symbol : String
+  version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
   commands : Array[(String, String)]
 }
 
@@ -18,11 +20,13 @@ pub fn FortranModule::default() -> FortranModule {
     format: "via [$symbol($version(-$name) )]($style)",
     style: "bold purple",
     symbol: "🅵  ",
+    version_format: "v${raw}",
     detect_files: ["fpm.toml"],
     detect_extensions: [
       ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".f77", ".F77", ".f90", ".F90",
       ".f95", ".F95", ".f03", ".F03", ".f08", ".F08", ".f18", ".F18",
     ],
+    detect_folders: [],
     commands: [
       ("gfortran", "--version"),
       ("flang", "--version"),
@@ -40,12 +44,18 @@ pub fn FortranModule::from_table(table : @config.ModuleTable) -> FortranModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     detect_files: table
     .get_string_array("detect_files")
     .unwrap_or(d.detect_files),
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
     commands: d.commands,
   }
 }
@@ -74,7 +84,7 @@ pub impl @ms.PromptModule for FortranModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no Fortran project detected")
   }
 
@@ -89,7 +99,7 @@ pub impl @ms.PromptModule for FortranModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "version": version,
+    "version": @exec.format_version(version, self.version_format),
     "symbol": self.symbol,
     "style": self.style,
   }

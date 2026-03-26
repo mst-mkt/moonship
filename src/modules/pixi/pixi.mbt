@@ -9,6 +9,7 @@ pub struct PixiModule {
   show_default_environment : Bool
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
 }
 
 ///|
@@ -23,6 +24,7 @@ pub fn PixiModule::default() -> PixiModule {
     show_default_environment: true,
     detect_files: ["pixi.toml", "pixi.lock"],
     detect_extensions: [],
+    detect_folders: [],
   }
 }
 
@@ -47,6 +49,9 @@ pub fn PixiModule::from_table(table : @config.ModuleTable) -> PixiModule {
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
   }
 }
 
@@ -79,7 +84,7 @@ pub impl @ms.PromptModule for PixiModule with execute(
   let has_env = not(env_name.is_empty())
 
   guard has_env ||
-    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no Pixi project detected")
   }
 

@@ -10,6 +10,7 @@ pub struct PythonModule {
   pyenv_prefix : String
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
 }
 
 ///|
@@ -28,6 +29,7 @@ pub fn PythonModule::default() -> PythonModule {
       "setup.py", "__init__.py",
     ],
     detect_extensions: [".py", ".ipynb"],
+    detect_folders: [],
   }
 }
 
@@ -53,6 +55,9 @@ pub fn PythonModule::from_table(table : @config.ModuleTable) -> PythonModule {
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
   }
 }
 
@@ -82,7 +87,7 @@ pub impl @ms.PromptModule for PythonModule with execute(
   guard not(self.disabled) else { return Disabled }
   let has_env = not(@sys.get_env_var("VIRTUAL_ENV").unwrap_or("").is_empty())
   guard has_env ||
-    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+    @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no Python project detected")
   }
 

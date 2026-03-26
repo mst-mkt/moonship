@@ -8,6 +8,7 @@ pub struct CppModule {
   version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
+  detect_folders : Array[String]
   commands : Array[(String, String)]
 }
 
@@ -24,6 +25,7 @@ pub fn CppModule::default() -> CppModule {
     detect_extensions: [
       ".cpp", ".cc", ".cxx", ".c++", ".hpp", ".hh", ".hxx", ".h++", ".tcc",
     ],
+    detect_folders: [],
     commands: [
       ("c++", "--version"),
       ("g++", "--version"),
@@ -50,6 +52,9 @@ pub fn CppModule::from_table(table : @config.ModuleTable) -> CppModule {
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    detect_folders: table
+    .get_string_array("detect_folders")
+    .unwrap_or(d.detect_folders),
     commands: d.commands,
   }
 }
@@ -78,7 +83,7 @@ pub impl @ms.PromptModule for CppModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions) else {
+  guard @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no C++ project detected")
   }
 
