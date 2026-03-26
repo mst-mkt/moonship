@@ -51,5 +51,3 @@ async test "execute: detects .hx extension" {
   assert_false(result is Skipped("no Haxe project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

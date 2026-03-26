@@ -103,5 +103,3 @@ test "parse_ruby_version: empty" {
 test "parse_ruby_version: single word" {
   assert_eq(parse_ruby_version("ruby"), "")
 }
-
-

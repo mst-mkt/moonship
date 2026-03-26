@@ -322,4 +322,3 @@ fn cleanup_test_repo(repo : @libgit2.Repository, path : String) -> Unit {
   @libgit2.git_shutdown()
   @test_util.remove_dir_recursive(path)
 }
-

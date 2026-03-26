@@ -79,5 +79,3 @@ test "parse_lua_version: empty" {
 test "parse_lua_version: single word" {
   assert_eq(parse_lua_version("Lua"), "")
 }
-
-

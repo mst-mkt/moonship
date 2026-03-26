@@ -89,5 +89,3 @@ test "parse_scalac_version: empty" {
 test "parse_scalac_version: too few words" {
   assert_eq(parse_scalac_version("Scala compiler version"), "")
 }
-
-

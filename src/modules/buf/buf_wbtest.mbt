@@ -39,5 +39,3 @@ async test "execute: detects buf.yaml" {
   assert_false(result is Skipped("no Buf project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

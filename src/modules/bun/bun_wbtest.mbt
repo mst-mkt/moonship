@@ -63,5 +63,3 @@ async test "execute: detects bunfig.toml" {
   assert_false(result is Skipped("no Bun project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

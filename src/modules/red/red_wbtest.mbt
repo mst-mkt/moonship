@@ -49,5 +49,3 @@ test "parse_red_version: typical output" {
 test "parse_red_version: empty" {
   assert_eq(parse_red_version(""), "")
 }
-
-

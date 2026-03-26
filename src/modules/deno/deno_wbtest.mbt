@@ -131,5 +131,3 @@ test "parse_deno_version: empty" {
 test "parse_deno_version: single word" {
   assert_eq(parse_deno_version("deno"), "")
 }
-
-

@@ -83,5 +83,3 @@ test "parse_julia_version: empty" {
 test "parse_julia_version: too few words" {
   assert_eq(parse_julia_version("julia version"), "")
 }
-
-

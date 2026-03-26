@@ -51,5 +51,3 @@ async test "execute: detects .purs extension" {
   assert_false(result is Skipped("no PureScript project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

@@ -49,5 +49,3 @@ test "parse_odin_version: typical output" {
 test "parse_odin_version: empty" {
   assert_eq(parse_odin_version(""), "")
 }
-
-

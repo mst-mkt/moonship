@@ -51,5 +51,3 @@ async test "execute: detects .raku extension" {
   assert_false(result is Skipped("no Raku project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

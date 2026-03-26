@@ -39,5 +39,3 @@ async test "execute: detects daml.yaml" {
   assert_false(result is Skipped("no DAML project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

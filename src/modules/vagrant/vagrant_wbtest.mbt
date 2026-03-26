@@ -39,5 +39,3 @@ async test "execute: detects Vagrantfile" {
   assert_false(result is Skipped("no Vagrant project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

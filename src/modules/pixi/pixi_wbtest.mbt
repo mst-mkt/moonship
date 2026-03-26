@@ -39,5 +39,3 @@ async test "execute: detects pixi.toml" {
   assert_false(result is Skipped("no Pixi project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

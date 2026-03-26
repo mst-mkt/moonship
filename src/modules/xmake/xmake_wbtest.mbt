@@ -39,5 +39,3 @@ async test "execute: detects xmake.lua" {
   assert_false(result is Skipped("no xmake project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

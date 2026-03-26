@@ -1,5 +1,5 @@
 ///|
-async fn finalize_prompt(
+fn finalize_prompt(
   ctx : @context.Context,
   raw : String,
   shell : String,

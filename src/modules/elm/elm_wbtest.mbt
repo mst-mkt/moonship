@@ -63,5 +63,3 @@ async test "execute: detects .elm extension" {
   assert_false(result is Skipped("no Elm project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

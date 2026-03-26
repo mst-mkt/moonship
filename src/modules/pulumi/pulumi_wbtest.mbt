@@ -26,5 +26,3 @@ async test "execute: detects Pulumi.yaml" {
   assert_false(result is Skipped("no Pulumi project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

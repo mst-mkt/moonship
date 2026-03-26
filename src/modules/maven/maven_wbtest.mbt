@@ -66,5 +66,3 @@ test "extract_maven_version: standard" {
     "3.9.12",
   )
 }
-
-

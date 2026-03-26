@@ -51,5 +51,3 @@ async test "execute: detects .h extension" {
   assert_false(result is Skipped("no C project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

@@ -59,5 +59,3 @@ test "parse_terraform_version: with extra info" {
 test "parse_terraform_version: empty" {
   assert_eq(parse_terraform_version(""), "")
 }
-
-

@@ -66,5 +66,3 @@ test "parse_cmake_version: empty" {
 test "parse_cmake_version: too few words" {
   assert_eq(parse_cmake_version("cmake version"), "")
 }
-
-

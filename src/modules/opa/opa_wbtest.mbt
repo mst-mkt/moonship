@@ -57,5 +57,3 @@ test "parse_opa_version: single line" {
 test "parse_opa_version: empty" {
   assert_eq(parse_opa_version(""), "")
 }
-
-

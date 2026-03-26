@@ -149,8 +149,6 @@ async test "detect_version: priority order" {
   @test_util.remove_dir_recursive(path)
 }
 
-
-
 // --- display_private ---
 
 ///|

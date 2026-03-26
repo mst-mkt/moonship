@@ -159,4 +159,3 @@ fn setup_git_dir(path : String) -> Unit {
     _ => ()
   }
 }
-

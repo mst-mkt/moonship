@@ -112,5 +112,3 @@ test "parse_go_version: empty" {
 test "parse_go_version: unexpected format" {
   assert_eq(parse_go_version("something else"), "something else")
 }
-
-

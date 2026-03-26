@@ -39,5 +39,3 @@ async test "execute: detects .sol extension" {
   assert_false(result is Skipped("no Solidity project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

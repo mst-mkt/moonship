@@ -51,5 +51,3 @@ async test "execute: detects .v extension" {
   assert_false(result is Skipped("no V project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

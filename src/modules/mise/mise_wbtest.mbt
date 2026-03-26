@@ -63,5 +63,3 @@ async test "execute: detects .mise.toml" {
   assert_false(result is Skipped("no mise project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

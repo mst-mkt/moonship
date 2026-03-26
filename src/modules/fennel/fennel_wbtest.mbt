@@ -38,5 +38,3 @@ test "parse_fennel_version: typical output" {
 test "parse_fennel_version: empty" {
   assert_eq(parse_fennel_version(""), "")
 }
-
-

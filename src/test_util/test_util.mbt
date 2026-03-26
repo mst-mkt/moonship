@@ -1,7 +1,9 @@
 ///|
 pub fn setup_dir(path : String) -> Unit {
   remove_dir_recursive(path)
-  @fs.create_dir(path) catch { _ => () }
+  @fs.create_dir(path) catch {
+    _ => ()
+  }
 }
 
 ///|
@@ -19,9 +21,13 @@ pub fn remove_dir_recursive(path : String) -> Unit {
     if is_dir {
       remove_dir_recursive(full)
     } else {
-      @fs.remove_file(full) catch { _ => () }
+      @fs.remove_file(full) catch {
+        _ => ()
+      }
     }
   }
 
-  @fs.remove_dir(path) catch { _ => () }
+  @fs.remove_dir(path) catch {
+    _ => ()
+  }
 }

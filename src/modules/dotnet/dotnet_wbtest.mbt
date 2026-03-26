@@ -113,5 +113,3 @@ test "extract_tfm: no tfm tag" {
     #|</Project>
   assert_eq(extract_tfm(csproj), "")
 }
-
-

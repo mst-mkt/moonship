@@ -51,5 +51,3 @@ async test "execute: detects .R extension" {
   assert_false(result is Skipped("no R project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

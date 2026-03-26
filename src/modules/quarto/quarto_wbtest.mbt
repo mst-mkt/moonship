@@ -51,5 +51,3 @@ async test "execute: detects .qmd extension" {
   assert_false(result is Skipped("no Quarto project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

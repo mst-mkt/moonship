@@ -76,5 +76,3 @@ test "parse_opam_switch: custom indicators" {
   assert_eq(indicator, "g/")
   assert_eq(name, "ocaml-base-compiler.4.10.0")
 }
-
-

@@ -123,5 +123,3 @@ async test "execute: detects .perl-version" {
   assert_false(result is Skipped("no Perl project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

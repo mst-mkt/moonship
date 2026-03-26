@@ -95,5 +95,3 @@ test "is_default_context: unix prefix" {
 test "is_default_context: custom" {
   assert_false(is_default_context("my-context"))
 }
-
-

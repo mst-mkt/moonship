@@ -54,5 +54,3 @@ test "parse_cobol_version: empty" {
 test "parse_cobol_version: no version" {
   assert_eq(parse_cobol_version("no version here"), "")
 }
-
-

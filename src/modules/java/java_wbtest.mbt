@@ -168,5 +168,3 @@ test "extract_version: from offset" {
 test "extract_version: empty after offset" {
   assert_eq(extract_version("abc", 3), "")
 }
-
-

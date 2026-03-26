@@ -67,5 +67,3 @@ test "parse_gradle_wrapper_version: empty" {
 test "parse_gradle_wrapper_version: no distribution url" {
   assert_eq(parse_gradle_wrapper_version("some=other\nlines=here"), "")
 }
-
-

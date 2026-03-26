@@ -49,5 +49,3 @@ test "parse_mojo_version: typical output" {
 test "parse_mojo_version: empty" {
   assert_eq(parse_mojo_version(""), "")
 }
-
-

@@ -51,5 +51,3 @@ async test "execute: detects .f90 extension" {
   assert_false(result is Skipped("no Fortran project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

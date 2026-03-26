@@ -98,5 +98,3 @@ test "parse_moon_version: empty" {
 test "parse_moon_version: single word" {
   assert_eq(parse_moon_version("moon"), "")
 }
-
-

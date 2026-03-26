@@ -102,5 +102,3 @@ test "parse_elixir_version: unexpected format" {
   assert_eq(elixir, "")
   assert_eq(otp, "")
 }
-
-

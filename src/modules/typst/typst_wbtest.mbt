@@ -51,5 +51,3 @@ async test "execute: detects .typ extension" {
   assert_false(result is Skipped("no Typst project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

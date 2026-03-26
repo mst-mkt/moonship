@@ -81,5 +81,3 @@ test "parse_swift_version: empty" {
 test "parse_swift_version: no version keyword" {
   assert_eq(parse_swift_version("something else"), "")
 }
-
-

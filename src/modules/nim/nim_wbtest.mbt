@@ -101,5 +101,3 @@ test "parse_nim_version: empty" {
 test "parse_nim_version: no version number" {
   assert_eq(parse_nim_version("Nim Compiler Version"), "")
 }
-
-

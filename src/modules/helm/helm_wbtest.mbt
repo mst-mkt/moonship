@@ -54,5 +54,3 @@ test "parse_helm_version: without v prefix" {
 test "parse_helm_version: empty" {
   assert_eq(parse_helm_version(""), "")
 }
-
-

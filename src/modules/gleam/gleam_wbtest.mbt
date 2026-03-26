@@ -66,5 +66,3 @@ test "parse_gleam_version: with extra info" {
 test "parse_gleam_version: empty" {
   assert_eq(parse_gleam_version(""), "")
 }
-
-

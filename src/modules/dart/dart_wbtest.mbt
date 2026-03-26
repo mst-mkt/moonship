@@ -113,5 +113,3 @@ test "parse_dart_version: empty" {
 test "parse_dart_version: too few words" {
   assert_eq(parse_dart_version("Dart VM version:"), "")
 }
-
-

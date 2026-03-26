@@ -74,5 +74,3 @@ test "parse_crystal_version: empty" {
 test "parse_crystal_version: single word" {
   assert_eq(parse_crystal_version("Crystal"), "")
 }
-
-

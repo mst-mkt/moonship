@@ -98,5 +98,3 @@ test "parse_direnv_status: empty" {
   assert_false(loaded)
   assert_eq(allowed, "not_allowed")
 }
-
-

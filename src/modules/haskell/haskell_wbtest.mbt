@@ -75,5 +75,3 @@ async test "execute: detects .cabal extension" {
   assert_false(result is Skipped("no Haskell project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

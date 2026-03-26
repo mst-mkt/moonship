@@ -63,5 +63,3 @@ async test "execute: detects .php extension" {
   assert_false(result is Skipped("no PHP project detected"))
   @test_util.remove_dir_recursive(path)
 }
-
-

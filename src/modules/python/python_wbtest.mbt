@@ -202,5 +202,3 @@ test "parent_dir: no slash" {
 test "parent_dir: root level" {
   assert_eq(@exec.parent_dir("/venv"), "")
 }
-
-

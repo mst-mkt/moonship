@@ -69,5 +69,3 @@ test "parse_rustc_version: nightly" {
 test "parse_rustc_version: empty" {
   assert_eq(parse_rustc_version(""), "")
 }
-
-

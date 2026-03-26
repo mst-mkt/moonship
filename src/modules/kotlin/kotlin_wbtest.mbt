@@ -77,5 +77,3 @@ test "parse_kotlin_version: empty" {
 test "parse_kotlin_version: no version" {
   assert_eq(parse_kotlin_version("no version here"), "")
 }
-
-
