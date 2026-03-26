@@ -1,4 +1,12 @@
 ///|
+pub(all) struct BatteryDisplayRule {
+  threshold : Int
+  style : String
+  charging_symbol : String
+  discharging_symbol : String
+}
+
+///|
 pub struct BatteryModule {
   disabled : Bool
   async_render : Bool
@@ -8,8 +16,7 @@ pub struct BatteryModule {
   discharging_symbol : String
   unknown_symbol : String
   empty_symbol : String
-  display_threshold : Int
-  display_style : String
+  display : Array[BatteryDisplayRule]
 }
 
 ///|
@@ -23,8 +30,7 @@ pub fn BatteryModule::default() -> BatteryModule {
     discharging_symbol: "󰂃 ",
     unknown_symbol: "󰂑 ",
     empty_symbol: "󰂎 ",
-    display_threshold: 10,
-    display_style: "red bold",
+    display: [{ threshold: 10, style: "red bold", charging_symbol: "", discharging_symbol: "" }],
   }
 }
 
@@ -46,10 +52,7 @@ pub fn BatteryModule::from_table(table : @config.ModuleTable) -> BatteryModule {
     .get_string("unknown_symbol")
     .unwrap_or(d.unknown_symbol),
     empty_symbol: table.get_string("empty_symbol").unwrap_or(d.empty_symbol),
-    display_threshold: table
-    .get_int("display_threshold")
-    .unwrap_or(d.display_threshold),
-    display_style: table.get_string("display_style").unwrap_or(d.display_style),
+    display: parse_display_rules(table, d.display),
   }
 }
 
@@ -80,19 +83,26 @@ pub impl @ms.PromptModule for BatteryModule with execute(
 
   let (percentage, status) = read_battery()
   guard percentage >= 0 else { return Skipped("no battery found") }
-  guard percentage <= self.display_threshold else {
-    return Skipped("battery above display threshold")
+
+  let rule = self.display.iter().find_first(fn(r) { percentage <= r.threshold })
+  guard rule is Some(r) else {
+    return Skipped("battery above all display thresholds")
   }
 
   let symbol = match status {
-    "Charging" => self.charging_symbol
-    "Full" => self.full_symbol
-    "Not charging" => self.full_symbol
-    "Discharging" =>
-      if percentage <= 5 {
-        self.empty_symbol
+    "Charging" =>
+      if r.charging_symbol.is_empty() {
+        self.charging_symbol
       } else {
+        r.charging_symbol
+      }
+    "Full" | "Not charging" => self.full_symbol
+    "Empty" => self.empty_symbol
+    "Discharging" =>
+      if r.discharging_symbol.is_empty() {
         self.discharging_symbol
+      } else {
+        r.discharging_symbol
       }
     _ => self.unknown_symbol
   }
@@ -100,7 +110,7 @@ pub impl @ms.PromptModule for BatteryModule with execute(
   let vars : Map[String, String] = {
     "percentage": "\{percentage}%",
     "symbol": symbol,
-    "style": self.display_style,
+    "style": r.style,
   }
   let segments = @ms.format_string(
     self.format,
@@ -109,6 +119,44 @@ pub impl @ms.PromptModule for BatteryModule with execute(
   )
 
   Output(@ms.ModuleOutput::new(segments))
+}
+
+///|
+fn parse_display_rules(
+  table : @config.ModuleTable,
+  defaults : Array[BatteryDisplayRule],
+) -> Array[BatteryDisplayRule] {
+  match table.0.get("display") {
+    Some(@config.CArray(arr)) =>
+      arr
+      .iter()
+      .filter_map(fn(item) {
+        guard item is @config.CTable(rule_table) else { return None }
+
+        let get_str = fn(key : String, default : String) -> String {
+          match rule_table.get(key) {
+            Some(@config.CString(s)) => s
+            _ => default
+          }
+        }
+
+        let get_int = fn(key : String, default : Int) -> Int {
+          match rule_table.get(key) {
+            Some(@config.CInt(n)) => n
+            _ => default
+          }
+        }
+
+        Some({
+          threshold: get_int("threshold", 10),
+          style: get_str("style", "red bold"),
+          charging_symbol: get_str("charging_symbol", ""),
+          discharging_symbol: get_str("discharging_symbol", ""),
+        })
+      })
+      .collect()
+    _ => defaults
+  }
 }
 
 ///|
@@ -199,14 +247,9 @@ pub fn BatteryModule::schema() -> @config.ModuleSchema {
         default_value: d.empty_symbol,
       },
       {
-        name: "display_threshold",
-        field_type: @config.FInt,
-        default_value: d.display_threshold.to_string(),
-      },
-      {
-        name: "display_style",
+        name: "display",
         field_type: @config.FString,
-        default_value: d.display_style,
+        default_value: "(array of display rules)",
       },
     ],
   }
