@@ -5,6 +5,7 @@ pub struct DotnetModule {
   format : String
   style : String
   symbol : String
+  heuristic : Bool
   version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
@@ -19,6 +20,7 @@ pub fn DotnetModule::default() -> DotnetModule {
     format: "via [$symbol($version )(🎯 $tfm )]($style)",
     style: "blue bold",
     symbol: ".NET ",
+    heuristic: true,
     version_format: "v${raw}",
     detect_files: [
       "global.json", "project.json", "Directory.Build.props", "Directory.Build.targets",
@@ -38,6 +40,7 @@ pub fn DotnetModule::from_table(table : @config.ModuleTable) -> DotnetModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    heuristic: table.get_bool("heuristic").unwrap_or(d.heuristic),
     version_format: table
     .get_string("version_format")
     .unwrap_or(d.version_format),

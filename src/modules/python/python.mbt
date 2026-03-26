@@ -6,8 +6,10 @@ pub struct PythonModule {
   style : String
   symbol : String
   version_format : String
+  python_binary : Array[String]
   pyenv_version_name : Bool
   pyenv_prefix : String
+  detect_env_vars : Array[String]
   detect_files : Array[String]
   detect_extensions : Array[String]
   detect_folders : Array[String]
@@ -22,8 +24,10 @@ pub fn PythonModule::default() -> PythonModule {
     style: "yellow bold",
     symbol: "🐍 ",
     version_format: "v${raw}",
+    python_binary: ["python", "python3", "python2"],
     pyenv_version_name: false,
     pyenv_prefix: "pyenv ",
+    detect_env_vars: ["VIRTUAL_ENV"],
     detect_files: [
       "requirements.txt", ".python-version", "pyproject.toml", "Pipfile", "tox.ini",
       "setup.py", "__init__.py",
@@ -45,10 +49,16 @@ pub fn PythonModule::from_table(table : @config.ModuleTable) -> PythonModule {
     version_format: table
     .get_string("version_format")
     .unwrap_or(d.version_format),
+    python_binary: table
+    .get_string_array("python_binary")
+    .unwrap_or(d.python_binary),
     pyenv_version_name: table
     .get_bool("pyenv_version_name")
     .unwrap_or(d.pyenv_version_name),
     pyenv_prefix: table.get_string("pyenv_prefix").unwrap_or(d.pyenv_prefix),
+    detect_env_vars: table
+    .get_string_array("detect_env_vars")
+    .unwrap_or(d.detect_env_vars),
     detect_files: table
     .get_string_array("detect_files")
     .unwrap_or(d.detect_files),

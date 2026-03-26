@@ -5,6 +5,7 @@ pub struct GradleModule {
   format : String
   style : String
   symbol : String
+  recursive : Bool
   version_format : String
   detect_files : Array[String]
   detect_folders : Array[String]
@@ -19,6 +20,7 @@ pub fn GradleModule::default() -> GradleModule {
     format: "via [$symbol($version )]($style)",
     style: "bold bright-cyan",
     symbol: "🅶 ",
+    recursive: false,
     version_format: "v${raw}",
     detect_files: [],
     detect_folders: ["gradle"],
@@ -35,6 +37,7 @@ pub fn GradleModule::from_table(table : @config.ModuleTable) -> GradleModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    recursive: table.get_bool("recursive").unwrap_or(d.recursive),
     version_format: table
     .get_string("version_format")
     .unwrap_or(d.version_format),

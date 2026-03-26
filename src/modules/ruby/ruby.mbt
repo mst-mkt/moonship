@@ -5,6 +5,7 @@ pub struct RubyModule {
   format : String
   style : String
   symbol : String
+  detect_variables : Array[String]
   version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
@@ -19,6 +20,7 @@ pub fn RubyModule::default() -> RubyModule {
     format: "via [$symbol($version )]($style)",
     style: "bold red",
     symbol: "💎 ",
+    detect_variables: ["RUBY_VERSION", "RBENV_VERSION"],
     version_format: "v${raw}",
     detect_files: ["Gemfile", ".ruby-version"],
     detect_extensions: [".rb"],
@@ -35,6 +37,9 @@ pub fn RubyModule::from_table(table : @config.ModuleTable) -> RubyModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    detect_variables: table
+    .get_string_array("detect_variables")
+    .unwrap_or(d.detect_variables),
     version_format: table
     .get_string("version_format")
     .unwrap_or(d.version_format),

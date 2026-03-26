@@ -9,6 +9,7 @@ pub struct TerraformModule {
   detect_files : Array[String]
   detect_folders : Array[String]
   detect_extensions : Array[String]
+  commands : Array[(String, String)]
 }
 
 ///|
@@ -23,6 +24,7 @@ pub fn TerraformModule::default() -> TerraformModule {
     detect_files: [],
     detect_folders: [".terraform"],
     detect_extensions: [".tf", ".tfplan", ".tfstate"],
+    commands: [("terraform", "version"), ("tofu", "version")],
   }
 }
 
@@ -49,6 +51,7 @@ pub fn TerraformModule::from_table(
     detect_extensions: table
     .get_string_array("detect_extensions")
     .unwrap_or(d.detect_extensions),
+    commands: d.commands,
   }
 }
 
@@ -99,10 +102,7 @@ pub impl @ms.PromptModule for TerraformModule with execute(
     vars["workspace"] = if workspace.is_empty() { "default" } else { workspace }
   }
 
-  let version_output = @exec.try_commands([
-    ("terraform", "version"),
-    ("tofu", "version"),
-  ])
+  let version_output = @exec.try_commands(self.commands)
   if not(version_output.is_empty()) {
     vars["version"] = @exec.format_version(
       parse_terraform_version(version_output),

@@ -5,6 +5,7 @@ pub struct PulumiModule {
   format : String
   style : String
   symbol : String
+  search_upwards : Bool
   version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
@@ -19,6 +20,7 @@ pub fn PulumiModule::default() -> PulumiModule {
     format: "via [$symbol($username@)$stack]($style) ",
     style: "bold 5",
     symbol: " ",
+    search_upwards: true,
     version_format: "v${raw}",
     detect_files: ["Pulumi.yaml", "Pulumi.yml"],
     detect_extensions: [],
@@ -35,6 +37,7 @@ pub fn PulumiModule::from_table(table : @config.ModuleTable) -> PulumiModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    search_upwards: table.get_bool("search_upwards").unwrap_or(d.search_upwards),
     version_format: table
     .get_string("version_format")
     .unwrap_or(d.version_format),

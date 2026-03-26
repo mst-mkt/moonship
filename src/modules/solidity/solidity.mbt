@@ -5,6 +5,7 @@ pub struct SolidityModule {
   format : String
   style : String
   symbol : String
+  compiler : Array[String]
   version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
@@ -19,6 +20,7 @@ pub fn SolidityModule::default() -> SolidityModule {
     format: "via [$symbol($version)]($style)",
     style: "bold blue",
     symbol: "S ",
+    compiler: ["solc"],
     version_format: "v${raw}",
     detect_files: [],
     detect_extensions: [".sol"],
@@ -37,6 +39,9 @@ pub fn SolidityModule::from_table(
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    compiler: table
+    .get_string_array("compiler")
+    .unwrap_or(d.compiler),
     version_format: table
     .get_string("version_format")
     .unwrap_or(d.version_format),

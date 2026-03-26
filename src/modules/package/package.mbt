@@ -5,6 +5,7 @@ pub struct PackageModule {
   format : String
   style : String
   symbol : String
+  display_private : Bool
 }
 
 ///|
@@ -15,6 +16,7 @@ pub fn PackageModule::default() -> PackageModule {
     format: "is [$symbol$version]($style) ",
     style: "208 bold",
     symbol: "📦 ",
+    display_private: false,
   }
 }
 
@@ -27,6 +29,9 @@ pub fn PackageModule::from_table(table : @config.ModuleTable) -> PackageModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    display_private: table
+    .get_bool("display_private")
+    .unwrap_or(d.display_private),
   }
 }
 
@@ -55,6 +60,11 @@ pub impl @ms.PromptModule for PackageModule with execute(
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
 
+  // Check if package is private
+  if not(self.display_private) && is_private_package(ctx.cwd) {
+    return Skipped("private package")
+  }
+
   let version = detect_version(ctx.cwd)
   guard not(version.is_empty()) else { return Skipped("no package file found") }
 
@@ -70,6 +80,16 @@ pub impl @ms.PromptModule for PackageModule with execute(
   )
 
   Output(@ms.ModuleOutput::new(segments))
+}
+
+///|
+fn is_private_package(cwd : String) -> Bool {
+  let path = "\{cwd}/package.json"
+  guard @fs.path_exists(path) else { return false }
+
+  let content = @fs.read_file_to_string(path) catch { _ => return false }
+  content.contains("\"private\"") &&
+    (content.contains("\"private\": true") || content.contains("\"private\":true"))
 }
 
 ///|

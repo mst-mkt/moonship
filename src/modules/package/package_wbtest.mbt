@@ -182,3 +182,88 @@ fn remove_dir_recursive(path : String) -> Unit {
     _ => ()
   }
 }
+
+// --- display_private ---
+
+///|
+test "is_private_package: private true" {
+  let path = "/tmp/moonship-test-pkg-private"
+  @fs.create_dir(path) catch { _ => () }
+  @fs.write_string_to_file(
+    path + "/package.json",
+    "{\"name\": \"test\", \"version\": \"1.0.0\", \"private\": true}",
+  )
+
+  assert_true(is_private_package(path))
+
+  @fs.remove_file(path + "/package.json") catch { _ => () }
+  @fs.remove_dir(path) catch { _ => () }
+}
+
+///|
+test "is_private_package: not private" {
+  let path = "/tmp/moonship-test-pkg-public"
+  @fs.create_dir(path) catch { _ => () }
+  @fs.write_string_to_file(
+    path + "/package.json",
+    "{\"name\": \"test\", \"version\": \"1.0.0\"}",
+  )
+
+  assert_false(is_private_package(path))
+
+  @fs.remove_file(path + "/package.json") catch { _ => () }
+  @fs.remove_dir(path) catch { _ => () }
+}
+
+///|
+test "is_private_package: no package.json" {
+  assert_false(is_private_package("/tmp"))
+}
+
+///|
+async test "execute: private package skipped by default" {
+  let path = "/tmp/moonship-test-pkg-skip-private"
+  @fs.create_dir(path) catch { _ => () }
+  @fs.write_string_to_file(
+    path + "/package.json",
+    "{\"name\": \"test\", \"version\": \"1.0.0\", \"private\": true}",
+  )
+
+  let m = PackageModule::default()
+  let ctx = @context.Context::new(cwd=path)
+  assert_true(m.execute(ctx) is Skipped(_))
+
+  @fs.remove_file(path + "/package.json") catch { _ => () }
+  @fs.remove_dir(path) catch { _ => () }
+}
+
+///|
+async test "execute: private package shown when display_private=true" {
+  let path = "/tmp/moonship-test-pkg-show-private"
+  @fs.create_dir(path) catch { _ => () }
+  @fs.write_string_to_file(
+    path + "/package.json",
+    "{\"name\": \"test\", \"version\": \"1.0.0\", \"private\": true}",
+  )
+
+  let config = @config.Config::from_toml(
+    (
+      #|[package]
+      #|display_private = true
+    ),
+  )
+  let m = PackageModule::from_config(config)
+  let ctx = @context.Context::new(cwd=path, config~)
+
+  guard m.execute(ctx) is Output(out) else {
+    @fs.remove_file(path + "/package.json") catch { _ => () }
+    @fs.remove_dir(path) catch { _ => () }
+    fail("expected Output")
+    return
+  }
+
+  assert_true(out.render().contains("1.0.0"))
+
+  @fs.remove_file(path + "/package.json") catch { _ => () }
+  @fs.remove_dir(path) catch { _ => () }
+}
