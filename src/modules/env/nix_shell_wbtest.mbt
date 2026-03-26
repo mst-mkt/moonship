@@ -10,7 +10,7 @@ async test "execute: not in nix shell returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
   // IN_NIX_SHELL is typically not set outside nix
-  assert_true(result is Skipped(_) || result is Output(_))
+  assert_true(not(result is Disabled))
 }
 
 ///|

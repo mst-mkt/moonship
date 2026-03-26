@@ -42,7 +42,9 @@ async test "execute: detects .envrc" {
   let m = DirenvModule::from_config(config)
   let ctx = @context.Context::new(cwd=path, config~)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no direnv detected"))
+  guard not(result is Skipped("no direnv detected")) else {
+    fail("expected .envrc to be detected, but got Skipped")
+  }
   @test_util.remove_dir_recursive(path)
 }
 

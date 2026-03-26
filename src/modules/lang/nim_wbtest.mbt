@@ -36,7 +36,12 @@ async test "execute: detects nim.cfg" {
   let m = NimModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Nim project detected"))
+  guard not(result is Skipped("no Nim project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -48,7 +53,12 @@ async test "execute: detects .nim extension" {
   let m = NimModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Nim project detected"))
+  guard not(result is Skipped("no Nim project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -60,7 +70,12 @@ async test "execute: detects .nims extension" {
   let m = NimModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Nim project detected"))
+  guard not(result is Skipped("no Nim project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -72,7 +87,12 @@ async test "execute: detects .nimble extension" {
   let m = NimModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Nim project detected"))
+  guard not(result is Skipped("no Nim project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 

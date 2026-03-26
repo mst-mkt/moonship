@@ -36,7 +36,12 @@ async test "execute: detects haxelib.json" {
   let m = HaxeModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Haxe project detected"))
+  guard not(result is Skipped("no Haxe project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -48,6 +53,11 @@ async test "execute: detects .hx extension" {
   let m = HaxeModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Haxe project detected"))
+  guard not(result is Skipped("no Haxe project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }

@@ -36,6 +36,8 @@ async test "execute: detects pixi.toml" {
   let m = PixiModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Pixi project detected"))
+  guard not(result is Skipped("no Pixi project detected")) else {
+    fail("expected pixi.toml to be detected, but got Skipped")
+  }
   @test_util.remove_dir_recursive(path)
 }

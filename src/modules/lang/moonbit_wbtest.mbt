@@ -36,7 +36,12 @@ async test "execute: detects moon.mod.json" {
   let m = MoonbitModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no MoonBit project detected"))
+  guard not(result is Skipped("no MoonBit project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -48,7 +53,12 @@ async test "execute: detects moon.pkg.json" {
   let m = MoonbitModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no MoonBit project detected"))
+  guard not(result is Skipped("no MoonBit project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -60,7 +70,12 @@ async test "execute: detects .mbt extension" {
   let m = MoonbitModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no MoonBit project detected"))
+  guard not(result is Skipped("no MoonBit project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 

@@ -22,5 +22,5 @@ async test "execute: enabled without cached credentials returns Skipped or Outpu
   let m = SudoModule::from_config(config)
   let ctx = @context.Context::new(cwd="/tmp", config~)
   let result = m.execute(ctx)
-  assert_true(result is Skipped(_) || result is Output(_))
+  assert_true(not(result is Disabled))
 }

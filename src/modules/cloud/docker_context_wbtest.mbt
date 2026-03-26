@@ -36,7 +36,9 @@ async test "execute: detects Dockerfile" {
   let m = DockerContextModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Docker files detected"))
+  guard not(result is Skipped("no Docker files detected")) else {
+    fail("expected Dockerfile to be detected, but got Skipped")
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -48,7 +50,9 @@ async test "execute: detects compose.yml" {
   let m = DockerContextModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Docker files detected"))
+  guard not(result is Skipped("no Docker files detected")) else {
+    fail("expected compose.yml to be detected, but got Skipped")
+  }
   @test_util.remove_dir_recursive(path)
 }
 

@@ -36,7 +36,12 @@ async test "execute: detects global.json" {
   let m = DotnetModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no .NET project detected"))
+  guard not(result is Skipped("no .NET project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -48,7 +53,12 @@ async test "execute: detects .csproj extension" {
   let m = DotnetModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no .NET project detected"))
+  guard not(result is Skipped("no .NET project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -60,7 +70,12 @@ async test "execute: detects Directory.Build.props" {
   let m = DotnetModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no .NET project detected"))
+  guard not(result is Skipped("no .NET project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -72,7 +87,12 @@ async test "execute: detects .fsproj extension" {
   let m = DotnetModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no .NET project detected"))
+  guard not(result is Skipped("no .NET project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 

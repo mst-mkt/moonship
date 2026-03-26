@@ -23,7 +23,7 @@ async test "execute: no conda env returns Skipped" {
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
   // CONDA_DEFAULT_ENV typically not set outside conda
-  assert_true(result is Skipped(_) || result is Output(_))
+  assert_true(not(result is Disabled))
 }
 
 ///|

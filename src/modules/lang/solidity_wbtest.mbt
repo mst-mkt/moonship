@@ -36,6 +36,11 @@ async test "execute: detects .sol extension" {
   let m = SolidityModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Solidity project detected"))
+  guard not(result is Skipped("no Solidity project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }

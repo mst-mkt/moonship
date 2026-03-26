@@ -9,7 +9,7 @@ async test "execute: no aws env returns Skipped" {
   let m = AwsModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
-  assert_true(result is Skipped(_) || result is Output(_))
+  assert_true(not(result is Disabled))
 }
 
 ///|

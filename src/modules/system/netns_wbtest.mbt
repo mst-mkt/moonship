@@ -9,5 +9,5 @@ async test "execute: not in netns returns Skipped" {
   let m = NetnsModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
-  assert_true(result is Skipped(_) || result is Output(_))
+  assert_true(not(result is Disabled))
 }

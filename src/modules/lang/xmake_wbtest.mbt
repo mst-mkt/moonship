@@ -36,6 +36,11 @@ async test "execute: detects xmake.lua" {
   let m = XmakeModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no xmake project detected"))
+  guard not(result is Skipped("no xmake project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }

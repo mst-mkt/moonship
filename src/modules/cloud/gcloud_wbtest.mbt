@@ -9,7 +9,7 @@ async test "execute: no gcloud config returns Skipped or Output" {
   let m = GcloudModule::default()
   let ctx = @context.Context::new(cwd="/tmp")
   let result = m.execute(ctx)
-  assert_true(result is Skipped(_) || result is Output(_))
+  assert_true(not(result is Disabled))
 }
 
 ///|

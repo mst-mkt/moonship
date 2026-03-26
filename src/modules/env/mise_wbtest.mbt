@@ -42,7 +42,9 @@ async test "execute: detects mise.toml" {
   let m = MiseModule::from_config(config)
   let ctx = @context.Context::new(cwd=path, config~)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no mise project detected"))
+  guard not(result is Skipped("no mise project detected")) else {
+    fail("expected mise.toml to be detected, but got Skipped")
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -60,6 +62,8 @@ async test "execute: detects .mise.toml" {
   let m = MiseModule::from_config(config)
   let ctx = @context.Context::new(cwd=path, config~)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no mise project detected"))
+  guard not(result is Skipped("no mise project detected")) else {
+    fail("expected .mise.toml to be detected, but got Skipped")
+  }
   @test_util.remove_dir_recursive(path)
 }

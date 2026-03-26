@@ -42,7 +42,12 @@ async test "execute: detects .cpp extension" {
   let m = CppModule::from_config(config)
   let ctx = @context.Context::new(cwd=path, config~)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no C++ project detected"))
+  guard not(result is Skipped("no C++ project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }
 
@@ -60,6 +65,11 @@ async test "execute: detects .hpp extension" {
   let m = CppModule::from_config(config)
   let ctx = @context.Context::new(cwd=path, config~)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no C++ project detected"))
+  guard not(result is Skipped("no C++ project detected")) else {
+    fail("project should be detected")
+  }
+  if result is Output(out) {
+    assert_true(out.render().contains("via"))
+  }
   @test_util.remove_dir_recursive(path)
 }

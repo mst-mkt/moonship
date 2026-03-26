@@ -23,6 +23,8 @@ async test "execute: detects Pulumi.yaml" {
   let m = PulumiModule::default()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
-  assert_false(result is Skipped("no Pulumi project detected"))
+  guard not(result is Skipped("no Pulumi project detected")) else {
+    fail("expected Pulumi.yaml to be detected, but got Skipped")
+  }
   @test_util.remove_dir_recursive(path)
 }
