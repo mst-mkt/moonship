@@ -186,7 +186,7 @@ fn read_battery() -> (Int, String) {
 
       let cap_lines = cap_str.split("\n").map(fn(s) { s.to_string() }).collect()
       let cap = if cap_lines.length() > 0 {
-        parse_battery_int(cap_lines[0])
+        @exec.parse_leading_int(cap_lines[0])
       } else {
         -1
       }
@@ -200,20 +200,6 @@ fn read_battery() -> (Int, String) {
       break (cap, status)
     }
   }
-}
-
-///|
-fn parse_battery_int(s : String) -> Int {
-  s
-  .iter()
-  .fold(init=(0, true), fn(acc, c) {
-    let (result, active) = acc
-    if active && c >= '0' && c <= '9' {
-      (result * 10 + (c.to_int() - '0'.to_int()), true)
-    } else {
-      (result, false)
-    }
-  }).0
 }
 
 ///|

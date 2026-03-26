@@ -18,13 +18,13 @@ async test "execute: disabled returns Disabled" {
 }
 
 ///|
-test "parse_battery_int: standard" {
-  assert_eq(parse_battery_int("85"), 85)
+test "parse_leading_int: standard" {
+  assert_eq(@exec.parse_leading_int("85"), 85)
 }
 
 ///|
-test "parse_battery_int: with newline" {
-  assert_eq(parse_battery_int("42\n"), 42)
+test "parse_leading_int: with newline" {
+  assert_eq(@exec.parse_leading_int("42\n"), 42)
 }
 
 // --- display rules ---
