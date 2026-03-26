@@ -6,6 +6,7 @@ pub struct NodejsModule {
   style : String
   not_capable_style : String
   symbol : String
+  version_format : String
   detect_files : Array[String]
   detect_folders : Array[String]
   detect_extensions : Array[String]
@@ -20,6 +21,7 @@ pub fn NodejsModule::default() -> NodejsModule {
     style: "bold green",
     not_capable_style: "bold red",
     symbol: " ",
+    version_format: "v${raw}",
     detect_files: ["package.json", ".node-version", ".nvmrc"],
     detect_folders: ["node_modules"],
     detect_extensions: [".js", ".mjs", ".cjs", ".ts", ".mts", ".cts"],
@@ -38,6 +40,9 @@ pub fn NodejsModule::from_table(table : @config.ModuleTable) -> NodejsModule {
     .get_string("not_capable_style")
     .unwrap_or(d.not_capable_style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     detect_files: table
     .get_string_array("detect_files")
     .unwrap_or(d.detect_files),
@@ -91,7 +96,7 @@ pub impl @ms.PromptModule for NodejsModule with execute(
   let active_style = if in_range { self.style } else { self.not_capable_style }
 
   let vars : Map[String, String] = {
-    "version": @exec.add_v_prefix(version),
+    "version": @exec.format_version(version, self.version_format),
     "symbol": self.symbol,
     "style": active_style,
   }

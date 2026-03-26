@@ -5,6 +5,7 @@ pub struct OdinModule {
   format : String
   style : String
   symbol : String
+  version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
 }
@@ -17,6 +18,7 @@ pub fn OdinModule::default() -> OdinModule {
     format: "via [$symbol($version )]($style)",
     style: "bold bright-blue",
     symbol: "Ø ",
+    version_format: "v${raw}",
     detect_files: [],
     detect_extensions: [".odin"],
   }
@@ -31,6 +33,9 @@ pub fn OdinModule::from_table(table : @config.ModuleTable) -> OdinModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     detect_files: table
     .get_string_array("detect_files")
     .unwrap_or(d.detect_files),
@@ -77,7 +82,7 @@ pub impl @ms.PromptModule for OdinModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "version": @exec.add_v_prefix(display),
+    "version": @exec.format_version(display, self.version_format),
     "symbol": self.symbol,
     "style": self.style,
   }

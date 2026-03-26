@@ -5,6 +5,7 @@ pub struct TerraformModule {
   format : String
   style : String
   symbol : String
+  version_format : String
   detect_files : Array[String]
   detect_folders : Array[String]
   detect_extensions : Array[String]
@@ -18,6 +19,7 @@ pub fn TerraformModule::default() -> TerraformModule {
     format: "via [$symbol$workspace]($style) ",
     style: "bold 105",
     symbol: "💠 ",
+    version_format: "v${raw}",
     detect_files: [],
     detect_folders: [".terraform"],
     detect_extensions: [".tf", ".tfplan", ".tfstate"],
@@ -35,6 +37,9 @@ pub fn TerraformModule::from_table(
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     detect_files: table
     .get_string_array("detect_files")
     .unwrap_or(d.detect_files),
@@ -99,8 +104,9 @@ pub impl @ms.PromptModule for TerraformModule with execute(
     ("tofu", "version"),
   ])
   if not(version_output.is_empty()) {
-    vars["version"] = @exec.add_v_prefix(
+    vars["version"] = @exec.format_version(
       parse_terraform_version(version_output),
+      self.version_format,
     )
   }
 

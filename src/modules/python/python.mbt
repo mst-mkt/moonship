@@ -5,6 +5,7 @@ pub struct PythonModule {
   format : String
   style : String
   symbol : String
+  version_format : String
   pyenv_version_name : Bool
   pyenv_prefix : String
   detect_files : Array[String]
@@ -19,6 +20,7 @@ pub fn PythonModule::default() -> PythonModule {
     format: "via [$symbol$pyenv_prefix($version )(\\($virtualenv\\) )]($style)",
     style: "yellow bold",
     symbol: "🐍 ",
+    version_format: "v${raw}",
     pyenv_version_name: false,
     pyenv_prefix: "pyenv ",
     detect_files: [
@@ -38,6 +40,9 @@ pub fn PythonModule::from_table(table : @config.ModuleTable) -> PythonModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     pyenv_version_name: table
     .get_bool("pyenv_version_name")
     .unwrap_or(d.pyenv_version_name),
@@ -96,7 +101,7 @@ pub impl @ms.PromptModule for PythonModule with execute(
   }
 
   if not(version.is_empty()) {
-    vars["version"] = @exec.add_v_prefix(version)
+    vars["version"] = @exec.format_version(version, self.version_format)
   }
 
   if not(virtualenv.is_empty()) {

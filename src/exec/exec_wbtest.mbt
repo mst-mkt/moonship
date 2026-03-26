@@ -251,3 +251,43 @@ fn remove_dir_recursive(path : String) -> Unit {
     _ => ()
   }
 }
+
+// --- format_version tests ---
+
+///|
+test "format_version: default v${raw}" {
+  assert_eq(format_version("3.12.1", "v${raw}"), "v3.12.1")
+}
+
+///|
+test "format_version: major.minor only" {
+  assert_eq(format_version("3.12.1", "${major}.${minor}"), "3.12")
+}
+
+///|
+test "format_version: major only" {
+  assert_eq(format_version("3.12.1", "v${major}"), "v3")
+}
+
+///|
+test "format_version: raw with v prefix stripped" {
+  assert_eq(format_version("v1.2.3", "v${raw}"), "v1.2.3")
+}
+
+///|
+test "format_version: empty raw" {
+  assert_eq(format_version("", "v${raw}"), "")
+}
+
+///|
+test "format_version: two-part version" {
+  assert_eq(format_version("1.2", "v${raw}"), "v1.2")
+  assert_eq(format_version("1.2", "${major}.${minor}"), "1.2")
+  assert_eq(format_version("1.2", "${patch}"), "")
+}
+
+///|
+test "format_version: single-part version" {
+  assert_eq(format_version("42", "v${raw}"), "v42")
+  assert_eq(format_version("42", "${major}"), "42")
+}

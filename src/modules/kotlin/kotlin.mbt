@@ -5,6 +5,7 @@ pub struct KotlinModule {
   format : String
   style : String
   symbol : String
+  version_format : String
   kotlin_binary : String
   detect_files : Array[String]
   detect_extensions : Array[String]
@@ -18,6 +19,7 @@ pub fn KotlinModule::default() -> KotlinModule {
     format: "via [$symbol($version )]($style)",
     style: "bold blue",
     symbol: "🅺 ",
+    version_format: "v${raw}",
     kotlin_binary: "kotlin",
     detect_files: [],
     detect_extensions: [".kt", ".kts"],
@@ -33,6 +35,9 @@ pub fn KotlinModule::from_table(table : @config.ModuleTable) -> KotlinModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     kotlin_binary: table.get_string("kotlin_binary").unwrap_or(d.kotlin_binary),
     detect_files: table
     .get_string_array("detect_files")
@@ -80,7 +85,7 @@ pub impl @ms.PromptModule for KotlinModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "version": @exec.add_v_prefix(display),
+    "version": @exec.format_version(display, self.version_format),
     "symbol": self.symbol,
     "style": self.style,
   }

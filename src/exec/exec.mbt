@@ -125,6 +125,24 @@ fn extract_semver(s : String) -> String {
 }
 
 ///|
+pub fn format_version(raw : String, version_format : String) -> String {
+  guard not(raw.is_empty()) else { return "" }
+
+  let stripped = strip_v_prefix(raw)
+  let parts = stripped.split(".").map(fn(s) { s.to_string() }).collect()
+
+  let major = if parts.length() > 0 { parts[0] } else { "" }
+  let minor = if parts.length() > 1 { parts[1] } else { "" }
+  let patch = if parts.length() > 2 { parts[2] } else { "" }
+
+  version_format
+  .replace(old="${raw}", new=stripped)
+  .replace(old="${major}", new=major)
+  .replace(old="${minor}", new=minor)
+  .replace(old="${patch}", new=patch)
+}
+
+///|
 pub fn detect_compiler_name(
   output : String,
   compilers : Array[(String, String)],

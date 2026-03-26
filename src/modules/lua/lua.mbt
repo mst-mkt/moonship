@@ -5,6 +5,7 @@ pub struct LuaModule {
   format : String
   style : String
   symbol : String
+  version_format : String
   lua_binary : String
   detect_files : Array[String]
   detect_folders : Array[String]
@@ -19,6 +20,7 @@ pub fn LuaModule::default() -> LuaModule {
     format: "via [$symbol($version )]($style)",
     style: "bold blue",
     symbol: "🌙 ",
+    version_format: "v${raw}",
     lua_binary: "lua",
     detect_files: [".lua-version"],
     detect_folders: ["lua"],
@@ -35,6 +37,9 @@ pub fn LuaModule::from_table(table : @config.ModuleTable) -> LuaModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     lua_binary: table.get_string("lua_binary").unwrap_or(d.lua_binary),
     detect_files: table
     .get_string_array("detect_files")
@@ -90,7 +95,7 @@ pub impl @ms.PromptModule for LuaModule with execute(
   }
 
   let vars : Map[String, String] = {
-    "version": @exec.add_v_prefix(display),
+    "version": @exec.format_version(display, self.version_format),
     "symbol": self.symbol,
     "style": self.style,
   }

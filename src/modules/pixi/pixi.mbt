@@ -5,6 +5,7 @@ pub struct PixiModule {
   format : String
   style : String
   symbol : String
+  version_format : String
   show_default_environment : Bool
   detect_files : Array[String]
   detect_extensions : Array[String]
@@ -18,6 +19,7 @@ pub fn PixiModule::default() -> PixiModule {
     format: "via [$symbol($version )(\\($environment\\) )]($style)",
     style: "yellow bold",
     symbol: "🧚 ",
+    version_format: "v${raw}",
     show_default_environment: true,
     detect_files: ["pixi.toml", "pixi.lock"],
     detect_extensions: [],
@@ -33,6 +35,9 @@ pub fn PixiModule::from_table(table : @config.ModuleTable) -> PixiModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     show_default_environment: table
     .get_bool("show_default_environment")
     .unwrap_or(d.show_default_environment),
@@ -87,7 +92,7 @@ pub impl @ms.PromptModule for PixiModule with execute(
   if not(version.is_empty()) {
     let parts = version.split(" ").collect()
     let ver = if parts.length() >= 2 { parts[1].to_string() } else { version }
-    vars["version"] = @exec.add_v_prefix(ver)
+    vars["version"] = @exec.format_version(ver, self.version_format)
   }
 
   if has_env && (self.show_default_environment || env_name != "default") {

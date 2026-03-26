@@ -5,6 +5,7 @@ pub struct OCamlModule {
   format : String
   style : String
   symbol : String
+  version_format : String
   global_switch_indicator : String
   local_switch_indicator : String
   detect_files : Array[String]
@@ -20,6 +21,7 @@ pub fn OCamlModule::default() -> OCamlModule {
     format: "via [$symbol($version )(\\($switch_indicator$switch_name\\) )]($style)",
     style: "bold yellow",
     symbol: "🐫 ",
+    version_format: "v${raw}",
     global_switch_indicator: "",
     local_switch_indicator: "*",
     detect_files: ["dune", "dune-project", "jbuild", "jbuild-ignore", ".merlin"],
@@ -37,6 +39,9 @@ pub fn OCamlModule::from_table(table : @config.ModuleTable) -> OCamlModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     global_switch_indicator: table
     .get_string("global_switch_indicator")
     .unwrap_or(d.global_switch_indicator),
@@ -92,7 +97,7 @@ pub impl @ms.PromptModule for OCamlModule with execute(
   guard not(version.is_empty()) else { return Skipped("ocaml not found") }
 
   let vars : Map[String, String] = {
-    "version": @exec.add_v_prefix(version),
+    "version": @exec.format_version(version, self.version_format),
     "symbol": self.symbol,
     "style": self.style,
   }

@@ -5,6 +5,7 @@ pub struct PulumiModule {
   format : String
   style : String
   symbol : String
+  version_format : String
   detect_files : Array[String]
   detect_extensions : Array[String]
 }
@@ -17,6 +18,7 @@ pub fn PulumiModule::default() -> PulumiModule {
     format: "via [$symbol($username@)$stack]($style) ",
     style: "bold 5",
     symbol: " ",
+    version_format: "v${raw}",
     detect_files: ["Pulumi.yaml", "Pulumi.yml"],
     detect_extensions: [],
   }
@@ -31,6 +33,9 @@ pub fn PulumiModule::from_table(table : @config.ModuleTable) -> PulumiModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
     detect_files: table
     .get_string_array("detect_files")
     .unwrap_or(d.detect_files),
@@ -82,7 +87,7 @@ pub impl @ms.PromptModule for PulumiModule with execute(
 
   let version = @exec.exec_cmd("pulumi", ["version"])
   if not(version.is_empty()) {
-    vars["version"] = @exec.add_v_prefix(@exec.strip_v_prefix(version))
+    vars["version"] = @exec.format_version(version, self.version_format)
   }
 
   let segments = @ms.format_string(
