@@ -78,7 +78,10 @@ pub fn stylize(text : String, style : Style) -> String {
 }
 
 ///|
-pub fn parse_color(name : String) -> Color {
+pub fn parse_color(
+  name : String,
+  palette? : Map[String, String] = active_palette.val,
+) -> Color {
   let lower = to_lower(name)
   match lower {
     "black" => Black
@@ -99,7 +102,11 @@ pub fn parse_color(name : String) -> Color {
     "bright-white" | "brightwhite" => BrightWhite
     "prev_fg" => PrevFg
     "prev_bg" => PrevBg
-    _ => parse_color_value(name)
+    _ =>
+      match palette.get(lower) {
+        Some(palette_color) => parse_color(palette_color, palette={})
+        None => parse_color_value(name)
+      }
   }
 }
 
@@ -145,16 +152,31 @@ fn parse_hex(s : String) -> Int? {
 }
 
 ///|
-pub fn parse_style(spec : String) -> Style {
+pub let active_palette : Ref[Map[String, String]] = Ref::new({})
+
+///|
+pub fn set_active_palette(palette : Map[String, String]) -> Unit {
+  active_palette.val = palette
+}
+
+///|
+pub fn parse_style(
+  spec : String,
+  palette? : Map[String, String] = active_palette.val,
+) -> Style {
   spec
   .split(" ")
   .fold(init=Style::default(), fn(style, part) {
-    apply_style_part(style, part.to_string())
+    apply_style_part(style, part.to_string(), palette)
   })
 }
 
 ///|
-fn apply_style_part(style : Style, part : String) -> Style {
+fn apply_style_part(
+  style : Style,
+  part : String,
+  palette : Map[String, String],
+) -> Style {
   let lower = to_lower(part)
   match lower {
     "none" => Style::default()
@@ -167,17 +189,17 @@ fn apply_style_part(style : Style, part : String) -> Style {
     "inverted" => style.with_inverted()
     "strikethrough" => style.with_strikethrough()
     _ if lower.has_prefix("bg:") =>
-      match parse_color(part[3:].to_string()) {
+      match parse_color(part[3:].to_string(), palette~) {
         Default => style
         color => style.with_bg(color)
       }
     _ if lower.has_prefix("fg:") =>
-      match parse_color(part[3:].to_string()) {
+      match parse_color(part[3:].to_string(), palette~) {
         Default => style
         color => style.with_fg(color)
       }
     _ =>
-      match parse_color(part) {
+      match parse_color(part, palette~) {
         Default => style
         color => style.with_fg(color)
       }

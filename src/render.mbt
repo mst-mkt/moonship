@@ -52,7 +52,8 @@ async fn render_prompt(
       segment_vars[name] = output.segments
     }
 
-    let output = @ms.compose_segments(format, segment_vars)
+    let palette = ctx.config.get_active_palette()
+    let output = @ms.compose_segments(format, segment_vars, palette~)
     output.render_with_fill(ctx.terminal_width)
   })
 }

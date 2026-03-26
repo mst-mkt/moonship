@@ -3,6 +3,7 @@ async fn run_prompt(pa : PromptArgs) -> Unit {
   let shell = @sys.get_env_var("MOONSHIP_SHELL").unwrap_or("")
   let ctx = build_context(pa)
   emit_warnings(ctx.config.warnings)
+  @terminal.set_active_palette(ctx.palette)
 
   // Handle --right and --continuation
   match pa.target {
@@ -106,6 +107,7 @@ async fn emit_warnings(warnings : Array[String]) -> Unit {
 async fn run_module(name : String, pa : PromptArgs) -> Unit {
   let ctx = build_context(pa)
   emit_warnings(ctx.config.warnings)
+  @terminal.set_active_palette(ctx.palette)
   let modules = build_modules(ctx.config)
 
   guard modules.get(name) is Some(m) else {
@@ -135,6 +137,7 @@ fn run_module_list() -> Unit {
 async fn run_timings(pa : PromptArgs) -> Unit {
   let ctx = build_context(pa)
   emit_warnings(ctx.config.warnings)
+  @terminal.set_active_palette(ctx.palette)
   let modules = build_modules(ctx.config)
   let format = expand_all(ctx.config.format, modules)
   let module_names = @ms.extract_module_names(format)
@@ -186,6 +189,7 @@ async fn run_timings(pa : PromptArgs) -> Unit {
 async fn run_explain(pa : PromptArgs) -> Unit {
   let ctx = build_context(pa)
   emit_warnings(ctx.config.warnings)
+  @terminal.set_active_palette(ctx.palette)
   let modules = build_modules(ctx.config)
   let format = expand_all(ctx.config.format, modules)
   let module_names = @ms.extract_module_names(format)
@@ -356,6 +360,7 @@ fn default_config_toml() -> String {
   buf.write_string("cache_ttl = \{d.cache_ttl}\n")
   buf.write_string("add_newline = \{d.add_newline}\n")
   buf.write_string("follow_symlinks = \{d.follow_symlinks}\n")
+  buf.write_string("palette = \{@config.escape_string(d.palette)}\n")
 
   for schema in schemas {
     buf.write_string("\n[\{schema.name}]\n")
@@ -414,6 +419,7 @@ async fn run_config(name : String, value : String) -> Unit {
         "cache_ttl" => Some(config.cache_ttl.to_string())
         "add_newline" => Some(config.add_newline.to_string())
         "follow_symlinks" => Some(config.follow_symlinks.to_string())
+        "palette" => Some(config.palette)
         _ =>
           config.get_raw_module(key).map(fn(table) {
             module_to_toml_string(key, table)

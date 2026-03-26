@@ -78,6 +78,8 @@ pub struct Config {
   cache_ttl : Int
   add_newline : Bool
   follow_symlinks : Bool
+  palette : String
+  palettes : Map[String, Map[String, String]]
   raw_modules : Map[String, ModuleTable]
   warnings : Array[String]
 }
@@ -93,6 +95,8 @@ pub fn Config::default() -> Config {
     cache_ttl: 5000,
     add_newline: true,
     follow_symlinks: true,
+    palette: "",
+    palettes: {},
     raw_modules: {},
     warnings: [],
   }
@@ -145,13 +149,18 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
   let cache_ttl = t.get_int("cache_ttl").unwrap_or(d.cache_ttl)
   let add_newline = t.get_bool("add_newline").unwrap_or(d.add_newline)
   let follow_symlinks = t.get_bool("follow_symlinks").unwrap_or(d.follow_symlinks)
+  let palette = t.get_string("palette").unwrap_or(d.palette)
+  let palettes = parse_palettes(table)
+
+  let top_level_tables : Array[String] = ["palettes"]
 
   let raw_modules = table
     .iter()
     .fold(init=(Map::new() : Map[String, ModuleTable]), fn(acc, pair) {
       let (name, value) = pair
       match value {
-        CTable(mod_table) => acc.set(name, ModuleTable(mod_table))
+        CTable(mod_table) if not(top_level_tables.contains(name)) =>
+          acc.set(name, ModuleTable(mod_table))
         _ => ()
       }
       acc
@@ -166,6 +175,8 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
     cache_ttl,
     add_newline,
     follow_symlinks,
+    palette,
+    palettes,
     raw_modules,
     warnings: [],
   }
@@ -182,6 +193,7 @@ pub fn Config::to_toml(self : Config) -> String {
     "cache_ttl = \{self.cache_ttl}",
     "add_newline = \{self.add_newline}",
     "follow_symlinks = \{self.follow_symlinks}",
+    "palette = \{escape_string(self.palette)}",
   ].join("\n")
 
   let module_names = self.raw_modules.keys().collect()
@@ -195,7 +207,27 @@ pub fn Config::to_toml(self : Config) -> String {
     .collect()
     .join("")
 
-  "\{header}\n\{sections}"
+  let palette_sections = self.palettes
+    .iter()
+    .fold(init=StringBuilder::new(), fn(buf, pair) {
+      let (name, colors) = pair
+      buf.write_string("\n[palettes.\{name}]\n")
+
+      let keys = colors.keys().collect()
+      keys.sort()
+      keys.each(fn(key) {
+        match colors.get(key) {
+          Some(val) =>
+            buf.write_string("\{key} = \{escape_string(val)}\n")
+          None => ()
+        }
+      })
+
+      buf
+    })
+    .to_string()
+
+  "\{header}\n\{palette_sections}\{sections}"
 }
 
 ///|
@@ -257,6 +289,43 @@ pub fn escape_string(s : String) -> String {
 
   buf.write_char('"')
   buf.to_string()
+}
+
+///|
+pub fn Config::get_active_palette(self : Config) -> Map[String, String] {
+  guard not(self.palette.is_empty()) else { return {} }
+
+  self.palettes.get(self.palette).unwrap_or({})
+}
+
+///|
+fn parse_palettes(
+  table : Map[String, ConfigValue],
+) -> Map[String, Map[String, String]] {
+  guard table.get("palettes") is Some(CTable(palettes_table)) else {
+    return {}
+  }
+
+  palettes_table
+  .iter()
+  .fold(
+    init=(Map::new() : Map[String, Map[String, String]]),
+    fn(acc, pair) {
+      let (name, value) = pair
+      guard value is CTable(palette_table) else { return acc }
+
+      let colors : Map[String, String] = palette_table
+        .iter()
+        .fold(init=Map::new(), fn(m, kv) {
+          guard kv.1 is CString(color_val) else { return m }
+          m[kv.0] = color_val
+          m
+        })
+
+      acc[name] = colors
+      acc
+    },
+  )
 }
 
 // --- JSON conversion ---

@@ -322,6 +322,35 @@ test "resolve_prev: first segment defaults to no color" {
   assert_true(resolved.bg is Default)
 }
 
+// --- palette ---
+
+///|
+test "parse_color: palette lookup" {
+  let palette : Map[String, String] = { "mustard": "#af8700" }
+  assert_true(@terminal.parse_color("mustard", palette~) is Hex(_))
+}
+
+///|
+test "parse_color: palette not found falls back" {
+  let palette : Map[String, String] = { "mustard": "#af8700" }
+  assert_true(@terminal.parse_color("unknown_color", palette~) is Default)
+}
+
+///|
+test "parse_style: palette color in style" {
+  let palette : Map[String, String] = { "sky": "#87ceeb" }
+  let style = @terminal.parse_style("bold sky", palette~)
+  assert_true(style.bold)
+  assert_true(style.fg is Hex(_))
+}
+
+///|
+test "parse_style: palette color in bg" {
+  let palette : Map[String, String] = { "ocean": "blue" }
+  let style = @terminal.parse_style("bg:ocean", palette~)
+  assert_true(style.bg is Blue)
+}
+
 ///|
 test "resolve_prev: no prev colors unchanged" {
   let style = @terminal.Style::default().with_fg(Red).with_bg(Blue)

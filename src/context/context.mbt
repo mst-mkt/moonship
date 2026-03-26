@@ -11,6 +11,7 @@ pub struct Context {
   keymap : String
   shlvl : Int
   config : @config.Config
+  palette : Map[String, String]
   mut git_repo : @git.RepoHandle?
   mut git_resolved : Bool
 }
@@ -41,6 +42,7 @@ pub fn Context::new(
     keymap,
     shlvl,
     config,
+    palette: config.get_active_palette(),
     git_repo: None,
     git_resolved: false,
   }

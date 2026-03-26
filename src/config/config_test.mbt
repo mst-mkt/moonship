@@ -567,3 +567,65 @@ test "to_toml: module with all field types" {
   assert_true(output.contains("enabled = true"))
   assert_true(output.contains("tags = [\"a\", \"b\"]"))
 }
+
+///|
+test "parse palette from TOML" {
+  let config = @config.Config::from_toml(
+    (
+      #|palette = "catppuccin"
+      #|
+      #|[palettes.catppuccin]
+      #|mustard = "#af8700"
+      #|sky = "51"
+    ),
+  )
+  assert_eq(config.palette, "catppuccin")
+
+  let active = config.get_active_palette()
+  assert_eq(active.get("mustard"), Some("#af8700"))
+  assert_eq(active.get("sky"), Some("51"))
+}
+
+///|
+test "get_active_palette: no palette set returns empty" {
+  let config = @config.Config::default()
+  let active = config.get_active_palette()
+  assert_eq(active.length(), 0)
+}
+
+///|
+test "palettes not in raw_modules" {
+  let config = @config.Config::from_toml(
+    (
+      #|[palettes.custom]
+      #|red = "#ff0000"
+    ),
+  )
+  assert_true(config.get_raw_module("palettes") is None)
+}
+
+///|
+test "palettes roundtrip in to_toml" {
+  let config = @config.Config::from_toml(
+    (
+      #|palette = "custom"
+      #|
+      #|[palettes.custom]
+      #|mustard = "#af8700"
+    ),
+  )
+  let toml = config.to_toml()
+  assert_true(toml.contains("[palettes.custom]"))
+  assert_true(toml.contains("mustard"))
+}
+
+///|
+test "get_active_palette: unknown palette returns empty" {
+  let config = @config.Config::from_toml(
+    (
+      #|palette = "nonexistent"
+    ),
+  )
+  let active = config.get_active_palette()
+  assert_eq(active.length(), 0)
+}

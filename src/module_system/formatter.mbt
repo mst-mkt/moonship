@@ -5,9 +5,10 @@ pub fn format_string(
   template : String,
   vars : Map[String, String],
   style : @terminal.Style,
+  palette? : Map[String, String] = @terminal.active_palette.val,
 ) -> Array[Segment] {
   let ast = parse_format(template)
-  evaluate(ast, vars, style)
+  evaluate(ast, vars, style, palette)
 }
 
 ///|
@@ -16,6 +17,7 @@ fn evaluate(
   nodes : Array[FormatNode],
   vars : Map[String, String],
   default_style : @terminal.Style,
+  palette : Map[String, String],
 ) -> Array[Segment] {
   nodes
   .iter()
@@ -26,7 +28,8 @@ fn evaluate(
         Iter::singleton(Segment::new(unescape(ch), style=default_style))
       Variable(name) =>
         match vars.get(name) {
-          Some(val) => evaluate(parse_format(val), {}, default_style).iter()
+          Some(val) =>
+            evaluate(parse_format(val), {}, default_style, palette).iter()
           None => Iter::empty()
         }
       EnvVar(name) => {
@@ -38,7 +41,7 @@ fn evaluate(
         }
       }
       Styled(content_nodes, style_spec) => {
-        let resolved_style = resolve_style(style_spec, vars)
+        let resolved_style = resolve_style(style_spec, vars, palette)
         let text = nodes_to_text(content_nodes, vars)
 
         if not(text.is_empty()) {
@@ -49,7 +52,7 @@ fn evaluate(
       }
       Conditional(content_nodes) =>
         if has_any_string_var(content_nodes, vars) {
-          evaluate(content_nodes, vars, default_style).iter()
+          evaluate(content_nodes, vars, default_style, palette).iter()
         } else {
           Iter::empty()
         }
@@ -84,14 +87,18 @@ fn nodes_to_text(
 }
 
 ///|
-fn resolve_style(spec : String, vars : Map[String, String]) -> @terminal.Style {
+fn resolve_style(
+  spec : String,
+  vars : Map[String, String],
+  palette : Map[String, String],
+) -> @terminal.Style {
   let resolved = if spec.has_prefix("$") {
     vars.get(spec[1:].to_string()).unwrap_or(spec)
   } else {
     spec
   }
 
-  @terminal.parse_style(resolved)
+  @terminal.parse_style(resolved, palette~)
 }
 
 ///|
@@ -101,6 +108,7 @@ pub fn evaluate_segments(
   nodes : Array[FormatNode],
   segment_vars : Map[String, Array[Segment]],
   default_style : @terminal.Style,
+  palette? : Map[String, String] = @terminal.active_palette.val,
 ) -> Array[Segment] {
   nodes
   .iter()
@@ -123,12 +131,15 @@ pub fn evaluate_segments(
         }
       }
       Styled(content_nodes, style_spec) => {
-        let style = @terminal.parse_style(style_spec)
-        evaluate_segments(content_nodes, segment_vars, style).iter()
+        let style = @terminal.parse_style(style_spec, palette~)
+        evaluate_segments(content_nodes, segment_vars, style, palette~)
+          .iter()
       }
       Conditional(content_nodes) =>
         if has_any_segment_var(content_nodes, segment_vars) {
-          evaluate_segments(content_nodes, segment_vars, default_style).iter()
+          evaluate_segments(
+            content_nodes, segment_vars, default_style, palette~,
+          ).iter()
         } else {
           Iter::empty()
         }
@@ -142,9 +153,12 @@ pub fn evaluate_segments(
 pub fn compose_segments(
   template : String,
   segment_vars : Map[String, Array[Segment]],
+  palette? : Map[String, String] = @terminal.active_palette.val,
 ) -> ModuleOutput {
   let ast = parse_format(template)
-  let segs = evaluate_segments(ast, segment_vars, @terminal.Style::default())
+  let segs = evaluate_segments(
+    ast, segment_vars, @terminal.Style::default(), palette~,
+  )
   ModuleOutput::new(segs)
 }
 
