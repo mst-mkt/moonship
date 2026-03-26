@@ -164,6 +164,11 @@ pub fn PackageModule::schema() -> @config.ModuleSchema {
       { name: "format", field_type: @config.FString, default_value: d.format },
       { name: "style", field_type: @config.FString, default_value: d.style },
       { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "display_private",
+        field_type: @config.FBool,
+        default_value: d.display_private.to_string(),
+      },
     ],
   }
 }

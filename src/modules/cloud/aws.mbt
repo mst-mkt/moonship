@@ -140,6 +140,16 @@ pub fn AwsModule::schema() -> @config.ModuleSchema {
       { name: "format", field_type: @config.FString, default_value: d.format },
       { name: "style", field_type: @config.FString, default_value: d.style },
       { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "expiration_symbol",
+        field_type: @config.FString,
+        default_value: d.expiration_symbol,
+      },
+      {
+        name: "force_display",
+        field_type: @config.FBool,
+        default_value: d.force_display.to_string(),
+      },
     ],
   }
 }

@@ -121,6 +121,16 @@ pub fn CondaModule::schema() -> @config.ModuleSchema {
         field_type: @config.FBool,
         default_value: d.ignore_base.to_string(),
       },
+      {
+        name: "detect_env_vars",
+        field_type: @config.FStringArray,
+        default_value: d.detect_env_vars.join(", "),
+      },
+      {
+        name: "truncation_length",
+        field_type: @config.FInt,
+        default_value: d.truncation_length.to_string(),
+      },
     ],
   }
 }

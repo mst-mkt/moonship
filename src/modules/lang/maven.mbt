@@ -179,6 +179,16 @@ pub fn MavenModule::schema() -> @config.ModuleSchema {
         field_type: @config.FStringArray,
         default_value: d.detect_extensions.join(", "),
       },
+      {
+        name: "recursive",
+        field_type: @config.FBool,
+        default_value: d.recursive.to_string(),
+      },
+      {
+        name: "version_format",
+        field_type: @config.FString,
+        default_value: d.version_format,
+      },
     ],
   }
 }

@@ -156,6 +156,11 @@ pub fn TimeModule::schema() -> @config.ModuleSchema {
         field_type: @config.FString,
         default_value: d.utc_time_offset,
       },
+      {
+        name: "time_range",
+        field_type: @config.FString,
+        default_value: d.time_range,
+      },
     ],
   }
 }

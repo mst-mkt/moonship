@@ -160,6 +160,11 @@ pub fn GitMetricsModule::schema() -> @config.ModuleSchema {
         field_type: @config.FBool,
         default_value: d.only_nonzero_diffs.to_string(),
       },
+      {
+        name: "ignore_submodules",
+        field_type: @config.FBool,
+        default_value: d.ignore_submodules.to_string(),
+      },
     ],
   }
 }

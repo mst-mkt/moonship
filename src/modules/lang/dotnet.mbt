@@ -184,6 +184,21 @@ pub fn DotnetModule::schema() -> @config.ModuleSchema {
         field_type: @config.FStringArray,
         default_value: d.detect_extensions.join(", "),
       },
+      {
+        name: "detect_folders",
+        field_type: @config.FStringArray,
+        default_value: d.detect_folders.join(", "),
+      },
+      {
+        name: "heuristic",
+        field_type: @config.FBool,
+        default_value: d.heuristic.to_string(),
+      },
+      {
+        name: "version_format",
+        field_type: @config.FString,
+        default_value: d.version_format,
+      },
     ],
   }
 }

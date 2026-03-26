@@ -198,6 +198,11 @@ pub fn DirenvModule::schema() -> @config.ModuleSchema {
         field_type: @config.FStringArray,
         default_value: d.detect_extensions.join(", "),
       },
+      {
+        name: "detect_folders",
+        field_type: @config.FStringArray,
+        default_value: d.detect_folders.join(", "),
+      },
     ],
   }
 }

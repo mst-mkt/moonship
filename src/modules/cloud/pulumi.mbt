@@ -136,6 +136,21 @@ pub fn PulumiModule::schema() -> @config.ModuleSchema {
         field_type: @config.FStringArray,
         default_value: d.detect_extensions.join(", "),
       },
+      {
+        name: "detect_folders",
+        field_type: @config.FStringArray,
+        default_value: d.detect_folders.join(", "),
+      },
+      {
+        name: "search_upwards",
+        field_type: @config.FBool,
+        default_value: d.search_upwards.to_string(),
+      },
+      {
+        name: "version_format",
+        field_type: @config.FString,
+        default_value: d.version_format,
+      },
     ],
   }
 }

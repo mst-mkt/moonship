@@ -148,6 +148,16 @@ pub fn CmdDurationModule::schema() -> @config.ModuleSchema {
         field_type: @config.FBool,
         default_value: d.show_milliseconds.to_string(),
       },
+      {
+        name: "min_time_to_notify",
+        field_type: @config.FInt,
+        default_value: d.min_time_to_notify.to_string(),
+      },
+      {
+        name: "show_notifications",
+        field_type: @config.FBool,
+        default_value: d.show_notifications.to_string(),
+      },
     ],
   }
 }

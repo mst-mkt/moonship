@@ -166,6 +166,44 @@ pub fn CustomModule::schema() -> @config.ModuleSchema {
       { name: "style", field_type: @config.FString, default_value: d.style },
       { name: "symbol", field_type: @config.FString, default_value: d.symbol },
       { name: "command", field_type: @config.FString, default_value: d.command },
+      {
+        name: "description",
+        field_type: @config.FString,
+        default_value: d.description,
+      },
+      {
+        name: "detect_extensions",
+        field_type: @config.FStringArray,
+        default_value: d.detect_extensions.join(", "),
+      },
+      {
+        name: "detect_files",
+        field_type: @config.FStringArray,
+        default_value: d.detect_files.join(", "),
+      },
+      {
+        name: "detect_folders",
+        field_type: @config.FStringArray,
+        default_value: d.detect_folders.join(", "),
+      },
+      {
+        name: "ignore_timeout",
+        field_type: @config.FBool,
+        default_value: d.ignore_timeout.to_string(),
+      },
+      { name: "os", field_type: @config.FString, default_value: d.os },
+      {
+        name: "require_repo",
+        field_type: @config.FBool,
+        default_value: d.require_repo.to_string(),
+      },
+      { name: "shell", field_type: @config.FString, default_value: d.shell },
+      {
+        name: "use_stdin",
+        field_type: @config.FBool,
+        default_value: d.use_stdin.to_string(),
+      },
+      { name: "when", field_type: @config.FString, default_value: d.when },
     ],
   }
 }

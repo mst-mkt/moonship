@@ -137,6 +137,21 @@ pub fn OdinModule::schema() -> @config.ModuleSchema {
         field_type: @config.FStringArray,
         default_value: d.detect_extensions.join(", "),
       },
+      {
+        name: "detect_folders",
+        field_type: @config.FStringArray,
+        default_value: d.detect_folders.join(", "),
+      },
+      {
+        name: "show_commit",
+        field_type: @config.FBool,
+        default_value: d.show_commit.to_string(),
+      },
+      {
+        name: "version_format",
+        field_type: @config.FString,
+        default_value: d.version_format,
+      },
     ],
   }
 }

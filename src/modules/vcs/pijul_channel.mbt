@@ -124,6 +124,16 @@ pub fn PijulChannelModule::schema() -> @config.ModuleSchema {
       { name: "format", field_type: @config.FString, default_value: d.format },
       { name: "style", field_type: @config.FString, default_value: d.style },
       { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "truncation_length",
+        field_type: @config.FInt,
+        default_value: d.truncation_length.to_string(),
+      },
+      {
+        name: "truncation_symbol",
+        field_type: @config.FString,
+        default_value: d.truncation_symbol,
+      },
     ],
   }
 }

@@ -335,6 +335,26 @@ pub fn KubernetesModule::schema() -> @config.ModuleSchema {
       { name: "format", field_type: @config.FString, default_value: d.format },
       { name: "style", field_type: @config.FString, default_value: d.style },
       { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "detect_env_vars",
+        field_type: @config.FStringArray,
+        default_value: d.detect_env_vars.join(", "),
+      },
+      {
+        name: "detect_extensions",
+        field_type: @config.FStringArray,
+        default_value: d.detect_extensions.join(", "),
+      },
+      {
+        name: "detect_files",
+        field_type: @config.FStringArray,
+        default_value: d.detect_files.join(", "),
+      },
+      {
+        name: "detect_folders",
+        field_type: @config.FStringArray,
+        default_value: d.detect_folders.join(", "),
+      },
     ],
   }
 }

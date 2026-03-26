@@ -168,6 +168,46 @@ pub fn ShellModule::schema() -> @config.ModuleSchema {
         field_type: @config.FString,
         default_value: d.unknown_indicator,
       },
+      {
+        name: "cmd_indicator",
+        field_type: @config.FString,
+        default_value: d.cmd_indicator,
+      },
+      {
+        name: "elvish_indicator",
+        field_type: @config.FString,
+        default_value: d.elvish_indicator,
+      },
+      {
+        name: "ion_indicator",
+        field_type: @config.FString,
+        default_value: d.ion_indicator,
+      },
+      {
+        name: "nu_indicator",
+        field_type: @config.FString,
+        default_value: d.nu_indicator,
+      },
+      {
+        name: "powershell_indicator",
+        field_type: @config.FString,
+        default_value: d.powershell_indicator,
+      },
+      {
+        name: "pwsh_indicator",
+        field_type: @config.FString,
+        default_value: d.pwsh_indicator,
+      },
+      {
+        name: "tcsh_indicator",
+        field_type: @config.FString,
+        default_value: d.tcsh_indicator,
+      },
+      {
+        name: "xonsh_indicator",
+        field_type: @config.FString,
+        default_value: d.xonsh_indicator,
+      },
     ],
   }
 }
