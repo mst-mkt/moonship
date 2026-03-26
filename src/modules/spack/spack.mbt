@@ -5,6 +5,7 @@ pub struct SpackModule {
   format : String
   style : String
   symbol : String
+  truncation_length : Int
 }
 
 ///|
@@ -15,6 +16,7 @@ pub fn SpackModule::default() -> SpackModule {
     format: "via [$symbol$environment]($style) ",
     style: "blue bold",
     symbol: "🅢 ",
+    truncation_length: 2147483647,
   }
 }
 
@@ -27,6 +29,9 @@ pub fn SpackModule::from_table(table : @config.ModuleTable) -> SpackModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    truncation_length: table
+    .get_int("truncation_length")
+    .unwrap_or(d.truncation_length),
   }
 }
 
@@ -58,7 +63,13 @@ pub impl @ms.PromptModule for SpackModule with execute(
   let env = @sys.get_env_var("SPACK_ENV").unwrap_or("")
   guard not(env.is_empty()) else { return Skipped("not in spack env") }
 
-  let name = basename(env)
+  let raw_name = basename(env)
+  let name = if raw_name.length() > self.truncation_length {
+    raw_name[:self.truncation_length].to_string()
+  } else {
+    raw_name
+  }
+
   let vars : Map[String, String] = {
     "environment": name,
     "symbol": self.symbol,

@@ -5,6 +5,8 @@ pub struct FossilBranchModule {
   format : String
   style : String
   symbol : String
+  truncation_length : Int
+  truncation_symbol : String
 }
 
 ///|
@@ -15,6 +17,8 @@ pub fn FossilBranchModule::default() -> FossilBranchModule {
     format: "on [$symbol$branch]($style) ",
     style: "bold purple",
     symbol: " ",
+    truncation_length: 2147483647,
+    truncation_symbol: "…",
   }
 }
 
@@ -29,6 +33,12 @@ pub fn FossilBranchModule::from_table(
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    truncation_length: table
+    .get_int("truncation_length")
+    .unwrap_or(d.truncation_length),
+    truncation_symbol: table
+    .get_string("truncation_symbol")
+    .unwrap_or(d.truncation_symbol),
   }
 }
 
@@ -63,8 +73,14 @@ pub impl @ms.PromptModule for FossilBranchModule with execute(
   let branch = @exec.exec_cmd("fossil", ["branch", "current"])
   guard not(branch.is_empty()) else { return Skipped("fossil not found") }
 
+  let display = if branch.length() > self.truncation_length {
+    branch[:self.truncation_length].to_string() + self.truncation_symbol
+  } else {
+    branch
+  }
+
   let vars : Map[String, String] = {
-    "branch": branch,
+    "branch": display,
     "symbol": self.symbol,
     "style": self.style,
   }

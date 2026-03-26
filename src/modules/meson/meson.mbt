@@ -5,6 +5,7 @@ pub struct MesonModule {
   format : String
   style : String
   symbol : String
+  truncation_length : Int
 }
 
 ///|
@@ -15,6 +16,7 @@ pub fn MesonModule::default() -> MesonModule {
     format: "via [$symbol$project]($style) ",
     style: "blue bold",
     symbol: "⬢ ",
+    truncation_length: 2147483647,
   }
 }
 
@@ -27,6 +29,9 @@ pub fn MesonModule::from_table(table : @config.ModuleTable) -> MesonModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    truncation_length: table
+    .get_int("truncation_length")
+    .unwrap_or(d.truncation_length),
   }
 }
 
@@ -62,8 +67,14 @@ pub impl @ms.PromptModule for MesonModule with execute(
   let project = trim(project_raw)
   guard not(project.is_empty()) else { return Skipped("no meson project name") }
 
+  let display = if project.length() > self.truncation_length {
+    project[:self.truncation_length].to_string()
+  } else {
+    project
+  }
+
   let vars : Map[String, String] = {
-    "project": project,
+    "project": display,
     "symbol": self.symbol,
     "style": self.style,
   }

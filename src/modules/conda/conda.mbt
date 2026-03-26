@@ -5,6 +5,7 @@ pub struct CondaModule {
   format : String
   style : String
   symbol : String
+  truncation_length : Int
   ignore_base : Bool
 }
 
@@ -16,6 +17,7 @@ pub fn CondaModule::default() -> CondaModule {
     format: "via [$symbol$environment]($style) ",
     style: "green bold",
     symbol: "🅒 ",
+    truncation_length: 2147483647,
     ignore_base: true,
   }
 }
@@ -29,6 +31,9 @@ pub fn CondaModule::from_table(table : @config.ModuleTable) -> CondaModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    truncation_length: table
+    .get_int("truncation_length")
+    .unwrap_or(d.truncation_length),
     ignore_base: table.get_bool("ignore_base").unwrap_or(d.ignore_base),
   }
 }
@@ -64,7 +69,13 @@ pub impl @ms.PromptModule for CondaModule with execute(
     return Skipped("ignoring base env")
   }
 
-  let name = basename(env)
+  let raw_name = basename(env)
+  let name = if raw_name.length() > self.truncation_length {
+    raw_name[:self.truncation_length].to_string()
+  } else {
+    raw_name
+  }
+
   let vars : Map[String, String] = {
     "environment": name,
     "symbol": self.symbol,

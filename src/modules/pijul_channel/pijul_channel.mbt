@@ -5,6 +5,8 @@ pub struct PijulChannelModule {
   format : String
   style : String
   symbol : String
+  truncation_length : Int
+  truncation_symbol : String
 }
 
 ///|
@@ -15,6 +17,8 @@ pub fn PijulChannelModule::default() -> PijulChannelModule {
     format: "on [$symbol$channel]($style) ",
     style: "bold purple",
     symbol: " ",
+    truncation_length: 2147483647,
+    truncation_symbol: "…",
   }
 }
 
@@ -29,6 +33,12 @@ pub fn PijulChannelModule::from_table(
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    truncation_length: table
+    .get_int("truncation_length")
+    .unwrap_or(d.truncation_length),
+    truncation_symbol: table
+    .get_string("truncation_symbol")
+    .unwrap_or(d.truncation_symbol),
   }
 }
 
@@ -70,8 +80,14 @@ pub impl @ms.PromptModule for PijulChannelModule with execute(
     return Skipped("could not parse pijul channel")
   }
 
+  let display = if channel.length() > self.truncation_length {
+    channel[:self.truncation_length].to_string() + self.truncation_symbol
+  } else {
+    channel
+  }
+
   let vars : Map[String, String] = {
-    "channel": channel,
+    "channel": display,
     "symbol": self.symbol,
     "style": self.style,
   }
