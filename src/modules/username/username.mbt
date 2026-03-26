@@ -127,6 +127,11 @@ pub fn UsernameModule::schema() -> @config.ModuleSchema {
         field_type: @config.FBool,
         default_value: d.show_always.to_string(),
       },
+      {
+        name: "detect_env_vars",
+        field_type: @config.FStringArray,
+        default_value: d.detect_env_vars.join(", "),
+      },
     ],
   }
 }

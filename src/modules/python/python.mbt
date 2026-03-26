@@ -100,14 +100,16 @@ pub impl @ms.PromptModule for PythonModule with execute(
   ctx : @context.Context,
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
-  let has_env = not(@sys.get_env_var("VIRTUAL_ENV").unwrap_or("").is_empty())
+  let has_env = self.detect_env_vars.iter().any(fn(env_var) {
+    not(@sys.get_env_var(env_var).unwrap_or("").is_empty())
+  })
   guard has_env ||
     @exec.detect_project(ctx.cwd, self.detect_files, self.detect_extensions, folders=self.detect_folders) else {
     return Skipped("no Python project detected")
   }
 
-  let version = get_python_version(self.pyenv_version_name)
-  let virtualenv = get_virtualenv_name()
+  let version = get_python_version(self.pyenv_version_name, self.python_binary)
+  let virtualenv = get_virtualenv_name(self.generic_venv_names)
   let pyenv_prefix = if self.pyenv_version_name {
     self.pyenv_prefix
   } else {
@@ -138,7 +140,10 @@ pub impl @ms.PromptModule for PythonModule with execute(
 }
 
 ///|
-async fn get_python_version(pyenv_version_name : Bool) -> String {
+async fn get_python_version(
+  pyenv_version_name : Bool,
+  python_binary : Array[String],
+) -> String {
   if pyenv_version_name {
     let env_ver = @sys.get_env_var("PYENV_VERSION").unwrap_or("")
     if not(env_ver.is_empty()) {
@@ -151,8 +156,7 @@ async fn get_python_version(pyenv_version_name : Bool) -> String {
     }
   }
 
-  let binaries = ["python", "python3", "python2"]
-  for binary in binaries {
+  for binary in python_binary {
     let output = @exec.exec_cmd(binary, ["--version"])
     if not(output.is_empty()) {
       return parse_python_version(output)
@@ -173,7 +177,7 @@ fn parse_python_version(output : String) -> String {
 }
 
 ///|
-fn get_virtualenv_name() -> String {
+fn get_virtualenv_name(generic_venv_names : Array[String]) -> String {
   let venv_path = @sys.get_env_var("VIRTUAL_ENV").unwrap_or("")
   if venv_path.is_empty() {
     return ""
@@ -181,8 +185,7 @@ fn get_virtualenv_name() -> String {
 
   let name = basename(venv_path)
 
-  let generic_names = [".venv", "venv", "env", ".env"]
-  if generic_names.contains(name) {
+  if generic_venv_names.contains(name) {
     return basename(parent_dir(venv_path))
   }
 
@@ -252,6 +255,21 @@ pub fn PythonModule::schema() -> @config.ModuleSchema {
         name: "pyenv_prefix",
         field_type: @config.FString,
         default_value: d.pyenv_prefix,
+      },
+      {
+        name: "python_binary",
+        field_type: @config.FStringArray,
+        default_value: d.python_binary.join(", "),
+      },
+      {
+        name: "detect_env_vars",
+        field_type: @config.FStringArray,
+        default_value: d.detect_env_vars.join(", "),
+      },
+      {
+        name: "generic_venv_names",
+        field_type: @config.FStringArray,
+        default_value: d.generic_venv_names.join(", "),
       },
       {
         name: "detect_files",

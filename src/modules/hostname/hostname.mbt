@@ -144,6 +144,11 @@ pub fn HostnameModule::schema() -> @config.ModuleSchema {
         field_type: @config.FString,
         default_value: d.ssh_symbol,
       },
+      {
+        name: "detect_env_vars",
+        field_type: @config.FStringArray,
+        default_value: d.detect_env_vars.join(", "),
+      },
     ],
   }
 }

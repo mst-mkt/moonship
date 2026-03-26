@@ -552,12 +552,12 @@ test "format_path: with substitutions" {
 }
 
 ///|
-test "is_writable: writable directory" {
+async test "is_writable: writable directory" {
   assert_true(is_writable("/tmp"))
 }
 
 ///|
-test "is_writable: non-writable directory" {
+async test "is_writable: non-writable directory" {
   assert_false(is_writable("/root"))
 }
 

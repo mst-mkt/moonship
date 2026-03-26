@@ -157,6 +157,11 @@ pub fn GitCommitModule::schema() -> @config.ModuleSchema {
         field_type: @config.FBool,
         default_value: d.tag_disabled.to_string(),
       },
+      {
+        name: "tag_max_candidates",
+        field_type: @config.FInt,
+        default_value: d.tag_max_candidates.to_string(),
+      },
     ],
   }
 }

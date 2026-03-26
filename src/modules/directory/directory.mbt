@@ -341,14 +341,8 @@ fn build_repo_root_parts(
 }
 
 ///|
-fn is_writable(path : String) -> Bool {
-  // Try to create a temp file to check writability
-  let test_path = path + "/.moonship_write_test"
-
-  @fs.write_string_to_file(test_path, "") catch { _ => return false }
-
-  @fs.remove_file(test_path) catch { _ => () }
-  true
+async fn is_writable(path : String) -> Bool {
+  @exec.exec_cmd_status("test", ["-w", path]) == 0
 }
 
 ///|
