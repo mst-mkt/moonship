@@ -13,6 +13,9 @@ pub struct CustomModule {
   detect_files : Array[String]
   detect_extensions : Array[String]
   detect_folders : Array[String]
+  os : String
+  use_stdin : Bool
+  ignore_timeout : Bool
 }
 
 ///|
@@ -31,6 +34,9 @@ pub fn CustomModule::default() -> CustomModule {
     detect_files: [],
     detect_extensions: [],
     detect_folders: [],
+    os: "",
+    use_stdin: false,
+    ignore_timeout: false,
   }
 }
 
@@ -57,6 +63,11 @@ pub fn CustomModule::from_table(table : @config.ModuleTable) -> CustomModule {
     detect_folders: table
     .get_string_array("detect_folders")
     .unwrap_or(d.detect_folders),
+    os: table.get_string("os").unwrap_or(d.os),
+    use_stdin: table.get_bool("use_stdin").unwrap_or(d.use_stdin),
+    ignore_timeout: table
+    .get_bool("ignore_timeout")
+    .unwrap_or(d.ignore_timeout),
   }
 }
 
