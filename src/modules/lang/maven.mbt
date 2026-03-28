@@ -116,9 +116,8 @@ pub impl @ms.PromptModule for MavenModule with execute(
 
 ///|
 fn parse_maven_wrapper_version(content : String) -> String {
-  content
-  .split("\n")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(content, "\n")
+  .iter()
   .find_first(fn(s) { s.has_prefix("distributionUrl") })
   .map(fn(s) { extract_maven_version(s) })
   .unwrap_or("")
@@ -134,9 +133,8 @@ fn parse_mvn_cli_version(output : String) -> String {
 
 ///|
 fn extract_maven_version(url_line : String) -> String {
-  url_line
-  .split("/")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(url_line, "/")
+  .iter()
   .find_first(fn(s) { s.has_prefix("apache-maven-") })
   .map(fn(s) {
     let after = s["apache-maven-".length():].to_string()

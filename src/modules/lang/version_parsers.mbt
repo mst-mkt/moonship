@@ -51,16 +51,13 @@ fn parse_helm_version(output : String) -> String {
 
 ///|
 fn parse_nim_version(output : String) -> String {
-  output
-  .split(" ")
-  .find_first(fn(part) {
-    let s = part.to_string()
-
+  @exec.split_to_strings(output, " ")
+  .iter()
+  .find_first(fn(s) {
     not(s.is_empty()) &&
     s.iter().next() is Some('0'..='9') &&
     s.iter().all(fn(c) { (c >= '0' && c <= '9') || c == '.' })
   })
-  .map(fn(s) { s.to_string() })
   .unwrap_or("")
 }
 
@@ -76,14 +73,11 @@ fn parse_opa_version(output : String) -> String {
 
 ///|
 fn parse_cobol_version(output : String) -> String {
-  let found = output
-    .split(" ")
-    .find_first(fn(part) {
-      let s = part.to_string()
-
+  let found = @exec.split_to_strings(output, " ")
+    .iter()
+    .find_first(fn(s) {
       not(s.is_empty()) && s.iter().next() is Some('0'..='9')
     })
-    .map(fn(s) { s.to_string() })
     .unwrap_or("")
 
   guard not(found.is_empty()) else { return "" }

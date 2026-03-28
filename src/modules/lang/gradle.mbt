@@ -116,9 +116,8 @@ pub impl @ms.PromptModule for GradleModule with execute(
 
 ///|
 fn parse_gradle_wrapper_version(content : String) -> String {
-  content
-  .split("\n")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(content, "\n")
+  .iter()
   .find_first(fn(s) { s.has_prefix("distributionUrl") })
   .map(fn(s) { extract_gradle_version(s) })
   .unwrap_or("")
@@ -134,9 +133,8 @@ fn parse_gradle_cli_version(output : String) -> String {
 
 ///|
 fn extract_gradle_version(url_line : String) -> String {
-  url_line
-  .split("/")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(url_line, "/")
+  .iter()
   .find_first(fn(s) { s.has_prefix("gradle-") })
   .map(fn(s) {
     let after = s["gradle-".length():].to_string()

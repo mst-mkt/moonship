@@ -138,9 +138,8 @@ fn get_go_mod_version(cwd : String) -> String {
   let path = cwd + "/go.mod"
   let content = @fs.read_file_to_string(path) catch { _ => return "" }
 
-  content
-  .split("\n")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(content, "\n")
+  .iter()
   .find_first(fn(s) { s.has_prefix("go ") })
   .map(fn(s) {
     s["go ".length():].to_string().trim(chars=" \t\r\n").to_string()

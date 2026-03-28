@@ -110,30 +110,14 @@ pub impl @ms.PromptModule for KotlinModule with execute(
 
 ///|
 fn parse_kotlin_version(output : String) -> String {
-  output
-  .split(" ")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(output, " ")
+  .iter()
   .find_first(fn(s) {
     not(s.is_empty()) &&
     s.iter().nth(0).map(fn(c) { c >= '0' && c <= '9' }).unwrap_or(false)
   })
-  .map(fn(s) { extract_digits_and_dots(s) })
+  .map(fn(s) { extract_version_digits(s) })
   .unwrap_or("")
-}
-
-///|
-fn extract_digits_and_dots(s : String) -> String {
-  let buf = StringBuilder::new()
-
-  for ch in s {
-    if (ch >= '0' && ch <= '9') || ch == '.' {
-      buf.write_char(ch)
-    } else {
-      break
-    }
-  }
-
-  buf.to_string()
 }
 
 ///|

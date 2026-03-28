@@ -113,12 +113,11 @@ pub impl @ms.PromptModule for DamlModule with execute(
 
 ///|
 fn parse_sdk_version(content : String) -> String {
-  content
-  .split("\n")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(content, "\n")
+  .iter()
   .find_first(fn(s) { s.has_prefix("sdk-version:") })
   .map(fn(s) {
-    let parts = s.split(":").map(fn(p) { p.to_string() }).collect()
+    let parts = @exec.split_to_strings(s, ":")
     if parts.length() >= 2 {
       parts[1].trim(chars=" ").to_string()
     } else {

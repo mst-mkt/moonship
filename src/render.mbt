@@ -125,7 +125,7 @@ fn replace_var(s : String, var_name : String, replacement : String) -> String {
 
   guard s.contains(target) else { return s }
 
-  let parts = s.split(target).map(fn(v) { v.to_string() }).collect()
+  let parts = @exec.split_to_strings(s, target)
 
   parts
   .foldi(init=StringBuilder::new(), fn(i, buf, part) {
