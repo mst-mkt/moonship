@@ -148,6 +148,13 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
         ("", "", substituted_full)
       }
 
+      let before_root_path = if not(before_root_path.is_empty()) &&
+        not(self.truncation_symbol.is_empty()) {
+        self.truncation_symbol
+      } else {
+        before_root_path
+      }
+
       let vars : Map[String, String] = {
         "before_root_path": before_root_path,
         "repo_root": repo_root_name,
