@@ -100,3 +100,54 @@ test "parse_direnv_status: empty" {
   assert_false(loaded)
   assert_eq(allowed, "not_allowed")
 }
+
+// --- detect_env_vars ---
+
+///|
+test "default: detect_env_vars contains DIRENV_FILE" {
+  let m = DirenvModule::default()
+  assert_eq(m.detect_env_vars, ["DIRENV_FILE"])
+}
+
+///|
+test "from_table: detect_env_vars parsed" {
+  let config = @config.Config::from_toml(
+    (
+      #|[direnv]
+      #|detect_env_vars = ["DIRENV_FILE", "DIRENV_DIR"]
+    ),
+  )
+  let m = DirenvModule::from_config(config)
+  assert_eq(m.detect_env_vars, ["DIRENV_FILE", "DIRENV_DIR"])
+}
+
+///|
+test "from_table: empty detect_env_vars" {
+  let config = @config.Config::from_toml(
+    (
+      #|[direnv]
+      #|detect_env_vars = []
+    ),
+  )
+  let m = DirenvModule::from_config(config)
+  assert_eq(m.detect_env_vars, [])
+}
+
+///|
+async test "execute: skips when detect_env_vars empty and no files" {
+  let path = "/tmp/moonship-test-direnv-noenv"
+  @test_util.setup_dir(path)
+
+  let config = @config.Config::from_toml(
+    (
+      #|[direnv]
+      #|disabled = false
+      #|detect_env_vars = []
+    ),
+  )
+  let m = DirenvModule::from_config(config)
+  let ctx = @context.Context::new(cwd=path, config~)
+  assert_true(m.execute(ctx) is Skipped(_))
+
+  @test_util.remove_dir_recursive(path)
+}

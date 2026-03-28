@@ -13,6 +13,7 @@ pub struct DirenvModule {
   detect_files : Array[String]
   detect_extensions : Array[String]
   detect_folders : Array[String]
+  detect_env_vars : Array[String]
 }
 
 ///|
@@ -31,6 +32,7 @@ pub fn DirenvModule::default() -> DirenvModule {
     detect_files: [".envrc"],
     detect_extensions: [],
     detect_folders: [],
+    detect_env_vars: ["DIRENV_FILE"],
   }
 }
 
@@ -59,6 +61,9 @@ pub fn DirenvModule::from_table(table : @config.ModuleTable) -> DirenvModule {
     detect_folders: table
     .get_string_array("detect_folders")
     .unwrap_or(d.detect_folders),
+    detect_env_vars: table
+    .get_string_array("detect_env_vars")
+    .unwrap_or(d.detect_env_vars),
   }
 }
 
@@ -87,7 +92,10 @@ pub impl @ms.PromptModule for DirenvModule with execute(
 ) -> @ms.ModuleResult {
   guard not(self.disabled) else { return Disabled }
 
-  let has_env = not(@sys.get_env_var("DIRENV_FILE").unwrap_or("").is_empty())
+  let has_env = self.detect_env_vars
+    .iter()
+    .any(fn(name) { not(@sys.get_env_var(name).unwrap_or("").is_empty()) })
+
   guard has_env ||
     @exec.detect_project(
       ctx.cwd,
@@ -202,6 +210,11 @@ pub fn DirenvModule::schema() -> @config.ModuleSchema {
         name: "detect_folders",
         field_type: @config.FStringArray,
         default_value: d.detect_folders.join(", "),
+      },
+      {
+        name: "detect_env_vars",
+        field_type: @config.FStringArray,
+        default_value: d.detect_env_vars.join(", "),
       },
     ],
   }
