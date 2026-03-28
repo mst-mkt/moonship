@@ -74,7 +74,10 @@ pub impl @ms.PromptModule for SudoModule with execute(
 
 ///|
 async fn is_sudo_cached() -> Bool {
-  let (status, _) = @process.collect_stdout("sudo", ["-n", "true"][:]) catch {
+  let (status, _) = @process.collect_stdout(
+    "sh",
+    ["-c", "sudo -n true 2>/dev/null"][:],
+  ) catch {
     _ => return false
   }
 
