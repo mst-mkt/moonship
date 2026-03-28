@@ -20,7 +20,7 @@ __moonship_async_callback() {
   local fd=$1
   local result
   result=$(cat <&$fd 2>/dev/null)
-  if [[ -n "$result" ]]; then
+  if [[ -n "$result" && "$result" != "$PROMPT" ]]; then
     PROMPT="$result"
     zle && zle reset-prompt
   fi
@@ -62,7 +62,7 @@ __moonship_precmd() {
   PROMPT="$raw"
 
   # Async update: recompute in background, update cache, redraw
-  exec {MOONSHIP_ASYNC_FD} < <("$MOONSHIP_BIN" prompt --async "${MOONSHIP_PROMPT_ARGS[@]}")
+  exec {MOONSHIP_ASYNC_FD} < <("$MOONSHIP_BIN" prompt --async "${MOONSHIP_PROMPT_ARGS[@]}" 2>/dev/null)
   zle -F "$MOONSHIP_ASYNC_FD" __moonship_async_callback 2>/dev/null
 }
 
