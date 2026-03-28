@@ -107,11 +107,9 @@ pub impl @ms.PromptModule for CMakeModule with execute(
 
 ///|
 fn parse_cmake_version(output : String) -> String {
-  let parts = @exec.split_to_strings(output, " ")
-  if parts.length() >= 3 {
-    parts[2]
-  } else {
-    ""
+  match @exec.split_to_strings(output, " ") {
+    [_, _, version, ..] => version
+    _ => ""
   }
 }
 

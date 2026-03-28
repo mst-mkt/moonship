@@ -126,11 +126,9 @@ fn parse_gradle_wrapper_version(content : String) -> String {
 
 ///|
 fn parse_gradle_cli_version(output : String) -> String {
-  let parts = @exec.split_to_strings(output, " ")
-  if parts.length() >= 2 && parts[0] == "Gradle" {
-    parts[1]
-  } else {
-    ""
+  match @exec.split_to_strings(output, " ") {
+    ["Gradle", version, ..] => version
+    _ => ""
   }
 }
 

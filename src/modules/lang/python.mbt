@@ -173,11 +173,9 @@ async fn get_python_version(
 
 ///|
 fn parse_python_version(output : String) -> String {
-  let parts = @exec.split_to_strings(output, " ")
-  if parts.length() >= 2 {
-    parts[1]
-  } else {
-    output
+  match @exec.split_to_strings(output, " ") {
+    [_, version, ..] => version
+    _ => output
   }
 }
 

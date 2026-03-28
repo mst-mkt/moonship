@@ -86,12 +86,10 @@ pub impl @ms.PromptModule for VagrantModule with execute(
   let output = @exec.exec_cmd("vagrant", ["--version"])
   guard not(output.is_empty()) else { return Skipped("vagrant not found") }
 
-  let parts = @exec.split_to_strings(output, " ")
-  guard parts.length() >= 2 else {
-    return Skipped("could not parse vagrant version")
+  let version = match @exec.split_to_strings(output, " ") {
+    [_, version, ..] => version
+    _ => return Skipped("could not parse vagrant version")
   }
-
-  let version = parts[1]
   guard not(version.is_empty()) else {
     return Skipped("could not parse vagrant version")
   }

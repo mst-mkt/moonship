@@ -86,12 +86,10 @@ pub impl @ms.PromptModule for TypstModule with execute(
   let output = @exec.exec_cmd("typst", ["--version"])
   guard not(output.is_empty()) else { return Skipped("typst not found") }
 
-  let parts = @exec.split_to_strings(output, " ")
-  guard parts.length() >= 2 else {
-    return Skipped("could not parse typst version")
+  let version = match @exec.split_to_strings(output, " ") {
+    [_, version, ..] => version
+    _ => return Skipped("could not parse typst version")
   }
-
-  let version = parts[1]
   guard not(version.is_empty()) else {
     return Skipped("could not parse typst version")
   }

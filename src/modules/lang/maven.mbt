@@ -126,11 +126,9 @@ fn parse_maven_wrapper_version(content : String) -> String {
 
 ///|
 fn parse_mvn_cli_version(output : String) -> String {
-  let parts = @exec.split_to_strings(output, " ")
-  if parts.length() >= 3 && parts[0] == "Apache" && parts[1] == "Maven" {
-    parts[2]
-  } else {
-    ""
+  match @exec.split_to_strings(output, " ") {
+    ["Apache", "Maven", version, ..] => version
+    _ => ""
   }
 }
 

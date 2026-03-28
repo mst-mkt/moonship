@@ -107,11 +107,9 @@ pub impl @ms.PromptModule for DartModule with execute(
 
 ///|
 fn parse_dart_version(output : String) -> String {
-  let parts = @exec.split_to_strings(output, " ")
-  if parts.length() >= 4 {
-    parts[3]
-  } else {
-    ""
+  match @exec.split_to_strings(output, " ") {
+    [_, _, _, version, ..] => version
+    _ => ""
   }
 }
 

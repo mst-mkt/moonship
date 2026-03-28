@@ -154,29 +154,18 @@ fn check_go_version(installed : String, required : String) -> Bool {
     return true
   }
 
-  let inst_parts = @exec.split_to_strings(installed, ".")
-  let req_parts = @exec.split_to_strings(required, ".")
-
-  let inst_major = if inst_parts.length() >= 1 {
-    @exec.parse_leading_int(inst_parts[0])
-  } else {
-    0
-  }
-  let inst_minor = if inst_parts.length() >= 2 {
-    @exec.parse_leading_int(inst_parts[1])
-  } else {
-    0
+  let (inst_major, inst_minor) = match @exec.split_to_strings(installed, ".") {
+    [major, minor, ..] =>
+      (@exec.parse_leading_int(major), @exec.parse_leading_int(minor))
+    [major] => (@exec.parse_leading_int(major), 0)
+    _ => (0, 0)
   }
 
-  let req_major = if req_parts.length() >= 1 {
-    @exec.parse_leading_int(req_parts[0])
-  } else {
-    0
-  }
-  let req_minor = if req_parts.length() >= 2 {
-    @exec.parse_leading_int(req_parts[1])
-  } else {
-    0
+  let (req_major, req_minor) = match @exec.split_to_strings(required, ".") {
+    [major, minor, ..] =>
+      (@exec.parse_leading_int(major), @exec.parse_leading_int(minor))
+    [major] => (@exec.parse_leading_int(major), 0)
+    _ => (0, 0)
   }
 
   if inst_major != req_major {

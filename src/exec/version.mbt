@@ -53,11 +53,13 @@ pub fn format_version(raw : String, version_format : String) -> String {
   guard not(raw.is_empty()) else { return "" }
 
   let stripped = strip_v_prefix(raw)
-  let parts = split_to_strings(stripped, ".")
 
-  let major = if parts.length() > 0 { parts[0] } else { "" }
-  let minor = if parts.length() > 1 { parts[1] } else { "" }
-  let patch = if parts.length() > 2 { parts[2] } else { "" }
+  let (major, minor, patch) = match split_to_strings(stripped, ".") {
+    [major, minor, patch, ..] => (major, minor, patch)
+    [major, minor] => (major, minor, "")
+    [major] => (major, "", "")
+    _ => ("", "", "")
+  }
 
   version_format
   .replace(old="${raw}", new=stripped)

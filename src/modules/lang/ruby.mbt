@@ -115,12 +115,10 @@ pub impl @ms.PromptModule for RubyModule with execute(
 
 ///|
 fn parse_ruby_version(output : String) -> String {
-  let parts = @exec.split_to_strings(output, " ")
-  if parts.length() < 2 {
-    return ""
+  let version_part = match @exec.split_to_strings(output, " ") {
+    [_, version, ..] => version
+    _ => return ""
   }
-
-  let version_part = parts[1]
 
   match version_part.find("p") {
     Some(idx) => version_part[:idx].to_string()

@@ -107,11 +107,9 @@ pub impl @ms.PromptModule for RustModule with execute(
 
 ///|
 fn parse_rustc_version(output : String) -> String {
-  let parts = @exec.split_to_strings(output, " ")
-  if parts.length() >= 2 {
-    parts[1]
-  } else {
-    output
+  match @exec.split_to_strings(output, " ") {
+    [_, version, ..] => version
+    _ => output
   }
 }
 

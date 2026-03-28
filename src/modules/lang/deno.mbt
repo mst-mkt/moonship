@@ -109,11 +109,9 @@ pub impl @ms.PromptModule for DenoModule with execute(
 
 ///|
 fn parse_deno_version(output : String) -> String {
-  let parts = @exec.split_to_strings(output, " ")
-  if parts.length() >= 2 {
-    parts[1]
-  } else {
-    ""
+  match @exec.split_to_strings(output, " ") {
+    [_, version, ..] => version
+    _ => ""
   }
 }
 
