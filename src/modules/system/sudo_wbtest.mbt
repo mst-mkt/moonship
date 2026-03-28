@@ -24,3 +24,23 @@ async test "execute: enabled without cached credentials returns Skipped or Outpu
   let result = m.execute(ctx)
   assert_true(not(result is Disabled))
 }
+
+// --- allow_windows ---
+
+///|
+test "default: allow_windows is false" {
+  let m = SudoModule::default()
+  assert_eq(m.allow_windows, false)
+}
+
+///|
+test "from_table: allow_windows parsed" {
+  let config = @config.Config::from_toml(
+    (
+      #|[sudo]
+      #|allow_windows = true
+    ),
+  )
+  let m = SudoModule::from_config(config)
+  assert_eq(m.allow_windows, true)
+}

@@ -5,6 +5,7 @@ pub struct SudoModule {
   format : String
   style : String
   symbol : String
+  allow_windows : Bool
 }
 
 ///|
@@ -15,6 +16,7 @@ pub fn SudoModule::default() -> SudoModule {
     format: "[as $symbol]($style)",
     style: "bold blue",
     symbol: "🧙 ",
+    allow_windows: false,
   }
 }
 
@@ -27,6 +29,7 @@ pub fn SudoModule::from_table(table : @config.ModuleTable) -> SudoModule {
     format: table.get_string("format").unwrap_or(d.format),
     style: table.get_string("style").unwrap_or(d.style),
     symbol: table.get_string("symbol").unwrap_or(d.symbol),
+    allow_windows: table.get_bool("allow_windows").unwrap_or(d.allow_windows),
   }
 }
 
@@ -92,6 +95,11 @@ pub fn SudoModule::schema() -> @config.ModuleSchema {
       { name: "format", field_type: @config.FString, default_value: d.format },
       { name: "style", field_type: @config.FString, default_value: d.style },
       { name: "symbol", field_type: @config.FString, default_value: d.symbol },
+      {
+        name: "allow_windows",
+        field_type: @config.FBool,
+        default_value: d.allow_windows.to_string(),
+      },
     ],
   }
 }
