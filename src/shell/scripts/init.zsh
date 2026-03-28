@@ -22,6 +22,7 @@ __moonship_async_callback() {
   result=$(cat <&$fd 2>/dev/null)
   if [[ -n "$result" && "$result" != "$PROMPT" ]]; then
     PROMPT="$result"
+    RPROMPT=$("$MOONSHIP_BIN" prompt --right "${MOONSHIP_PROMPT_ARGS[@]}" 2>/dev/null)
     zle && zle reset-prompt
   fi
   zle -F "$fd"
@@ -61,6 +62,9 @@ __moonship_precmd() {
   local raw=$("$MOONSHIP_BIN" prompt "${MOONSHIP_PROMPT_ARGS[@]}")
   PROMPT="$raw"
 
+  # Right prompt
+  RPROMPT=$("$MOONSHIP_BIN" prompt --right "${MOONSHIP_PROMPT_ARGS[@]}" 2>/dev/null)
+
   # Async update: recompute in background, update cache, redraw
   exec {MOONSHIP_ASYNC_FD} < <("$MOONSHIP_BIN" prompt --async "${MOONSHIP_PROMPT_ARGS[@]}" 2>/dev/null)
   zle -F "$MOONSHIP_ASYNC_FD" __moonship_async_callback 2>/dev/null
@@ -68,8 +72,8 @@ __moonship_precmd() {
 
 # Keymap change: redraw prompt with new keymap
 __moonship_zle_keymap_select() {
-  local raw=$("$MOONSHIP_BIN" prompt "${MOONSHIP_PROMPT_ARGS[@]}" --keymap "$KEYMAP")
-  PROMPT="$raw"
+  PROMPT=$("$MOONSHIP_BIN" prompt "${MOONSHIP_PROMPT_ARGS[@]}" --keymap "$KEYMAP")
+  RPROMPT=$("$MOONSHIP_BIN" prompt --right "${MOONSHIP_PROMPT_ARGS[@]}" --keymap "$KEYMAP" 2>/dev/null)
   zle reset-prompt
 }
 

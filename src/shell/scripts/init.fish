@@ -10,6 +10,7 @@ end
 
 function fish_prompt
   set -l exit_code $status
+  set -g __moonship_last_status $exit_code
   set -l cmd_duration 0
 
   if set -q MOONSHIP_START_TIME
@@ -20,11 +21,12 @@ function fish_prompt
 
   set -l jobs_count (count (jobs -p))
   set -l term_width $COLUMNS
-  set -l prompt_args \
+  set -g __moonship_prompt_args \
     --status "$exit_code" \
     --cmd-duration "$cmd_duration" \
     --jobs "$jobs_count" \
     --terminal-width "$term_width"
+  set -l prompt_args $__moonship_prompt_args
 
   # Synchronous prompt (uses cache if available)
   $MOONSHIP_BIN prompt $prompt_args
@@ -35,6 +37,10 @@ function fish_prompt
     disown
   end
   set -e __moonship_is_repaint
+end
+
+function fish_right_prompt
+  $MOONSHIP_BIN prompt --right $__moonship_prompt_args 2>/dev/null
 end
 
 function __moonship_preexec --on-event fish_preexec
