@@ -16,7 +16,7 @@ pub fn FossilBranchModule::default() -> FossilBranchModule {
     async_render: false,
     format: "on [$symbol$branch]($style) ",
     style: "bold purple",
-    symbol: " ",
+    symbol: " ",
     truncation_length: 2147483647,
     truncation_symbol: "…",
   }

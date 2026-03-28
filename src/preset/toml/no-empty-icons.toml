@@ -72,6 +72,9 @@ format = '(via [$symbol($version )]($style))'
 [lua]
 format = '(via [$symbol($version )]($style))'
 
+[moonbit]
+format = '(via [$symbol($version )]($style))'
+
 [nim]
 format = '(via [$symbol($version )]($style))'
 

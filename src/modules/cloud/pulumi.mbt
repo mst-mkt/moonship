@@ -19,7 +19,7 @@ pub fn PulumiModule::default() -> PulumiModule {
     async_render: false,
     format: "via [$symbol($username@)$stack]($style) ",
     style: "bold 5",
-    symbol: " ",
+    symbol: " ",
     search_upwards: true,
     version_format: "v${raw}",
     detect_files: ["Pulumi.yaml", "Pulumi.yml"],

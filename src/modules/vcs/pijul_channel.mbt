@@ -16,7 +16,7 @@ pub fn PijulChannelModule::default() -> PijulChannelModule {
     async_render: false,
     format: "on [$symbol$channel]($style) ",
     style: "bold purple",
-    symbol: " ",
+    symbol: " ",
     truncation_length: 2147483647,
     truncation_symbol: "…",
   }

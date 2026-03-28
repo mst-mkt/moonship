@@ -159,6 +159,9 @@ format = '\[[$symbol$health]($style)\]'
 [mojo]
 format = '\[[$symbol($version)]($style)\]'
 
+[moonbit]
+format = '\[[$symbol($version)]($style)\]'
+
 [nats]
 format = '\[[$symbol$name]($style)\]'
 

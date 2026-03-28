@@ -16,7 +16,7 @@ pub fn HgBranchModule::default() -> HgBranchModule {
     async_render: false,
     format: "on [$symbol$branch(:$topic)]($style) ",
     style: "bold purple",
-    symbol: " ",
+    symbol: " ",
     truncation_length: 2147483647,
     truncation_symbol: "…",
   }

@@ -22,7 +22,7 @@ pub fn GitBranchModule::default() -> GitBranchModule {
     style: "bold purple",
     truncation_length: 20,
     truncation_symbol: "…",
-    symbol: " ",
+    symbol: " ",
     only_attached: false,
     always_show_remote: false,
     ignore_bare_repo: false,

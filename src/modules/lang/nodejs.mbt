@@ -20,7 +20,7 @@ pub fn NodejsModule::default() -> NodejsModule {
     format: "via [$symbol($version )]($style)",
     style: "bold green",
     not_capable_style: "bold red",
-    symbol: " ",
+    symbol: " ",
     version_format: "v${raw}",
     detect_files: ["package.json", ".node-version", ".nvmrc"],
     detect_folders: ["node_modules"],

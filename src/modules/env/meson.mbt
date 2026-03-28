@@ -15,7 +15,7 @@ pub fn MesonModule::default() -> MesonModule {
     async_render: false,
     format: "via [$symbol$project]($style) ",
     style: "blue bold",
-    symbol: "⬢ ",
+    symbol: "⬡ ",
     truncation_length: 2147483647,
   }
 }

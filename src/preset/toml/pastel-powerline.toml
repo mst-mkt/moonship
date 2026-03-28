@@ -22,6 +22,7 @@ $maven\
 $nodejs\
 $nim\
 $rust\
+$moonbit\
 $scala\
 [](fg:#86BBD8 bg:#06969A)\
 $docker_context\
@@ -131,6 +132,11 @@ format = '[ $symbol ($version) ]($style)'
 
 [nodejs]
 symbol = ""
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[moonbit]
+symbol = " "
 style = "bg:#86BBD8"
 format = '[ $symbol ($version) ]($style)'
 

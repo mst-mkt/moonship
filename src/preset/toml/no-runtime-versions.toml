@@ -87,6 +87,9 @@ format = 'via [$symbol]($style)'
 [mojo]
 format = 'with [$symbol]($style)'
 
+[moonbit]
+format = 'via [$symbol]($style)'
+
 [nim]
 format = 'via [$symbol]($style)'
 

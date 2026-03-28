@@ -173,6 +173,9 @@ symbol = "nats "
 [netns]
 symbol = "netns "
 
+[moonbit]
+symbol = "moon "
+
 [nim]
 symbol = "nim "
 

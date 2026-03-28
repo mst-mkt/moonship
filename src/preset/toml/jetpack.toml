@@ -66,6 +66,7 @@ $raku\
 $rlang\
 $red\
 $ruby\
+$moonbit\
 $rust\
 $scala\
 $solidity\
@@ -237,6 +238,12 @@ format = " [rs](italic) [$symbol$version]($style)"
 symbol = "⊃ "
 version_format = "${raw}"
 style = "bold red"
+
+[moonbit]
+format = " [mbt](italic) [$symbol$version]($style)"
+symbol = "🐰 "
+version_format = "${raw}"
+style = "bold 125"
 
 [package]
 format = " [pkg](italic dimmed) [$symbol$version]($style)"

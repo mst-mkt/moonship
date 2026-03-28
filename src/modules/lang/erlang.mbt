@@ -18,7 +18,7 @@ pub fn ErlangModule::default() -> ErlangModule {
     async_render: false,
     format: "via [$symbol($version )]($style)",
     style: "bold red",
-    symbol: " ",
+    symbol: " ",
     version_format: "v${raw}",
     detect_files: ["rebar.config", "erlang.mk"],
     detect_extensions: [],
