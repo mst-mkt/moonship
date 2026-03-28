@@ -102,9 +102,8 @@ pub impl @ms.PromptModule for PijulChannelModule with execute(
 
 ///|
 fn parse_pijul_channel(output : String) -> String {
-  output
-  .split("\n")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(output, "\n")
+  .iter()
   .find_first(fn(s) { s.has_prefix("* ") })
   .map(fn(s) { s[2:].to_string() })
   .unwrap_or("")

@@ -275,11 +275,7 @@ fn last_path_component(path : String) -> String {
 
 ///|
 fn split_path(path : String) -> Array[String] {
-  path
-  .split("/")
-  .map(fn(sv) { sv.to_string() })
-  .filter(fn(s) { not(s.is_empty()) })
-  .collect()
+  @exec.split_to_strings(path, "/").filter(fn(s) { not(s.is_empty()) })
 }
 
 ///|

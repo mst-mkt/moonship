@@ -68,9 +68,8 @@ fn extract_toml_version(content : String, path~ : Array[String]) -> String {
 
 ///|
 fn extract_version_line(content : String) -> String {
-  content
-  .split("\n")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(content, "\n")
+  .iter()
   .find_first(fn(s) {
     has_version_key(s) && not(extract_value_after_separator(s).is_empty())
   })
@@ -117,9 +116,8 @@ fn strip_quotes(s : String) -> String {
 fn parse_r_description(content : String) -> String {
   let prefix = "Version:"
 
-  content
-  .split("\n")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(content, "\n")
+  .iter()
   .find_first(fn(s) { s.has_prefix(prefix) })
   .map(fn(s) { strip_quotes(s[prefix.length():].to_string()) })
   .unwrap_or("")

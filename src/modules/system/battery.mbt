@@ -184,18 +184,15 @@ fn read_battery() -> (Int, String) {
         _ => continue i + 1
       }
 
-      let cap_lines = @exec.split_to_strings(cap_str, "\n")
-      let cap = if cap_lines.length() > 0 {
-        @exec.parse_leading_int(cap_lines[0])
-      } else {
-        -1
+      let cap = match @exec.split_to_strings(cap_str, "\n") {
+        [first, ..] => @exec.parse_leading_int(first)
+        _ => -1
       }
 
-      let status_lines = status_str
-        .split("\n")
-        .map(fn(s) { s.to_string() })
-        .collect()
-      let status = if status_lines.length() > 0 { status_lines[0] } else { "" }
+      let status = match @exec.split_to_strings(status_str, "\n") {
+        [first, ..] => first
+        _ => ""
+      }
 
       break (cap, status)
     }

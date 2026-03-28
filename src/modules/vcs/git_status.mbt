@@ -275,12 +275,14 @@ fn parse_git_porcelain(
 fn parse_ahead_behind(output : String) -> (Int, Int) {
   guard not(output.is_empty()) else { return (0, 0) }
 
-  let parts = @exec.split_to_strings(output, "\t")
-  guard parts.length() == 2 else { return (0, 0) }
-
-  let behind = @strconv.parse_int(parts[0]) catch { _ => 0 }
-  let ahead = @strconv.parse_int(parts[1]) catch { _ => 0 }
-  (ahead, behind)
+  match @exec.split_to_strings(output, "\t") {
+    [behind_str, ahead_str] => {
+      let behind = @strconv.parse_int(behind_str) catch { _ => 0 }
+      let ahead = @strconv.parse_int(ahead_str) catch { _ => 0 }
+      (ahead, behind)
+    }
+    _ => (0, 0)
+  }
 }
 
 ///|

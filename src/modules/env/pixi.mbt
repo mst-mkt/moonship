@@ -103,8 +103,10 @@ pub impl @ms.PromptModule for PixiModule with execute(
   }
 
   if not(version.is_empty()) {
-    let parts = version.split(" ").collect()
-    let ver = if parts.length() >= 2 { parts[1].to_string() } else { version }
+    let ver = match @exec.split_to_strings(version, " ") {
+      [_, v, ..] => v
+      _ => version
+    }
     vars["version"] = @exec.format_version(ver, self.version_format)
   }
 

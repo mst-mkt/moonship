@@ -107,17 +107,18 @@ fn parse_fossil_numstat(output : String) -> (Int, Int) {
 
       let s = lines[i]
       if s.contains("TOTAL") {
-        let nums = s
-          .split(" ")
-          .map(fn(p) { p.to_string() })
+        let nums = @exec.split_to_strings(s, " ")
+          .iter()
           .filter(fn(p) {
             not(p.is_empty()) &&
             p.iter().nth(0).map(fn(c) { c >= '0' && c <= '9' }).unwrap_or(false)
           })
           .map(fn(p) { parse_num(p) })
           .collect()
-        if nums.length() >= 2 {
-          break (nums[0], nums[1])
+
+        match nums {
+          [added, deleted, ..] => break (added, deleted)
+          _ => ()
         }
       }
       continue i - 1

@@ -113,9 +113,8 @@ fn parse_meminfo(content : String) -> (Int64, Int64) {
 
 ///|
 fn parse_kb_value(line : String) -> Int64 {
-  line
-  .split(" ")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(line, " ")
+  .iter()
   .find_first(fn(s) {
     not(s.is_empty()) &&
     s.iter().nth(0).map(fn(c) { c >= '0' && c <= '9' }).unwrap_or(false)

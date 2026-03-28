@@ -244,7 +244,7 @@ pub impl @ms.PromptModule for KubernetesModule with execute(
 fn get_kubeconfig_paths(home_dir : String) -> Array[String] {
   let env = @sys.get_env_var("KUBECONFIG").unwrap_or("")
   if not(env.is_empty()) {
-    return env.split(":").map(fn(p) { p.to_string() }).collect()
+    return @exec.split_to_strings(env, ":")
   }
 
   if not(home_dir.is_empty()) {

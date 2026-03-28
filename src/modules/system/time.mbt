@@ -114,11 +114,10 @@ async fn in_time_range(range : String) -> Bool {
   let now = @exec.exec_cmd("date", ["+%H:%M"])
   guard not(now.is_empty()) else { return true }
 
-  let parts = @exec.split_to_strings(range, "-")
-  guard parts.length() == 2 else { return true }
-
-  let start = parts[0]
-  let end = parts[1]
+  let (start, end) = match @exec.split_to_strings(range, "-") {
+    [s, e] => (s, e)
+    _ => return true
+  }
 
   if start <= end {
     now >= start && now <= end

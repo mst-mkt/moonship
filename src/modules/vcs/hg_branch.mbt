@@ -114,11 +114,10 @@ pub impl @ms.PromptModule for HgBranchModule with execute(
 ///|
 fn read_hg_file(path : String) -> String {
   let content = @fs.read_file_to_string(path) catch { _ => return "" }
-  let lines = content.split("\n").collect()
-  if lines.length() > 0 {
-    lines[0].to_string()
-  } else {
-    ""
+
+  match @exec.split_to_strings(content, "\n") {
+    [first, ..] => first
+    _ => ""
   }
 }
 

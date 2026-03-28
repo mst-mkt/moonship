@@ -171,11 +171,7 @@ fn parse_string_list(s : String) -> Array[String] {
     return []
   }
 
-  s
-  .split(",")
-  .map(fn(sv) { sv.to_string() })
-  .filter(fn(s) { not(s.is_empty()) })
-  .collect()
+  @exec.split_to_strings(s, ",").filter(fn(s) { not(s.is_empty()) })
 }
 
 ///|

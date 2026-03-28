@@ -102,8 +102,10 @@ fn detect_container() -> String {
       _ => return ""
     }
 
-    let lines = @exec.split_to_strings(content, "\n")
-    let value = if lines.length() > 0 { lines[0] } else { "" }
+    let value = match @exec.split_to_strings(content, "\n") {
+      [first, ..] => first
+      _ => ""
+    }
 
     if value == "wsl" {
       return ""
@@ -123,9 +125,8 @@ fn detect_container() -> String {
 
 ///|
 fn parse_containerenv_name(content : String) -> String {
-  content
-  .split("\n")
-  .map(fn(s) { s.to_string() })
+  @exec.split_to_strings(content, "\n")
+  .iter()
   .find_first(fn(s) {
     s.has_prefix("name=\"") ||
     s.has_prefix("name=") ||
