@@ -201,12 +201,18 @@ fn GitStatusModule::render_status(
 
 ///|
 fn format_count(count : Int, symbol : String) -> String {
-  if count > 1 {
-    symbol + count.to_string()
-  } else if count == 1 {
+  if count <= 0 {
+    return ""
+  }
+
+  if symbol.contains("${count}") || symbol.contains("$count") {
     symbol
+    .replace(old="${count}", new=count.to_string())
+    .replace(old="$count", new=count.to_string())
+  } else if count > 1 {
+    symbol + count.to_string()
   } else {
-    ""
+    symbol
   }
 }
 
@@ -294,10 +300,20 @@ fn build_ahead_behind(
 ) -> String {
   if ahead > 0 && behind > 0 {
     diverged_sym
+    .replace(old="${ahead_count}", new=ahead.to_string())
+    .replace(old="$ahead_count", new=ahead.to_string())
+    .replace(old="${behind_count}", new=behind.to_string())
+    .replace(old="$behind_count", new=behind.to_string())
+    .replace(old="${count}", new=(ahead + behind).to_string())
+    .replace(old="$count", new=(ahead + behind).to_string())
   } else if ahead > 0 {
     ahead_sym
+    .replace(old="${count}", new=ahead.to_string())
+    .replace(old="$count", new=ahead.to_string())
   } else if behind > 0 {
     behind_sym
+    .replace(old="${count}", new=behind.to_string())
+    .replace(old="$count", new=behind.to_string())
   } else if not(up_to_date_sym.is_empty()) {
     up_to_date_sym
   } else {

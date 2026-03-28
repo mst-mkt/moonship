@@ -305,8 +305,47 @@ test "format_count: empty symbol" {
 }
 
 ///|
+test "format_count: symbol with count placeholder" {
+  assert_eq(
+    format_count(3, "[▪┤[$count](bold)│]"),
+    "[▪┤[3](bold)│]",
+  )
+}
+
+///|
+test "format_count: symbol with braced count placeholder" {
+  assert_eq(
+    format_count(5, "[▪┤[${count}](bold)│]"),
+    "[▪┤[5](bold)│]",
+  )
+}
+
+///|
+test "format_count: count placeholder with count=1" {
+  assert_eq(format_count(1, "[$count]"), "[1]")
+}
+
+///|
 test "build_status_string: all zeros" {
   assert_eq(build_status_string([(0, "+"), (0, "!"), (0, "?")]), "")
+}
+
+///|
+test "build_ahead_behind: diverged with count placeholders" {
+  let result = build_ahead_behind(
+    3, 2, "⇡", "⇣", "", "[◇ ▴${ahead_count}▿${behind_count}]",
+  )
+  assert_eq(result, "[◇ ▴3▿2]")
+}
+
+///|
+test "build_ahead_behind: ahead with count placeholder" {
+  assert_eq(build_ahead_behind(5, 0, "[⇡$count]", "⇣", "", "⇕"), "[⇡5]")
+}
+
+///|
+test "build_ahead_behind: behind with count placeholder" {
+  assert_eq(build_ahead_behind(0, 3, "⇡", "[⇣$count]", "", "⇕"), "[⇣3]")
 }
 
 ///|
