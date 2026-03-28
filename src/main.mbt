@@ -28,6 +28,8 @@ async fn main {
         emit_warnings(config.warnings)
         println(config.to_toml())
       }
+    Preset(name) => run_preset(name)
+    PresetList => run_preset_list()
     Schema => run_schema()
     Version => println("moonship 0.0.0")
     Help => run_help()

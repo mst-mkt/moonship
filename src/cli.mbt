@@ -14,6 +14,8 @@ enum Command {
   BugReport
   Completions(String)
   Session
+  Preset(String)
+  PresetList
   Schema
   Version
   Help
@@ -75,6 +77,7 @@ fn parse_args(args : Array[String]) -> Command {
     "completions" => if args.length() > 1 { Completions(args[1]) } else { Help }
     "session" => Session
     "time" => Time
+    "preset" => parse_preset_command(args)
     "print-config" => {
       let is_default = args[1:]
         .to_array()
@@ -203,6 +206,17 @@ fn parse_init_command(args : Array[String]) -> Command {
     .any(fn(a) { a == "--print-full-init" })
 
   Init(shell, print_full)
+}
+
+///|
+fn parse_preset_command(args : Array[String]) -> Command {
+  guard args.length() > 1 else { return PresetList }
+
+  if args[1] == "--list" || args[1] == "-l" {
+    return PresetList
+  }
+
+  Preset(args[1])
 }
 
 ///|

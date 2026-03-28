@@ -1,0 +1,65 @@
+options(
+  "pre-build": [
+    {
+      "command": ":embed -i $input -o $output --text --name preset_bracketed_segments",
+      "input": "toml/bracketed-segments.toml",
+      "output": "bracketed_segments_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_catppuccin_powerline",
+      "input": "toml/catppuccin-powerline.toml",
+      "output": "catppuccin_powerline_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_gruvbox_rainbow",
+      "input": "toml/gruvbox-rainbow.toml",
+      "output": "gruvbox_rainbow_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_jetpack",
+      "input": "toml/jetpack.toml",
+      "output": "jetpack_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_nerd_font_symbols",
+      "input": "toml/nerd-font-symbols.toml",
+      "output": "nerd_font_symbols_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_no_empty_icons",
+      "input": "toml/no-empty-icons.toml",
+      "output": "no_empty_icons_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_no_nerd_font",
+      "input": "toml/no-nerd-font.toml",
+      "output": "no_nerd_font_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_no_runtime_versions",
+      "input": "toml/no-runtime-versions.toml",
+      "output": "no_runtime_versions_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_pastel_powerline",
+      "input": "toml/pastel-powerline.toml",
+      "output": "pastel_powerline_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_plain_text_symbols",
+      "input": "toml/plain-text-symbols.toml",
+      "output": "plain_text_symbols_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_pure_preset",
+      "input": "toml/pure-preset.toml",
+      "output": "pure_preset_embed.mbt",
+    },
+    {
+      "command": ":embed -i $input -o $output --text --name preset_tokyo_night",
+      "input": "toml/tokyo-night.toml",
+      "output": "tokyo_night_embed.mbt",
+    },
+  ],
+  "supported-targets": "native",
+)

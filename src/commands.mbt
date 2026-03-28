@@ -525,18 +525,19 @@ fn generate_zsh_completions() -> String {
     "#compdef moonship", "", "_moonship() {", "  local -a commands", "  commands=(",
     "    'prompt:Generate prompt string'", "    'timings:Show module execution times'",
     "    'explain:Explain active modules'", "    'module:Run a single module'", "    'init:Print shell init script'",
-    "    'cache:Cache operations'", "    'completions:Generate shell completions'",
-    "    'session:Generate random session key'", "    'time:Print current time in ms'",
-    "    'print-config:Print active configuration'", "    'schema:Print JSON Schema for config'",
-    "    'version:Print version'", "    'help:Print help'", "  )", "", "  _describe 'command' commands",
-    "}", "", "_moonship",
+    "    'cache:Cache operations'", "    'config:Edit configuration'", "    'toggle:Toggle a module config value'",
+    "    'preset:Print a preset configuration'", "    'bug-report:Print environment info'",
+    "    'completions:Generate shell completions'", "    'session:Generate random session key'",
+    "    'time:Print current time in ms'", "    'print-config:Print active configuration'",
+    "    'schema:Print JSON Schema for config'", "    'version:Print version'", "    'help:Print help'",
+    "  )", "", "  _describe 'command' commands", "}", "", "_moonship",
   ].join("\n")
 }
 
 ///|
 fn generate_bash_completions() -> String {
   [
-    "_moonship() {", "  local cur=\"${COMP_WORDS[COMP_CWORD]}\"", "  local commands=\"prompt timings explain module init cache completions session time print-config schema version help\"",
+    "_moonship() {", "  local cur=\"${COMP_WORDS[COMP_CWORD]}\"", "  local commands=\"prompt timings explain module init cache config toggle preset bug-report completions session time print-config schema version help\"",
     "", "  COMPREPLY=( $(compgen -W \"$commands\" -- \"$cur\") )", "}", "", "complete -F _moonship moonship",
   ].join("\n")
 }
@@ -550,6 +551,10 @@ fn generate_fish_completions() -> String {
     "complete -c moonship -n '__fish_use_subcommand' -a module -d 'Run a single module'",
     "complete -c moonship -n '__fish_use_subcommand' -a init -d 'Print shell init script'",
     "complete -c moonship -n '__fish_use_subcommand' -a cache -d 'Cache operations'",
+    "complete -c moonship -n '__fish_use_subcommand' -a config -d 'Edit configuration'",
+    "complete -c moonship -n '__fish_use_subcommand' -a toggle -d 'Toggle a module config value'",
+    "complete -c moonship -n '__fish_use_subcommand' -a preset -d 'Print a preset configuration'",
+    "complete -c moonship -n '__fish_use_subcommand' -a bug-report -d 'Print environment info'",
     "complete -c moonship -n '__fish_use_subcommand' -a completions -d 'Generate shell completions'",
     "complete -c moonship -n '__fish_use_subcommand' -a session -d 'Generate random session key'",
     "complete -c moonship -n '__fish_use_subcommand' -a time -d 'Print current time in ms'",
@@ -576,6 +581,24 @@ fn run_init(shell_name : String, print_full : Bool) -> Unit {
         "moonship: unknown shell '\{shell_name}'. Supported: zsh, bash, fish",
       )
   }
+}
+
+///|
+fn run_preset(name : String) -> Unit {
+  match @preset.get_preset(name) {
+    Some(content) => println(content)
+    None => {
+      println("moonship: unknown preset '\{name}'")
+      println("")
+      println("Available presets:")
+      @preset.list_presets().each(fn(n) { println("  \{n}") })
+    }
+  }
+}
+
+///|
+fn run_preset_list() -> Unit {
+  @preset.list_presets().each(fn(name) { println(name) })
 }
 
 ///|
@@ -606,6 +629,8 @@ fn run_help() -> Unit {
     #|  moonship time                Print current time in ms
     #|  moonship print-config        Print active configuration
     #|    --default, -d              Print default configuration
+    #|  moonship preset <name>       Print a preset configuration
+    #|  moonship preset --list       List available presets
     #|  moonship schema              Print JSON Schema for config
     #|  moonship version             Print version
     #|  moonship help                Print this help

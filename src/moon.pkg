@@ -17,6 +17,7 @@ import {
   "mst-mkt/moonship/modules/env" @mod_env,
   "mst-mkt/moonship/modules/lang" @mod_lang,
   "mst-mkt/moonship/modules/prompt" @mod_prompt,
+  "mst-mkt/moonship/preset" @preset,
   "mst-mkt/moonship/modules/system" @mod_system,
   "mst-mkt/moonship/modules/vcs" @mod_vcs,
   "mst-mkt/moonship/shell" @shell,
