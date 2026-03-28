@@ -19,84 +19,8 @@ fn last_word(output : String) -> String {
 }
 
 ///|
-fn parse_rustc_version(output : String) -> String {
-  match @exec.split_to_strings(output, " ") {
-    [_, version, ..] => version
-    _ => output
-  }
-}
-
-///|
 fn parse_dart_version(output : String) -> String {
-  match @exec.split_to_strings(output, " ") {
-    [_, _, _, version, ..] => version
-    _ => ""
-  }
-}
-
-///|
-fn parse_crystal_version(output : String) -> String {
-  match @exec.split_to_strings(output, " ") {
-    [_, version, ..] => version
-    _ => ""
-  }
-}
-
-///|
-fn parse_deno_version(output : String) -> String {
-  match @exec.split_to_strings(output, " ") {
-    [_, version, ..] => version
-    _ => ""
-  }
-}
-
-///|
-fn parse_cmake_version(output : String) -> String {
-  match @exec.split_to_strings(output, " ") {
-    [_, _, version, ..] => version
-    _ => ""
-  }
-}
-
-///|
-fn parse_moon_version(output : String) -> String {
-  match @exec.split_to_strings(output, " ") {
-    [_, version, ..] => version
-    _ => ""
-  }
-}
-
-///|
-fn parse_julia_version(output : String) -> String {
-  match @exec.split_to_strings(output, " ") {
-    [_, _, version, ..] => version
-    _ => ""
-  }
-}
-
-///|
-fn parse_mojo_version(output : String) -> String {
-  last_word(output)
-}
-
-///|
-fn parse_gleam_version(output : String) -> String {
-  last_word(output)
-}
-
-///|
-fn parse_red_version(output : String) -> String {
-  last_word(output)
-}
-
-///|
-fn parse_fennel_version(output : String) -> String {
-  last_word(output)
-}
-
-///|
-fn parse_odin_version(output : String) -> String {
-  last_word(output)
+  nth_word(output, 3)
 }
 
 ///|

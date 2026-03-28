@@ -64,23 +64,20 @@ async test "execute: detects .cr extension" {
 
 ///|
 test "parse_crystal_version: standard" {
-  assert_eq(parse_crystal_version("Crystal 1.7.3 (2023-03-20)"), "1.7.3")
+  assert_eq(nth_word("Crystal 1.7.3 (2023-03-20)", 1), "1.7.3")
 }
 
 ///|
 test "parse_crystal_version: with build info" {
-  assert_eq(
-    parse_crystal_version("Crystal 1.10.0 [dd40a27] (2023-10-09)"),
-    "1.10.0",
-  )
+  assert_eq(nth_word("Crystal 1.10.0 [dd40a27] (2023-10-09)", 1), "1.10.0")
 }
 
 ///|
 test "parse_crystal_version: empty" {
-  assert_eq(parse_crystal_version(""), "")
+  assert_eq(nth_word("", 1), "")
 }
 
 ///|
 test "parse_crystal_version: single word" {
-  assert_eq(parse_crystal_version("Crystal"), "")
+  assert_eq(nth_word("Crystal", 1), "")
 }

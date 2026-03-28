@@ -64,15 +64,15 @@ async test "execute: detects .gleam extension" {
 
 ///|
 test "parse_gleam_version: standard" {
-  assert_eq(parse_gleam_version("gleam 1.0.0"), "1.0.0")
+  assert_eq(last_word("gleam 1.0.0"), "1.0.0")
 }
 
 ///|
 test "parse_gleam_version: with extra info" {
-  assert_eq(parse_gleam_version("gleam 0.33.0-rc1"), "0.33.0-rc1")
+  assert_eq(last_word("gleam 0.33.0-rc1"), "0.33.0-rc1")
 }
 
 ///|
 test "parse_gleam_version: empty" {
-  assert_eq(parse_gleam_version(""), "")
+  assert_eq(last_word(""), "")
 }

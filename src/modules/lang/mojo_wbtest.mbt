@@ -47,10 +47,10 @@ async test "execute: detects .mojo extension" {
 
 ///|
 test "parse_mojo_version: typical output" {
-  assert_eq(parse_mojo_version("mojo 24.1.0"), "24.1.0")
+  assert_eq(last_word("mojo 24.1.0"), "24.1.0")
 }
 
 ///|
 test "parse_mojo_version: empty" {
-  assert_eq(parse_mojo_version(""), "")
+  assert_eq(last_word(""), "")
 }

@@ -241,7 +241,7 @@ pub fn rust_defaults() -> SimpleLangModule {
     command: "rustc",
     command_args: ["--version"],
     detect_label: "Rust",
-    version_extract: parse_rustc_version,
+    version_extract: fn(output) { nth_word(output, 1) },
   }
 }
 
@@ -281,7 +281,7 @@ pub fn crystal_defaults() -> SimpleLangModule {
     command: "crystal",
     command_args: ["--version"],
     detect_label: "Crystal",
-    version_extract: parse_crystal_version,
+    version_extract: fn(output) { nth_word(output, 1) },
   }
 }
 
@@ -303,7 +303,7 @@ pub fn deno_defaults() -> SimpleLangModule {
     command: "deno",
     command_args: ["-V"],
     detect_label: "Deno",
-    version_extract: parse_deno_version,
+    version_extract: fn(output) { nth_word(output, 1) },
   }
 }
 
@@ -323,7 +323,7 @@ pub fn cmake_defaults() -> SimpleLangModule {
     command: "cmake",
     command_args: ["--version"],
     detect_label: "CMake",
-    version_extract: parse_cmake_version,
+    version_extract: fn(output) { nth_word(output, 2) },
   }
 }
 
@@ -343,7 +343,7 @@ pub fn moonbit_defaults() -> SimpleLangModule {
     command: "moon",
     command_args: ["version"],
     detect_label: "MoonBit",
-    version_extract: parse_moon_version,
+    version_extract: fn(output) { nth_word(output, 1) },
   }
 }
 
@@ -363,7 +363,7 @@ pub fn mojo_defaults() -> SimpleLangModule {
     command: "mojo",
     command_args: ["--version"],
     detect_label: "Mojo",
-    version_extract: parse_mojo_version,
+    version_extract: last_word,
   }
 }
 
@@ -403,7 +403,7 @@ pub fn gleam_defaults() -> SimpleLangModule {
     command: "gleam",
     command_args: ["--version"],
     detect_label: "Gleam",
-    version_extract: parse_gleam_version,
+    version_extract: last_word,
   }
 }
 
@@ -543,7 +543,7 @@ pub fn julia_defaults() -> SimpleLangModule {
     command: "julia",
     command_args: ["--version"],
     detect_label: "Julia",
-    version_extract: parse_julia_version,
+    version_extract: fn(output) { nth_word(output, 2) },
   }
 }
 
@@ -583,7 +583,7 @@ pub fn red_defaults() -> SimpleLangModule {
     command: "red",
     command_args: ["--version"],
     detect_label: "Red",
-    version_extract: parse_red_version,
+    version_extract: last_word,
   }
 }
 
@@ -603,7 +603,7 @@ pub fn fennel_defaults() -> SimpleLangModule {
     command: "fennel",
     command_args: ["--version"],
     detect_label: "Fennel",
-    version_extract: parse_fennel_version,
+    version_extract: last_word,
   }
 }
 
@@ -663,6 +663,6 @@ pub fn odin_defaults() -> SimpleLangModule {
     command: "odin",
     command_args: ["version"],
     detect_label: "Odin",
-    version_extract: parse_odin_version,
+    version_extract: last_word,
   }
 }

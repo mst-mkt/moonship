@@ -149,20 +149,20 @@ async test "execute: detects deps.js" {
 
 ///|
 test "parse_deno_version: standard output" {
-  assert_eq(parse_deno_version("deno 1.40.2"), "1.40.2")
+  assert_eq(nth_word("deno 1.40.2", 1), "1.40.2")
 }
 
 ///|
 test "parse_deno_version: v2" {
-  assert_eq(parse_deno_version("deno 2.0.0"), "2.0.0")
+  assert_eq(nth_word("deno 2.0.0", 1), "2.0.0")
 }
 
 ///|
 test "parse_deno_version: empty" {
-  assert_eq(parse_deno_version(""), "")
+  assert_eq(nth_word("", 1), "")
 }
 
 ///|
 test "parse_deno_version: single word" {
-  assert_eq(parse_deno_version("deno"), "")
+  assert_eq(nth_word("deno", 1), "")
 }

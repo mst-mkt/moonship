@@ -64,15 +64,15 @@ async test "execute: detects CMakeCache.txt" {
 
 ///|
 test "parse_cmake_version: standard" {
-  assert_eq(parse_cmake_version("cmake version 3.27.4"), "3.27.4")
+  assert_eq(nth_word("cmake version 3.27.4", 2), "3.27.4")
 }
 
 ///|
 test "parse_cmake_version: empty" {
-  assert_eq(parse_cmake_version(""), "")
+  assert_eq(nth_word("", 2), "")
 }
 
 ///|
 test "parse_cmake_version: too few words" {
-  assert_eq(parse_cmake_version("cmake version"), "")
+  assert_eq(nth_word("cmake version", 2), "")
 }

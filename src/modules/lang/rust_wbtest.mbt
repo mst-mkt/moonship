@@ -67,34 +67,31 @@ async test "execute: detects .rs extension and produces output with symbol" {
 
 ///|
 test "parse_rustc_version: standard output" {
-  assert_eq(
-    parse_rustc_version("rustc 1.75.0 (82e1608df 2023-12-21)"),
-    "1.75.0",
-  )
+  assert_eq(nth_word("rustc 1.75.0 (82e1608df 2023-12-21)", 1), "1.75.0")
 }
 
 ///|
 test "parse_rustc_version: nightly" {
   assert_eq(
-    parse_rustc_version("rustc 1.77.0-nightly (bf3c6c5be 2024-01-10)"),
+    nth_word("rustc 1.77.0-nightly (bf3c6c5be 2024-01-10)", 1),
     "1.77.0-nightly",
   )
 }
 
 ///|
 test "parse_rustc_version: empty" {
-  assert_eq(parse_rustc_version(""), "")
+  assert_eq(nth_word("", 1), "")
 }
 
 ///|
 test "parse_rustc_version: single word" {
-  assert_eq(parse_rustc_version("1.75.0"), "1.75.0")
+  assert_eq(nth_word("1.75.0", 1), "")
 }
 
 ///|
 test "parse_rustc_version: beta" {
   assert_eq(
-    parse_rustc_version("rustc 1.76.0-beta.1 (abc123 2024-01-01)"),
+    nth_word("rustc 1.76.0-beta.1 (abc123 2024-01-01)", 1),
     "1.76.0-beta.1",
   )
 }

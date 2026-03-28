@@ -36,10 +36,10 @@ async test "execute: detects .fnl extension" {
 
 ///|
 test "parse_fennel_version: typical output" {
-  assert_eq(parse_fennel_version("Fennel 1.3.1"), "1.3.1")
+  assert_eq(last_word("Fennel 1.3.1"), "1.3.1")
 }
 
 ///|
 test "parse_fennel_version: empty" {
-  assert_eq(parse_fennel_version(""), "")
+  assert_eq(last_word(""), "")
 }

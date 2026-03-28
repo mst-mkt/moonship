@@ -81,20 +81,20 @@ async test "execute: detects .jl extension" {
 
 ///|
 test "parse_julia_version: standard" {
-  assert_eq(parse_julia_version("julia version 1.8.5"), "1.8.5")
+  assert_eq(nth_word("julia version 1.8.5", 2), "1.8.5")
 }
 
 ///|
 test "parse_julia_version: rc" {
-  assert_eq(parse_julia_version("julia version 1.9.0-rc1"), "1.9.0-rc1")
+  assert_eq(nth_word("julia version 1.9.0-rc1", 2), "1.9.0-rc1")
 }
 
 ///|
 test "parse_julia_version: empty" {
-  assert_eq(parse_julia_version(""), "")
+  assert_eq(nth_word("", 2), "")
 }
 
 ///|
 test "parse_julia_version: too few words" {
-  assert_eq(parse_julia_version("julia version"), "")
+  assert_eq(nth_word("julia version", 2), "")
 }

@@ -47,10 +47,10 @@ async test "execute: detects .odin extension" {
 
 ///|
 test "parse_odin_version: typical output" {
-  assert_eq(parse_odin_version("odin version dev-2024-01"), "dev-2024-01")
+  assert_eq(last_word("odin version dev-2024-01"), "dev-2024-01")
 }
 
 ///|
 test "parse_odin_version: empty" {
-  assert_eq(parse_odin_version(""), "")
+  assert_eq(last_word(""), "")
 }

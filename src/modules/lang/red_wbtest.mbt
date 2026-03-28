@@ -47,10 +47,10 @@ async test "execute: detects .red extension" {
 
 ///|
 test "parse_red_version: typical output" {
-  assert_eq(parse_red_version("Red 0.6.4"), "0.6.4")
+  assert_eq(last_word("Red 0.6.4"), "0.6.4")
 }
 
 ///|
 test "parse_red_version: empty" {
-  assert_eq(parse_red_version(""), "")
+  assert_eq(last_word(""), "")
 }

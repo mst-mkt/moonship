@@ -94,22 +94,22 @@ async test "execute: outputs version in moonbit project" {
 ///|
 test "parse_moon_version: standard" {
   assert_eq(
-    parse_moon_version("moon 0.1.20260309 (f21b520 2026-03-09)"),
+    nth_word("moon 0.1.20260309 (f21b520 2026-03-09)", 1),
     "0.1.20260309",
   )
 }
 
 ///|
 test "parse_moon_version: simple" {
-  assert_eq(parse_moon_version("moon 0.2.0"), "0.2.0")
+  assert_eq(nth_word("moon 0.2.0", 1), "0.2.0")
 }
 
 ///|
 test "parse_moon_version: empty" {
-  assert_eq(parse_moon_version(""), "")
+  assert_eq(nth_word("", 1), "")
 }
 
 ///|
 test "parse_moon_version: single word" {
-  assert_eq(parse_moon_version("moon"), "")
+  assert_eq(nth_word("moon", 1), "")
 }
