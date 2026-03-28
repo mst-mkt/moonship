@@ -15,7 +15,7 @@ async test "build_status_string: all types" {
     (1, "!"),
     (3, "?"),
   ])
-  assert_eq(result, "⇡+2!?3")
+  assert_eq(result, "⇡+!?")
 }
 
 ///|
@@ -36,8 +36,8 @@ async test "build_status_string: count=1 symbol only" {
 }
 
 ///|
-async test "build_status_string: count>1 shows count" {
-  assert_eq(build_status_string([(5, "+")]), "+5")
+async test "build_status_string: count>1 shows symbol only" {
+  assert_eq(build_status_string([(5, "+")]), "+")
 }
 
 // --- render_status unit tests ---
@@ -295,13 +295,13 @@ test "format_count: count of 1" {
 }
 
 ///|
-test "format_count: count greater than 1" {
-  assert_eq(format_count(5, "+"), "+5")
+test "format_count: count greater than 1 without placeholder" {
+  assert_eq(format_count(5, "+"), "+")
 }
 
 ///|
-test "format_count: empty symbol" {
-  assert_eq(format_count(3, ""), "3")
+test "format_count: empty symbol stays empty" {
+  assert_eq(format_count(3, ""), "")
 }
 
 ///|

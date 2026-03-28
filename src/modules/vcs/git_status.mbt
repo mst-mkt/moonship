@@ -205,15 +205,9 @@ fn format_count(count : Int, symbol : String) -> String {
     return ""
   }
 
-  if symbol.contains("${count}") || symbol.contains("$count") {
-    symbol
-    .replace(old="${count}", new=count.to_string())
-    .replace(old="$count", new=count.to_string())
-  } else if count > 1 {
-    symbol + count.to_string()
-  } else {
-    symbol
-  }
+  symbol
+  .replace(old="${count}", new=count.to_string())
+  .replace(old="$count", new=count.to_string())
 }
 
 ///|

@@ -85,7 +85,7 @@ pub fn ModuleOutput::render_with_fill(
 }
 
 ///|
-fn visible_width(s : String) -> Int {
+pub fn visible_width(s : String) -> Int {
   s
   .iter()
   .fold(init=(0, false), fn(state, ch) {
