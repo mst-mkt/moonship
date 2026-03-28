@@ -19,6 +19,17 @@ fn evaluate(
   default_style : @terminal.Style,
   palette : Map[String, String],
 ) -> Array[Segment] {
+  evaluate_inner(nodes, vars, default_style, palette, reparse_vars=true)
+}
+
+///|
+fn evaluate_inner(
+  nodes : Array[FormatNode],
+  vars : Map[String, String],
+  default_style : @terminal.Style,
+  palette : Map[String, String],
+  reparse_vars~ : Bool,
+) -> Array[Segment] {
   nodes
   .iter()
   .flat_map(fn(node) {
@@ -29,7 +40,13 @@ fn evaluate(
       Variable(name) =>
         match vars.get(name) {
           Some(val) =>
-            evaluate(parse_format(val), {}, default_style, palette).iter()
+            if reparse_vars {
+              evaluate(parse_format(val), {}, default_style, palette).iter()
+            } else if not(val.is_empty()) {
+              Iter::singleton(Segment::new(val, style=default_style))
+            } else {
+              Iter::empty()
+            }
           None => Iter::empty()
         }
       EnvVar(name) => {
@@ -42,48 +59,35 @@ fn evaluate(
       }
       Styled(content_nodes, style_spec) => {
         let resolved_style = resolve_style(style_spec, vars, palette)
-        let text = nodes_to_text(content_nodes, vars)
+        let segs = evaluate_inner(
+          content_nodes,
+          vars,
+          resolved_style,
+          palette,
+          reparse_vars=false,
+        )
 
-        if not(text.is_empty()) {
-          Iter::singleton(Segment::new(text, style=resolved_style))
-        } else {
+        if segs.is_empty() {
           Iter::empty()
+        } else {
+          segs.iter()
         }
       }
       Conditional(content_nodes) =>
         if has_any_string_var(content_nodes, vars) {
-          evaluate(content_nodes, vars, default_style, palette).iter()
+          evaluate_inner(
+            content_nodes,
+            vars,
+            default_style,
+            palette,
+            reparse_vars~,
+          ).iter()
         } else {
           Iter::empty()
         }
     }
   })
   .collect()
-}
-
-///|
-/// Convert AST nodes to plain text with variable substitution (no styling).
-fn nodes_to_text(
-  nodes : Array[FormatNode],
-  vars : Map[String, String],
-) -> String {
-  let buf = StringBuilder::new()
-
-  for node in nodes {
-    match node {
-      Text(t) => buf.write_string(t)
-      Escape(ch) => buf.write_string(unescape(ch))
-      Variable(name) => buf.write_string(vars.get(name).unwrap_or(""))
-      EnvVar(name) => buf.write_string(@sys.get_env_var(name).unwrap_or(""))
-      Styled(inner, _) => buf.write_string(nodes_to_text(inner, vars))
-      Conditional(content) =>
-        if has_any_string_var(content, vars) {
-          buf.write_string(nodes_to_text(content, vars))
-        }
-    }
-  }
-
-  buf.to_string()
 }
 
 ///|

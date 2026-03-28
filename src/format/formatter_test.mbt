@@ -122,7 +122,36 @@ test "format: nested brackets" {
     {},
     @terminal.Style::default(),
   )
-  assert_eq(segs[0].text, "[inner]")
+  let text = segs.map(fn(s) { s.text }).join("")
+  assert_eq(text, "[inner]")
+  assert_true(segs[0].style.bold)
+}
+
+///|
+test "format: nested styled block preserves inner style" {
+  let vars : Map[String, String] = { "branch": "main", "style": "bg:yellow" }
+  let segs = @format.format_string(
+    "[[ $branch ](fg:red bg:yellow)]($style)",
+    vars,
+    @terminal.Style::default(),
+  )
+  let text = segs.map(fn(s) { s.text }).join("")
+  assert_true(text.contains("main"))
+  let branch_seg = segs.iter().find_first(fn(s) { s.text.contains("main") })
+  guard branch_seg is Some(seg)
+  assert_true(seg.style.fg is Red)
+}
+
+///|
+test "format: nested styled block with special char variable" {
+  let vars : Map[String, String] = { "stashed": "$", "style": "red bold" }
+  let segs = @format.format_string(
+    "[[$stashed]($style)](bold)",
+    vars,
+    @terminal.Style::default(),
+  )
+  let text = segs.map(fn(s) { s.text }).join("")
+  assert_true(text.contains("$"))
 }
 
 ///|
@@ -157,7 +186,9 @@ test "format: escaped brackets" {
     vars,
     @terminal.Style::default(),
   )
-  assert_eq(segs[0].text, "[hello]")
+  let text = segs.map(fn(s) { s.text }).join("")
+  assert_eq(text, "[hello]")
+  assert_true(segs[0].style.bold)
 }
 
 ///|

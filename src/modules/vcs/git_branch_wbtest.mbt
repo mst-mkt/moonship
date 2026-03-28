@@ -200,8 +200,8 @@ async test "render_branch: always_show_remote forces remote display" {
     fail("expected Output")
   }
 
-  let rendered = out.render()
-  assert_true(rendered.contains(":main"))
+  let text = out.segments.map(fn(s) { s.text }).join("")
+  assert_true(text.contains(":main"))
 }
 
 ///|

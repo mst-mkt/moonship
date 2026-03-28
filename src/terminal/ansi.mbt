@@ -83,6 +83,13 @@ pub fn parse_color(
   palette? : Map[String, String] = active_palette.val,
 ) -> Color {
   let lower = name.to_lower()
+
+  // Palette overrides named colors (Starship behavior)
+  match palette.get(lower) {
+    Some(palette_color) => return parse_color(palette_color, palette={})
+    None => ()
+  }
+
   match lower {
     "black" => Black
     "red" => Red
@@ -102,11 +109,7 @@ pub fn parse_color(
     "bright-white" | "brightwhite" => BrightWhite
     "prev_fg" => PrevFg
     "prev_bg" => PrevBg
-    _ =>
-      match palette.get(lower) {
-        Some(palette_color) => parse_color(palette_color, palette={})
-        None => parse_color_value(name)
-      }
+    _ => parse_color_value(name)
   }
 }
 

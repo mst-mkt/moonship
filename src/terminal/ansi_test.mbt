@@ -414,6 +414,31 @@ test "parse_color: palette lookup resolves hex" {
   assert_true(@terminal.parse_color("accent", palette~) is Hex(0xFF0000))
 }
 
+///|
+test "parse_color: palette overrides named color" {
+  let palette : Map[String, String] = { "yellow": "#f9e2af" }
+  assert_true(@terminal.parse_color("yellow", palette~) is Hex(0xf9e2af))
+}
+
+///|
+test "parse_color: palette overrides multiple named colors" {
+  let palette : Map[String, String] = {
+    "red": "#f38ba8",
+    "green": "#a6e3a1",
+    "blue": "#89b4fa",
+  }
+  assert_true(@terminal.parse_color("red", palette~) is Hex(0xf38ba8))
+  assert_true(@terminal.parse_color("green", palette~) is Hex(0xa6e3a1))
+  assert_true(@terminal.parse_color("blue", palette~) is Hex(0x89b4fa))
+}
+
+///|
+test "parse_color: named color works without palette override" {
+  let palette : Map[String, String] = { "custom": "#123456" }
+  assert_true(@terminal.parse_color("yellow", palette~) is Yellow)
+  assert_true(@terminal.parse_color("red", palette~) is Red)
+}
+
 // --- parse_style edge cases ---
 
 ///|
