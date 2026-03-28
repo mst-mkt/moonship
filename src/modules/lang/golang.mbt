@@ -154,8 +154,8 @@ fn check_go_version(installed : String, required : String) -> Bool {
     return true
   }
 
-  let inst_parts = installed.split(".").map(fn(s) { s.to_string() }).collect()
-  let req_parts = required.split(".").map(fn(s) { s.to_string() }).collect()
+  let inst_parts = @exec.split_to_strings(installed, ".")
+  let req_parts = @exec.split_to_strings(required, ".")
 
   let inst_major = if inst_parts.length() >= 1 {
     @exec.parse_leading_int(inst_parts[0])

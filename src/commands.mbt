@@ -325,7 +325,7 @@ async fn run_config(name : String, value : String) -> Unit {
   emit_warnings(config.warnings)
 
   if value.is_empty() {
-    let parts = name.split(".").map(fn(s) { s.to_string() }).collect()
+    let parts = @exec.split_to_strings(name, ".")
 
     if parts.length() == 1 {
       let key = parts[0]

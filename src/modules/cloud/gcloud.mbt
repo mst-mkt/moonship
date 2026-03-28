@@ -150,7 +150,7 @@ fn read_gcloud_config(home_dir : String) -> String {
     _ => "default"
   }
 
-  let name = active_name.split("\n").map(fn(s) { s.to_string() }).collect()
+  let name = @exec.split_to_strings(active_name, "\n")
   let raw_name = if name.length() > 0 { name[0] } else { "default" }
 
   let config_name = trim_whitespace(raw_name)

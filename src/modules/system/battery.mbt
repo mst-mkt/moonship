@@ -184,7 +184,7 @@ fn read_battery() -> (Int, String) {
         _ => continue i + 1
       }
 
-      let cap_lines = cap_str.split("\n").map(fn(s) { s.to_string() }).collect()
+      let cap_lines = @exec.split_to_strings(cap_str, "\n")
       let cap = if cap_lines.length() > 0 {
         @exec.parse_leading_int(cap_lines[0])
       } else {

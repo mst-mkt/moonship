@@ -122,7 +122,7 @@ pub impl @ms.PromptModule for ScalaModule with execute(
 
 ///|
 fn parse_scalac_version(output : String) -> String {
-  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
+  let parts = @exec.split_to_strings(output, " ")
   if parts.length() >= 4 {
     parts[3]
   } else {

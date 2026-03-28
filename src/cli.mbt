@@ -154,7 +154,7 @@ fn parse_prompt_args(
   let pipestatus = if pipestatus_raw.val.is_empty() {
     []
   } else {
-    pipestatus_raw.val.split(" ").map(fn(s) { s.to_string() }).collect()
+    @exec.split_to_strings(pipestatus_raw.val, " ")
   }
 
   let target = if not(profile.val.is_empty()) {

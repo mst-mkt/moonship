@@ -107,7 +107,7 @@ pub impl @ms.PromptModule for CrystalModule with execute(
 
 ///|
 fn parse_crystal_version(output : String) -> String {
-  let parts = output.split(" ").map(fn(s) { s.to_string() }).collect()
+  let parts = @exec.split_to_strings(output, " ")
   if parts.length() >= 2 {
     parts[1]
   } else {

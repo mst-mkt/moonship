@@ -114,7 +114,7 @@ async fn in_time_range(range : String) -> Bool {
   let now = @exec.exec_cmd("date", ["+%H:%M"])
   guard not(now.is_empty()) else { return true }
 
-  let parts = range.split("-").map(fn(s) { s.to_string() }).collect()
+  let parts = @exec.split_to_strings(range, "-")
   guard parts.length() == 2 else { return true }
 
   let start = parts[0]

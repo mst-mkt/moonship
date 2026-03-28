@@ -38,6 +38,11 @@ pub fn last_slash(s : String) -> Int? {
 }
 
 ///|
+pub fn split_to_strings(s : String, sep : String) -> Array[String] {
+  s.split(sep).map(fn(v) { v.to_string() }).collect()
+}
+
+///|
 pub fn parse_leading_int(s : String) -> Int {
   s
   .iter()

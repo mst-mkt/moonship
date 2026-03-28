@@ -102,7 +102,7 @@ fn detect_container() -> String {
       _ => return ""
     }
 
-    let lines = content.split("\n").map(fn(s) { s.to_string() }).collect()
+    let lines = @exec.split_to_strings(content, "\n")
     let value = if lines.length() > 0 { lines[0] } else { "" }
 
     if value == "wsl" {

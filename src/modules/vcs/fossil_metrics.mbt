@@ -99,7 +99,7 @@ pub impl @ms.PromptModule for FossilMetricsModule with execute(
 
 ///|
 fn parse_fossil_numstat(output : String) -> (Int, Int) {
-  let lines = output.split("\n").map(fn(s) { s.to_string() }).collect()
+  let lines = @exec.split_to_strings(output, "\n")
 
   loop lines.length() - 1 {
     i => {

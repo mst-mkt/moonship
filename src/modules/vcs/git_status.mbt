@@ -275,7 +275,7 @@ fn parse_git_porcelain(
 fn parse_ahead_behind(output : String) -> (Int, Int) {
   guard not(output.is_empty()) else { return (0, 0) }
 
-  let parts = output.split("\t").map(fn(s) { s.to_string() }).collect()
+  let parts = @exec.split_to_strings(output, "\t")
   guard parts.length() == 2 else { return (0, 0) }
 
   let behind = @strconv.parse_int(parts[0]) catch { _ => 0 }
