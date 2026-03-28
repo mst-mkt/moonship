@@ -630,37 +630,23 @@ let module_registry : Array[ModuleEntry] = [
 
 ///|
 fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
-  let modules : Map[String, &@ms.PromptModule] = module_registry
-    .iter()
-    .fold(init=(Map::new() : Map[String, &@ms.PromptModule]), fn(
-      modules,
-      entry,
-    ) {
-      modules[entry.name] = (entry.create)(config)
-      modules
-    })
+  let modules : Map[String, &@ms.PromptModule] = {}
 
-  config
-  .get_child_module_names("env_var")
-  .iter()
-  .fold(init=modules, fn(m, child) {
-    m["env_var.\{child}"] = @mod_env.EnvVarModule::from_named_config(
+  for entry in module_registry {
+    modules[entry.name] = (entry.create)(config)
+  }
+
+  for child in config.get_child_module_names("env_var") {
+    modules["env_var.\{child}"] = @mod_env.EnvVarModule::from_named_config(
       config, child,
     )
-    m
-  })
-  |> ignore
+  }
 
-  config
-  .get_child_module_names("custom")
-  .iter()
-  .fold(init=modules, fn(m, child) {
-    m["custom.\{child}"] = @mod_prompt.CustomModule::from_named_config(
+  for child in config.get_child_module_names("custom") {
+    modules["custom.\{child}"] = @mod_prompt.CustomModule::from_named_config(
       config, child,
     )
-    m
-  })
-  |> ignore
+  }
 
   modules
 }
