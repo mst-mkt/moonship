@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = MoonbitModule::default()
+  let m : &@ms.PromptModule = moonbit_defaults()
   assert_eq(m.name(), "moonbit")
 }
 
@@ -13,7 +13,7 @@ async test "execute: disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m = MoonbitModule::from_config(config)
+  let m = SimpleLangModule::from_config(config, moonbit_defaults())
   assert_true(m.execute(ctx) is Disabled)
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-moonbit-empty"
   @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = MoonbitModule::default()
+  let m = moonbit_defaults()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   @test_util.remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects moon.mod.json" {
   let path = "/tmp/moonship-test-moonbit-mod"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/moon.mod.json", "")
-  let m = MoonbitModule::default()
+  let m = moonbit_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no MoonBit project detected")) else {
@@ -50,7 +50,7 @@ async test "execute: detects moon.pkg.json" {
   let path = "/tmp/moonship-test-moonbit-pkg"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/moon.pkg.json", "")
-  let m = MoonbitModule::default()
+  let m = moonbit_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no MoonBit project detected")) else {
@@ -67,7 +67,7 @@ async test "execute: detects .mbt extension" {
   let path = "/tmp/moonship-test-moonbit-ext"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.mbt", "")
-  let m = MoonbitModule::default()
+  let m = moonbit_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no MoonBit project detected")) else {
@@ -84,7 +84,7 @@ async test "execute: outputs version in moonbit project" {
   let path = "/tmp/moonship-test-moonbit-version"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/moon.mod.json", "")
-  let m = MoonbitModule::default()
+  let m = moonbit_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   assert_true(result is Output(_))

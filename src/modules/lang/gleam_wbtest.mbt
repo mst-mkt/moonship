@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = GleamModule::default()
+  let m : &@ms.PromptModule = gleam_defaults()
   assert_eq(m.name(), "gleam")
 }
 
@@ -13,7 +13,7 @@ async test "execute: disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m = GleamModule::from_config(config)
+  let m = SimpleLangModule::from_config(config, gleam_defaults())
   assert_true(m.execute(ctx) is Disabled)
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-gleam-empty"
   @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = GleamModule::default()
+  let m = gleam_defaults()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   @test_util.remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects gleam.toml" {
   let path = "/tmp/moonship-test-gleam-toml"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/gleam.toml", "")
-  let m = GleamModule::default()
+  let m = gleam_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Gleam project detected")) else {
@@ -50,7 +50,7 @@ async test "execute: detects .gleam extension" {
   let path = "/tmp/moonship-test-gleam-ext"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.gleam", "")
-  let m = GleamModule::default()
+  let m = gleam_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Gleam project detected")) else {

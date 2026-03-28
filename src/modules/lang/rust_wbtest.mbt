@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = RustModule::default()
+  let m : &@ms.PromptModule = rust_defaults()
   assert_eq(m.name(), "rust")
 }
 
@@ -13,7 +13,7 @@ async test "execute: disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m = RustModule::from_config(config)
+  let m = SimpleLangModule::from_config(config, rust_defaults())
   assert_true(m.execute(ctx) is Disabled)
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-rust-empty"
   @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = RustModule::default()
+  let m = rust_defaults()
   assert_true(m.execute(ctx) is Skipped(_))
   @test_util.remove_dir_recursive(path)
 }
@@ -32,7 +32,7 @@ async test "execute: detects Cargo.toml and produces output with symbol" {
   let path = "/tmp/moonship-test-rust-cargo"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/Cargo.toml", "")
-  let m = RustModule::default()
+  let m = rust_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
 
@@ -51,7 +51,7 @@ async test "execute: detects .rs extension and produces output with symbol" {
   let path = "/tmp/moonship-test-rust-ext"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.rs", "")
-  let m = RustModule::default()
+  let m = rust_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
 

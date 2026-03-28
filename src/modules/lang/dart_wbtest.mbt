@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = DartModule::default()
+  let m : &@ms.PromptModule = dart_defaults()
   assert_eq(m.name(), "dart")
 }
 
@@ -13,7 +13,7 @@ async test "execute: disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m = DartModule::from_config(config)
+  let m = SimpleLangModule::from_config(config, dart_defaults())
   assert_true(m.execute(ctx) is Disabled)
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-dart-empty"
   @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = DartModule::default()
+  let m = dart_defaults()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   @test_util.remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects pubspec.yaml" {
   let path = "/tmp/moonship-test-dart-pubspec"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/pubspec.yaml", "")
-  let m = DartModule::default()
+  let m = dart_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Dart project detected")) else {
@@ -50,7 +50,7 @@ async test "execute: detects pubspec.yml" {
   let path = "/tmp/moonship-test-dart-yml"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/pubspec.yml", "")
-  let m = DartModule::default()
+  let m = dart_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Dart project detected")) else {
@@ -67,7 +67,7 @@ async test "execute: detects pubspec.lock" {
   let path = "/tmp/moonship-test-dart-lock"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/pubspec.lock", "")
-  let m = DartModule::default()
+  let m = dart_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Dart project detected")) else {
@@ -84,7 +84,7 @@ async test "execute: detects .dart extension" {
   let path = "/tmp/moonship-test-dart-ext"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.dart", "")
-  let m = DartModule::default()
+  let m = dart_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Dart project detected")) else {

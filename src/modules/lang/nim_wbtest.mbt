@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = NimModule::default()
+  let m : &@ms.PromptModule = nim_defaults()
   assert_eq(m.name(), "nim")
 }
 
@@ -13,7 +13,7 @@ async test "execute: disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m = NimModule::from_config(config)
+  let m = SimpleLangModule::from_config(config, nim_defaults())
   assert_true(m.execute(ctx) is Disabled)
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-nim-empty"
   @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = NimModule::default()
+  let m = nim_defaults()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   @test_util.remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects nim.cfg" {
   let path = "/tmp/moonship-test-nim-cfg"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/nim.cfg", "")
-  let m = NimModule::default()
+  let m = nim_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Nim project detected")) else {
@@ -50,7 +50,7 @@ async test "execute: detects .nim extension" {
   let path = "/tmp/moonship-test-nim-ext"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.nim", "")
-  let m = NimModule::default()
+  let m = nim_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Nim project detected")) else {
@@ -67,7 +67,7 @@ async test "execute: detects .nims extension" {
   let path = "/tmp/moonship-test-nim-nims"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/config.nims", "")
-  let m = NimModule::default()
+  let m = nim_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Nim project detected")) else {
@@ -84,7 +84,7 @@ async test "execute: detects .nimble extension" {
   let path = "/tmp/moonship-test-nim-nimble"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/app.nimble", "")
-  let m = NimModule::default()
+  let m = nim_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Nim project detected")) else {

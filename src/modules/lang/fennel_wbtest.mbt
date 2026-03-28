@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = FennelModule::default()
+  let m : &@ms.PromptModule = fennel_defaults()
   assert_eq(m.name(), "fennel")
 }
 
@@ -13,7 +13,7 @@ async test "execute: disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m = FennelModule::from_config(config)
+  let m = SimpleLangModule::from_config(config, fennel_defaults())
   assert_true(m.execute(ctx) is Disabled)
 }
 
@@ -22,7 +22,7 @@ async test "execute: detects .fnl extension" {
   let path = "/tmp/moonship-test-fennel-fnl"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/init.fnl", "")
-  let m = FennelModule::default()
+  let m = fennel_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Fennel project detected")) else {

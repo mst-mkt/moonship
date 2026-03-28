@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = CrystalModule::default()
+  let m : &@ms.PromptModule = crystal_defaults()
   assert_eq(m.name(), "crystal")
 }
 
@@ -13,7 +13,7 @@ async test "execute: disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m = CrystalModule::from_config(config)
+  let m = SimpleLangModule::from_config(config, crystal_defaults())
   assert_true(m.execute(ctx) is Disabled)
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-crystal-empty"
   @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = CrystalModule::default()
+  let m = crystal_defaults()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   @test_util.remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects shard.yml" {
   let path = "/tmp/moonship-test-crystal-shard"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/shard.yml", "")
-  let m = CrystalModule::default()
+  let m = crystal_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Crystal project detected")) else {
@@ -50,7 +50,7 @@ async test "execute: detects .cr extension" {
   let path = "/tmp/moonship-test-crystal-ext"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.cr", "")
-  let m = CrystalModule::default()
+  let m = crystal_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Crystal project detected")) else {

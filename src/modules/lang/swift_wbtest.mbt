@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = SwiftModule::default()
+  let m : &@ms.PromptModule = swift_defaults()
   assert_eq(m.name(), "swift")
 }
 
@@ -13,7 +13,7 @@ async test "execute: disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m = SwiftModule::from_config(config)
+  let m = SimpleLangModule::from_config(config, swift_defaults())
   assert_true(m.execute(ctx) is Disabled)
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-swift-empty"
   @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = SwiftModule::default()
+  let m = swift_defaults()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   @test_util.remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects Package.swift" {
   let path = "/tmp/moonship-test-swift-package"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/Package.swift", "")
-  let m = SwiftModule::default()
+  let m = swift_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Swift project detected")) else {
@@ -50,7 +50,7 @@ async test "execute: detects .swift extension" {
   let path = "/tmp/moonship-test-swift-ext"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.swift", "")
-  let m = SwiftModule::default()
+  let m = swift_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Swift project detected")) else {

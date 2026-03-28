@@ -1,6 +1,6 @@
 ///|
 async test "name" {
-  let m : &@ms.PromptModule = RedModule::default()
+  let m : &@ms.PromptModule = red_defaults()
   assert_eq(m.name(), "red")
 }
 
@@ -13,7 +13,7 @@ async test "execute: disabled returns Disabled" {
     ),
   )
   let ctx = @context.Context::new(cwd="/tmp", config~)
-  let m = RedModule::from_config(config)
+  let m = SimpleLangModule::from_config(config, red_defaults())
   assert_true(m.execute(ctx) is Disabled)
 }
 
@@ -22,7 +22,7 @@ async test "execute: no project returns Skipped" {
   let path = "/tmp/moonship-test-red-empty"
   @test_util.setup_dir(path)
   let ctx = @context.Context::new(cwd=path)
-  let m = RedModule::default()
+  let m = red_defaults()
   let result = m.execute(ctx)
   assert_true(result is Skipped(_))
   @test_util.remove_dir_recursive(path)
@@ -33,7 +33,7 @@ async test "execute: detects .red extension" {
   let path = "/tmp/moonship-test-red-ext"
   @test_util.setup_dir(path)
   @fs.write_string_to_file(path + "/main.red", "")
-  let m = RedModule::default()
+  let m = red_defaults()
   let ctx = @context.Context::new(cwd=path)
   let result = m.execute(ctx)
   guard not(result is Skipped("no Red project detected")) else {
