@@ -221,6 +221,100 @@ async test "execute: private package skipped by default" {
   }
 }
 
+// --- version_format ---
+
+///|
+test "from_table: version_format parsed" {
+  let config = @config.Config::from_toml(
+    (
+      #|[package]
+      #|version_format = "${major}.${minor}"
+    ),
+  )
+  let m = PackageModule::from_config(config)
+  assert_eq(m.version_format, "${major}.${minor}")
+}
+
+///|
+test "from_table: version_format defaults to v${raw}" {
+  let m = PackageModule::default()
+  assert_eq(m.version_format, "v${raw}")
+}
+
+///|
+async test "execute: version_format applied to output" {
+  let path = "/tmp/moonship-test-pkg-vfmt"
+  @test_util.setup_dir(path)
+  @fs.write_string_to_file(path + "/package.json", "{\"version\": \"1.2.3\"}")
+
+  let config = @config.Config::from_toml(
+    (
+      #|[package]
+      #|version_format = "${major}.${minor}"
+    ),
+  )
+  let m = PackageModule::from_config(config)
+  let ctx = @context.Context::new(cwd=path, config~)
+
+  guard m.execute(ctx) is Output(out) else {
+    @test_util.remove_dir_recursive(path)
+    fail("expected Output")
+    return
+  }
+
+  let rendered = out.render()
+  assert_true(rendered.contains("1.2"))
+  assert_false(rendered.contains("1.2.3"))
+
+  @test_util.remove_dir_recursive(path)
+}
+
+///|
+async test "execute: default version_format adds v prefix" {
+  let path = "/tmp/moonship-test-pkg-vprefix"
+  @test_util.setup_dir(path)
+  @fs.write_string_to_file(path + "/package.json", "{\"version\": \"2.0.0\"}")
+
+  let m = PackageModule::default()
+  let ctx = @context.Context::new(cwd=path)
+
+  guard m.execute(ctx) is Output(out) else {
+    @test_util.remove_dir_recursive(path)
+    fail("expected Output")
+    return
+  }
+
+  assert_true(out.render().contains("v2.0.0"))
+
+  @test_util.remove_dir_recursive(path)
+}
+
+///|
+async test "execute: version_format raw passthrough" {
+  let path = "/tmp/moonship-test-pkg-raw"
+  @test_util.setup_dir(path)
+  @fs.write_string_to_file(path + "/package.json", "{\"version\": \"3.1.4\"}")
+
+  let config = @config.Config::from_toml(
+    (
+      #|[package]
+      #|version_format = "${raw}"
+    ),
+  )
+  let m = PackageModule::from_config(config)
+  let ctx = @context.Context::new(cwd=path, config~)
+
+  guard m.execute(ctx) is Output(out) else {
+    @test_util.remove_dir_recursive(path)
+    fail("expected Output")
+    return
+  }
+
+  assert_true(out.render().contains("3.1.4"))
+
+  @test_util.remove_dir_recursive(path)
+}
+
 ///|
 async test "execute: private package shown when display_private=true" {
   let path = "/tmp/moonship-test-pkg-show-private"

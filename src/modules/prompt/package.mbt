@@ -6,6 +6,7 @@ pub struct PackageModule {
   style : String
   symbol : String
   display_private : Bool
+  version_format : String
 }
 
 ///|
@@ -17,6 +18,7 @@ pub fn PackageModule::default() -> PackageModule {
     style: "208 bold",
     symbol: "📦 ",
     display_private: false,
+    version_format: "v${raw}",
   }
 }
 
@@ -32,6 +34,9 @@ pub fn PackageModule::from_table(table : @config.ModuleTable) -> PackageModule {
     display_private: table
     .get_bool("display_private")
     .unwrap_or(d.display_private),
+    version_format: table
+    .get_string("version_format")
+    .unwrap_or(d.version_format),
   }
 }
 
@@ -65,8 +70,12 @@ pub impl @ms.PromptModule for PackageModule with execute(
     return Skipped("private package")
   }
 
-  let version = detect_version(ctx.cwd)
-  guard not(version.is_empty()) else { return Skipped("no package file found") }
+  let raw_version = detect_version(ctx.cwd)
+  guard not(raw_version.is_empty()) else {
+    return Skipped("no package file found")
+  }
+
+  let version = @exec.format_version(raw_version, self.version_format)
 
   let vars : Map[String, String] = {
     "version": version,
@@ -168,6 +177,11 @@ pub fn PackageModule::schema() -> @config.ModuleSchema {
         name: "display_private",
         field_type: @config.FBool,
         default_value: d.display_private.to_string(),
+      },
+      {
+        name: "version_format",
+        field_type: @config.FString,
+        default_value: d.version_format,
       },
     ],
   }
