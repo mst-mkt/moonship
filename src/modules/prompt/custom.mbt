@@ -1,5 +1,6 @@
 ///|
 pub struct CustomModule {
+  module_name : String
   disabled : Bool
   async_render : Bool
   format : String
@@ -21,6 +22,7 @@ pub struct CustomModule {
 ///|
 pub fn CustomModule::default() -> CustomModule {
   {
+    module_name: "custom",
     disabled: false,
     async_render: false,
     format: "[$symbol($output )]($style)",
@@ -41,9 +43,13 @@ pub fn CustomModule::default() -> CustomModule {
 }
 
 ///|
-pub fn CustomModule::from_table(table : @config.ModuleTable) -> CustomModule {
+pub fn CustomModule::from_table(
+  table : @config.ModuleTable,
+  module_name? : String = "custom",
+) -> CustomModule {
   let d = CustomModule::default()
   {
+    module_name,
     disabled: table.get_bool("disabled").unwrap_or(d.disabled),
     async_render: table.get_bool("async").unwrap_or(d.async_render),
     format: table.get_string("format").unwrap_or(d.format),
@@ -78,8 +84,21 @@ pub fn CustomModule::from_config(config : @config.Config) -> CustomModule {
 }
 
 ///|
-pub impl @ms.PromptModule for CustomModule with name(_self) -> String {
-  "custom"
+pub fn CustomModule::from_named_config(
+  config : @config.Config,
+  instance_name : String,
+) -> CustomModule {
+  let module_name = "custom.\{instance_name}"
+
+  match config.get_child_module("custom", instance_name) {
+    Some(table) => CustomModule::from_table(table, module_name~)
+    None => { ..CustomModule::default(), module_name, }
+  }
+}
+
+///|
+pub impl @ms.PromptModule for CustomModule with name(self) -> String {
+  self.module_name
 }
 
 ///|

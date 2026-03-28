@@ -30,6 +30,7 @@ async fn render_prompt(
   should_run? : (&@ms.PromptModule) -> Bool = fn(_) { true },
 ) -> String {
   let format = expand_all(format, modules)
+  let format = expand_prefixed_modules(format, modules)
   let names = @ms.extract_module_names(format)
   let segment_vars : Map[String, Array[@ms.Segment]] = {}
 
@@ -81,6 +82,41 @@ fn expand_all(
     .join("")
 
   replace_var(format, "all", expansion)
+}
+
+///|
+/// Replace `$env_var` and `$custom` with their child instances when children
+/// exist in the config (e.g., `$env_var` → `${env_var.VIMSHELL}${env_var.HOME}`).
+fn expand_prefixed_modules(
+  format : String,
+  modules : Map[String, &@ms.PromptModule],
+) -> String {
+  let prefixes : Array[String] = ["env_var", "custom"]
+
+  prefixes
+  .iter()
+  .fold(init=format, fn(fmt, prefix) {
+    guard fmt.contains("$\{prefix}") else { return fmt }
+
+    let children : Array[String] = modules
+      .keys()
+      .collect()
+      .iter()
+      .filter(fn(name) { name.has_prefix("\{prefix}.") })
+      .collect()
+
+    guard not(children.is_empty()) else { return fmt }
+
+    children.sort()
+
+    let expansion = children
+      .iter()
+      .map(fn(name) { "${\{name}}" })
+      .collect()
+      .join("")
+
+    replace_var(fmt, prefix, expansion)
+  })
 }
 
 ///|

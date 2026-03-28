@@ -136,6 +136,40 @@ pub fn Config::get_raw_module(self : Config, name : String) -> ModuleTable? {
 }
 
 ///|
+/// Return the names of child tables under a module prefix.
+/// For example, if config has `[env_var.VIMSHELL]`, calling with "env_var"
+/// returns `["VIMSHELL"]`.
+pub fn Config::get_child_module_names(
+  self : Config,
+  prefix : String,
+) -> Array[String] {
+  guard self.raw_modules.get(prefix) is Some(table) else { return [] }
+
+  table.0
+  .iter()
+  .filter_map(fn(pair) {
+    guard pair.1 is CTable(_) else { return None }
+    Some(pair.0)
+  })
+  .collect()
+}
+
+///|
+/// Return the child table under a module prefix.
+/// For example, `get_child_module("env_var", "VIMSHELL")` returns the table
+/// from `[env_var.VIMSHELL]`.
+pub fn Config::get_child_module(
+  self : Config,
+  prefix : String,
+  child : String,
+) -> ModuleTable? {
+  guard self.raw_modules.get(prefix) is Some(table) else { return None }
+  guard table.0.get(child) is Some(CTable(child_table)) else { return None }
+
+  Some(ModuleTable(child_table))
+}
+
+///|
 pub fn Config::from_toml(toml_str : String) -> Config raise {
   let value = @toml.parse(toml_str)
   guard value is TomlTable(table) else {

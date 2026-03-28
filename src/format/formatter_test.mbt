@@ -563,10 +563,10 @@ test "parse_format: env var with surrounding text" {
 }
 
 ///|
-test "parse_format: invalid env syntax falls through" {
-  let nodes = @format.parse_format("${invalid}")
-  // ${invalid} doesn't have "env:" prefix, so $ is skipped, rest is text
-  assert_true(nodes.length() > 0)
+test "parse_format: braced variable without env prefix" {
+  let nodes = @format.parse_format("${my_var}")
+  assert_eq(nodes.length(), 1)
+  assert_true(nodes[0] is Variable("my_var"))
 }
 
 ///|
@@ -828,4 +828,136 @@ test "evaluate_segments: styled block inherits parent style" {
   )
   assert_eq(segs[0].text, "hi")
   assert_true(segs[0].style.bold)
+}
+
+// --- ${variable} and ${dotted.name} ---
+
+///|
+test "parse_format: unbraced dotted form splits at dot" {
+  let nodes = @format.parse_format("$env_var.VIMSHELL")
+  assert_eq(nodes.length(), 2)
+  assert_true(nodes[0] is Variable("env_var"))
+  assert_true(nodes[1] is Text(".VIMSHELL"))
+}
+
+///|
+test "parse_format: braced dotted variable" {
+  let nodes = @format.parse_format("${env_var.VIMSHELL}")
+  assert_eq(nodes.length(), 1)
+  assert_true(nodes[0] is Variable("env_var.VIMSHELL"))
+}
+
+///|
+test "parse_format: braced dotted variable with surrounding text" {
+  let nodes = @format.parse_format("before ${custom.my_cmd} after")
+  assert_eq(nodes.length(), 3)
+  assert_true(nodes[0] is Text("before "))
+  assert_true(nodes[1] is Variable("custom.my_cmd"))
+  assert_true(nodes[2] is Text(" after"))
+}
+
+///|
+test "parse_format: multiple braced dotted variables" {
+  let nodes = @format.parse_format("${env_var.A}${env_var.B}")
+  assert_eq(nodes.length(), 2)
+  assert_true(nodes[0] is Variable("env_var.A"))
+  assert_true(nodes[1] is Variable("env_var.B"))
+}
+
+///|
+test "parse_format: braced variable empty content" {
+  let nodes = @format.parse_format("${}")
+  // Empty content inside braces produces no variable
+  let has_var = nodes.iter().any(fn(n) { n is Variable(_) })
+  assert_false(has_var)
+}
+
+///|
+test "parse_format: braced variable unclosed" {
+  let nodes = @format.parse_format("${unclosed")
+  let has_var = nodes.iter().any(fn(n) { n is Variable(_) })
+  assert_false(has_var)
+}
+
+///|
+test "parse_format: env var still works alongside braced variable" {
+  let nodes = @format.parse_format("${env:HOME} ${my_var}")
+  assert_eq(nodes.length(), 3)
+  assert_true(nodes[0] is EnvVar("HOME"))
+  assert_true(nodes[2] is Variable("my_var"))
+}
+
+///|
+test "extract names: braced dotted variable" {
+  let names = @format.extract_module_names("${env_var.VIMSHELL}")
+  assert_eq(names, ["env_var.VIMSHELL"])
+}
+
+///|
+test "extract names: mixed simple and braced dotted" {
+  let names = @format.extract_module_names(
+    "$directory ${env_var.VIMSHELL} $character",
+  )
+  assert_eq(names, ["directory", "env_var.VIMSHELL", "character"])
+}
+
+///|
+test "format: braced dotted variable substitution" {
+  let vars : Map[String, String] = { "env_var.HOME": "/home/user" }
+  let segs = @format.format_string(
+    "${env_var.HOME}",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "/home/user")
+}
+
+///|
+test "format: braced simple variable substitution" {
+  let vars : Map[String, String] = { "name": "world" }
+  let segs = @format.format_string(
+    "hello ${name}!",
+    vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "hello world!")
+}
+
+///|
+test "evaluate_segments: braced dotted variable" {
+  let segment_vars : Map[String, Array[@format.Segment]] = {
+    "env_var.VIMSHELL": [@format.Segment::new("vim")],
+  }
+  let ast = @format.parse_format("${env_var.VIMSHELL}")
+  let segs = @format.evaluate_segments(
+    ast,
+    segment_vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs[0].text, "vim")
+}
+
+///|
+test "evaluate_segments: mixed simple and dotted variables" {
+  let segment_vars : Map[String, Array[@format.Segment]] = {
+    "directory": [@format.Segment::new("~/project")],
+    "env_var.VIMSHELL": [@format.Segment::new("vim")],
+    "character": [@format.Segment::new("❯")],
+  }
+  let ast = @format.parse_format("$directory ${env_var.VIMSHELL} $character")
+  let segs = @format.evaluate_segments(
+    ast,
+    segment_vars,
+    @terminal.Style::default(),
+  )
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "~/project vim ❯")
+}
+
+///|
+test "compose_segments: dotted variable" {
+  let segment_vars : Map[String, Array[@format.Segment]] = {
+    "custom.hello": [@format.Segment::new("hi")],
+  }
+  let output = @format.compose_segments("${custom.hello}", segment_vars)
+  assert_eq(output.render(), "hi")
 }

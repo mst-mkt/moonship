@@ -78,18 +78,21 @@ fn parse_dollar(s : String, start : Int) -> (FormatNode, Int)? {
   let after = start + 1
   guard after < s.length() else { return None }
 
-  // ${env:VAR_NAME}
+  // ${env:VAR_NAME} or ${variable.name} or ${variable}
   if char_at(s, after) == '{' {
-    let env_prefix = "env:"
     let content_start = after + 1
     let close = scan_while(s, content_start, fn(c) { c != '}' })
     guard close < s.length() else { return None }
 
     let content = s[content_start:close].to_string()
-    guard content.has_prefix(env_prefix) else { return None }
 
-    let var_name = content[env_prefix.length():].to_string()
-    return Some((EnvVar(var_name), close + 1))
+    if content.has_prefix("env:") {
+      let var_name = content["env:".length():].to_string()
+      return Some((EnvVar(var_name), close + 1))
+    }
+
+    guard not(content.is_empty()) else { return None }
+    return Some((Variable(content), close + 1))
   }
 
   // $variable

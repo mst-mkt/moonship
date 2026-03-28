@@ -630,12 +630,39 @@ let module_registry : Array[ModuleEntry] = [
 
 ///|
 fn build_modules(config : @config.Config) -> Map[String, &@ms.PromptModule] {
-  module_registry
+  let modules : Map[String, &@ms.PromptModule] = module_registry
+    .iter()
+    .fold(init=(Map::new() : Map[String, &@ms.PromptModule]), fn(
+      modules,
+      entry,
+    ) {
+      modules[entry.name] = (entry.create)(config)
+      modules
+    })
+
+  config
+  .get_child_module_names("env_var")
   .iter()
-  .fold(init=(Map::new() : Map[String, &@ms.PromptModule]), fn(modules, entry) {
-    modules[entry.name] = (entry.create)(config)
-    modules
+  .fold(init=modules, fn(m, child) {
+    m["env_var.\{child}"] = @mod_env.EnvVarModule::from_named_config(
+      config, child,
+    )
+    m
   })
+  |> ignore
+
+  config
+  .get_child_module_names("custom")
+  .iter()
+  .fold(init=modules, fn(m, child) {
+    m["custom.\{child}"] = @mod_prompt.CustomModule::from_named_config(
+      config, child,
+    )
+    m
+  })
+  |> ignore
+
+  modules
 }
 
 ///|

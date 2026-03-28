@@ -815,3 +815,108 @@ test "escape_string: empty string" {
 test "escape_string: string with no special chars" {
   assert_eq(@config.escape_string("hello"), "\"hello\"")
 }
+
+// --- get_child_module_names / get_child_module ---
+
+///|
+test "get_child_module_names: env_var with children" {
+  let config = @config.Config::from_toml(
+    (
+      #|[env_var.VIMSHELL]
+      #|variable = "VIMSHELL"
+      #|default = "unknown shell"
+      #|
+      #|[env_var.HOME]
+      #|variable = "HOME"
+    ),
+  )
+  let children = config.get_child_module_names("env_var")
+  assert_true(children.contains("VIMSHELL"))
+  assert_true(children.contains("HOME"))
+  assert_eq(children.length(), 2)
+}
+
+///|
+test "get_child_module_names: no children returns empty" {
+  let config = @config.Config::from_toml(
+    (
+      #|[env_var]
+      #|variable = "HOME"
+    ),
+  )
+  let children = config.get_child_module_names("env_var")
+  assert_eq(children.length(), 0)
+}
+
+///|
+test "get_child_module_names: nonexistent module returns empty" {
+  let config = @config.Config::default()
+  let children = config.get_child_module_names("env_var")
+  assert_eq(children.length(), 0)
+}
+
+///|
+test "get_child_module_names: skips non-table values" {
+  let config = @config.Config::from_toml(
+    (
+      #|[env_var]
+      #|symbol = "⚡"
+      #|
+      #|[env_var.VIMSHELL]
+      #|variable = "VIMSHELL"
+    ),
+  )
+  let children = config.get_child_module_names("env_var")
+  assert_eq(children, ["VIMSHELL"])
+}
+
+///|
+test "get_child_module: returns child table" {
+  let config = @config.Config::from_toml(
+    (
+      #|[env_var.VIMSHELL]
+      #|variable = "VIMSHELL"
+      #|default = "unknown shell"
+    ),
+  )
+  guard config.get_child_module("env_var", "VIMSHELL") is Some(table) else {
+    fail("expected child module")
+    return
+  }
+  assert_eq(table.get_string("variable"), Some("VIMSHELL"))
+  assert_eq(table.get_string("default"), Some("unknown shell"))
+}
+
+///|
+test "get_child_module: nonexistent child returns None" {
+  let config = @config.Config::from_toml(
+    (
+      #|[env_var.VIMSHELL]
+      #|variable = "VIMSHELL"
+    ),
+  )
+  assert_true(config.get_child_module("env_var", "NONEXISTENT") is None)
+}
+
+///|
+test "get_child_module: nonexistent parent returns None" {
+  let config = @config.Config::default()
+  assert_true(config.get_child_module("env_var", "VIMSHELL") is None)
+}
+
+///|
+test "get_child_module_names: custom with children" {
+  let config = @config.Config::from_toml(
+    (
+      #|[custom.my_cmd]
+      #|command = "echo hello"
+      #|
+      #|[custom.other]
+      #|command = "echo other"
+    ),
+  )
+  let children = config.get_child_module_names("custom")
+  assert_true(children.contains("my_cmd"))
+  assert_true(children.contains("other"))
+  assert_eq(children.length(), 2)
+}

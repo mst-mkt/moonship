@@ -1,5 +1,6 @@
 ///|
 pub struct EnvVarModule {
+  module_name : String
   disabled : Bool
   async_render : Bool
   format : String
@@ -12,6 +13,7 @@ pub struct EnvVarModule {
 ///|
 pub fn EnvVarModule::default() -> EnvVarModule {
   {
+    module_name: "env_var",
     disabled: false,
     async_render: false,
     format: "with [$symbol$env_value]($style) ",
@@ -23,9 +25,13 @@ pub fn EnvVarModule::default() -> EnvVarModule {
 }
 
 ///|
-pub fn EnvVarModule::from_table(table : @config.ModuleTable) -> EnvVarModule {
+pub fn EnvVarModule::from_table(
+  table : @config.ModuleTable,
+  module_name? : String = "env_var",
+) -> EnvVarModule {
   let d = EnvVarModule::default()
   {
+    module_name,
     disabled: table.get_bool("disabled").unwrap_or(d.disabled),
     async_render: table.get_bool("async").unwrap_or(d.async_render),
     format: table.get_string("format").unwrap_or(d.format),
@@ -45,8 +51,29 @@ pub fn EnvVarModule::from_config(config : @config.Config) -> EnvVarModule {
 }
 
 ///|
-pub impl @ms.PromptModule for EnvVarModule with name(_self) -> String {
-  "env_var"
+pub fn EnvVarModule::from_named_config(
+  config : @config.Config,
+  instance_name : String,
+) -> EnvVarModule {
+  let module_name = "env_var.\{instance_name}"
+
+  match config.get_child_module("env_var", instance_name) {
+    Some(table) => {
+      let m = EnvVarModule::from_table(table, module_name~)
+      let variable = if m.variable.is_empty() {
+        instance_name
+      } else {
+        m.variable
+      }
+      { ..m, variable, }
+    }
+    None => { ..EnvVarModule::default(), module_name, variable: instance_name }
+  }
+}
+
+///|
+pub impl @ms.PromptModule for EnvVarModule with name(self) -> String {
+  self.module_name
 }
 
 ///|
