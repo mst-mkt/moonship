@@ -107,9 +107,8 @@ fn self_exe() -> String {
   }
 
   let path_var = @sys.get_env_var("PATH").unwrap_or("")
-  path_var
-  .split(":")
-  .map(fn(dir) { dir.to_string() })
+  @exec.split_to_strings(path_var, ":")
+  .iter()
   .filter(fn(dir) { not(dir.is_empty()) })
   .map(fn(dir) { "\{dir}/\{arg0}" })
   .find_first(fn(candidate) { @fs.path_exists(candidate) })

@@ -325,52 +325,47 @@ async fn run_config(name : String, value : String) -> Unit {
   emit_warnings(config.warnings)
 
   if value.is_empty() {
-    let parts = @exec.split_to_strings(name, ".")
+    match @exec.split_to_strings(name, ".") {
+      [key] => {
+        let result = match key {
+          "format" => Some(config.format)
+          "right_format" => Some(config.right_format)
+          "continuation_prompt" => Some(config.continuation_prompt)
+          "scan_timeout" => Some(config.scan_timeout.to_string())
+          "command_timeout" => Some(config.command_timeout.to_string())
+          "cache_ttl" => Some(config.cache_ttl.to_string())
+          "add_newline" => Some(config.add_newline.to_string())
+          "follow_symlinks" => Some(config.follow_symlinks.to_string())
+          "palette" => Some(config.palette)
+          "profiles" =>
+            Some(
+              config.profiles
+              .iter()
+              .map(fn(pair) { "\{pair.0} = \{@config.escape_string(pair.1)}" })
+              .collect()
+              .join("\n"),
+            )
+          _ =>
+            config
+            .get_raw_module(key)
+            .map(fn(table) { module_to_toml_string(key, table) })
+        }
 
-    if parts.length() == 1 {
-      let key = parts[0]
-      let result = match key {
-        "format" => Some(config.format)
-        "right_format" => Some(config.right_format)
-        "continuation_prompt" => Some(config.continuation_prompt)
-        "scan_timeout" => Some(config.scan_timeout.to_string())
-        "command_timeout" => Some(config.command_timeout.to_string())
-        "cache_ttl" => Some(config.cache_ttl.to_string())
-        "add_newline" => Some(config.add_newline.to_string())
-        "follow_symlinks" => Some(config.follow_symlinks.to_string())
-        "palette" => Some(config.palette)
-        "profiles" =>
-          Some(
-            config.profiles
-            .iter()
-            .map(fn(pair) { "\{pair.0} = \{@config.escape_string(pair.1)}" })
-            .collect()
-            .join("\n"),
-          )
-        _ =>
-          config
-          .get_raw_module(key)
-          .map(fn(table) { module_to_toml_string(key, table) })
+        match result {
+          Some(val) => println(val)
+          None => println("moonship: key '\{name}' not found")
+        }
       }
-
-      match result {
-        Some(val) => println(val)
-        None => println("moonship: key '\{name}' not found")
-      }
-    } else if parts.length() == 2 {
-      let mod_name = parts[0]
-      let key = parts[1]
-
-      match config.get_raw_module(mod_name) {
-        Some(table) =>
-          match table.0.get(key) {
-            Some(v) => println(config_value_display(v))
-            None => println("moonship: key '\{name}' not found")
-          }
-        None => println("moonship: module '\{mod_name}' not found")
-      }
-    } else {
-      println("moonship: invalid key '\{name}'")
+      [mod_name, key] =>
+        match config.get_raw_module(mod_name) {
+          Some(table) =>
+            match table.0.get(key) {
+              Some(v) => println(config_value_display(v))
+              None => println("moonship: key '\{name}' not found")
+            }
+          None => println("moonship: module '\{mod_name}' not found")
+        }
+      _ => println("moonship: invalid key '\{name}'")
     }
   } else {
     println("moonship: config editing by key is not yet supported")

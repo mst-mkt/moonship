@@ -18,9 +18,9 @@ pub fn strip_v_prefix(s : String) -> String {
 
 ///|
 pub fn find_semver(output : String) -> String {
-  output
-  .split(" ")
-  .map(fn(part) { extract_semver(part.to_string()) })
+  split_to_strings(output, " ")
+  .iter()
+  .map(fn(part) { extract_semver(part) })
   .find_first(fn(ver) { not(ver.is_empty()) })
   .unwrap_or("")
 }
