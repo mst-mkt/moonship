@@ -131,11 +131,22 @@ pub impl @ms.PromptModule for DirectoryModule with execute(
         ctx.home_dir,
         self.home_symbol,
       )
-      // Note: substitutions are applied per-part, not to the full joined path.
-      // Patterns spanning part boundaries won't match (minor Starship divergence).
-      let before_root_path = apply_substitutions(raw_before, self.substitutions)
-      let repo_root_name = apply_substitutions(raw_root, self.substitutions)
-      let path_in_repo = apply_substitutions(raw_after, self.substitutions)
+
+      let full = raw_before + raw_root + raw_after
+      let substituted_full = apply_substitutions(full, self.substitutions)
+
+      let sub_before = apply_substitutions(raw_before, self.substitutions)
+      let sub_root = apply_substitutions(raw_root, self.substitutions)
+      let sub_after = apply_substitutions(raw_after, self.substitutions)
+
+      let (before_root_path, repo_root_name, path_in_repo) = if sub_before +
+        sub_root +
+        sub_after ==
+        substituted_full {
+        (sub_before, sub_root, sub_after)
+      } else {
+        ("", "", substituted_full)
+      }
 
       let vars : Map[String, String] = {
         "before_root_path": before_root_path,

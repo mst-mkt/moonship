@@ -642,3 +642,102 @@ test "build_repo_root_parts: cwd not in repo" {
   assert_eq(root, "")
   assert_eq(after, "/other/path")
 }
+
+// --- repo root + substitutions: full-path substitution ---
+
+///|
+test "substitutions on full path: single component" {
+  // Substitution "Documents" → "📁" applied to before part
+  let (raw_before, raw_root, raw_after) = build_repo_root_parts(
+    "/home/user/Documents/myrepo/src", "/home/user/Documents/myrepo", "/home/user",
+    "~",
+  )
+  let subs : Array[(String, String)] = [("Documents", "📁")]
+
+  let full = raw_before + raw_root + raw_after
+  let substituted_full = apply_substitutions(full, subs)
+  let sub_before = apply_substitutions(raw_before, subs)
+  let sub_root = apply_substitutions(raw_root, subs)
+  let sub_after = apply_substitutions(raw_after, subs)
+
+  // Per-part matches full-path substitution
+  assert_eq(sub_before + sub_root + sub_after, substituted_full)
+  assert_eq(sub_before, "~/📁/")
+  assert_eq(sub_root, "myrepo")
+  assert_eq(sub_after, "/src")
+}
+
+///|
+test "substitutions on full path: boundary-spanning pattern" {
+  // Substitution "Documents/myrepo" → "project" spans before+root boundary
+  let (raw_before, raw_root, raw_after) = build_repo_root_parts(
+    "/home/user/Documents/myrepo/src", "/home/user/Documents/myrepo", "/home/user",
+    "~",
+  )
+  let subs : Array[(String, String)] = [("Documents/myrepo", "project")]
+
+  let full = raw_before + raw_root + raw_after
+  let substituted_full = apply_substitutions(full, subs)
+  let sub_before = apply_substitutions(raw_before, subs)
+  let sub_root = apply_substitutions(raw_root, subs)
+  let sub_after = apply_substitutions(raw_after, subs)
+
+  // Per-part does NOT match full-path substitution (boundary-spanning)
+  assert_true(sub_before + sub_root + sub_after != substituted_full)
+  assert_eq(substituted_full, "~/project/src")
+
+  // Fallback: full substituted path used as path
+  let (before, root, path) = if sub_before + sub_root + sub_after ==
+    substituted_full {
+    (sub_before, sub_root, sub_after)
+  } else {
+    ("", "", substituted_full)
+  }
+  assert_eq(before, "")
+  assert_eq(root, "")
+  assert_eq(path, "~/project/src")
+}
+
+///|
+test "substitutions on full path: no substitutions" {
+  let (raw_before, raw_root, raw_after) = build_repo_root_parts(
+    "/home/user/repos/myproject/src", "/home/user/repos/myproject", "/home/user",
+    "~",
+  )
+  let subs : Array[(String, String)] = []
+
+  let full = raw_before + raw_root + raw_after
+  let substituted_full = apply_substitutions(full, subs)
+  let sub_before = apply_substitutions(raw_before, subs)
+  let sub_root = apply_substitutions(raw_root, subs)
+  let sub_after = apply_substitutions(raw_after, subs)
+
+  assert_eq(sub_before + sub_root + sub_after, substituted_full)
+  assert_eq(sub_before, "~/repos/")
+  assert_eq(sub_root, "myproject")
+  assert_eq(sub_after, "/src")
+}
+
+///|
+test "substitutions on full path: multiple non-spanning substitutions" {
+  let (raw_before, raw_root, raw_after) = build_repo_root_parts(
+    "/home/user/Documents/myrepo/src/lib", "/home/user/Documents/myrepo", "/home/user",
+    "~",
+  )
+  let subs : Array[(String, String)] = [
+    ("Documents", "📁"),
+    ("myrepo", "🔧"),
+    ("src", "s"),
+  ]
+
+  let full = raw_before + raw_root + raw_after
+  let substituted_full = apply_substitutions(full, subs)
+  let sub_before = apply_substitutions(raw_before, subs)
+  let sub_root = apply_substitutions(raw_root, subs)
+  let sub_after = apply_substitutions(raw_after, subs)
+
+  assert_eq(sub_before + sub_root + sub_after, substituted_full)
+  assert_eq(sub_before, "~/📁/")
+  assert_eq(sub_root, "🔧")
+  assert_eq(sub_after, "/s/lib")
+}
