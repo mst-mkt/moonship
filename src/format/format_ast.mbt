@@ -30,7 +30,10 @@ pub fn parse_format(template : String) -> Array[FormatNode] {
                 nodes.push(node)
                 continue end
               }
-              None => continue i + 1
+              None => {
+                nodes.push(Text("$"))
+                continue i + 1
+              }
             }
           '[' =>
             match parse_styled_node(template, i) {

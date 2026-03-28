@@ -122,7 +122,7 @@ fn GitBranchModule::render_branch(
     } else {
       commit_hash
     }
-    "(\{short_hash})"
+    "\\(\{short_hash}\\)"
   } else {
     raw_branch
   }

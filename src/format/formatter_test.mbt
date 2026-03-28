@@ -110,9 +110,10 @@ test "format: empty template" {
 }
 
 ///|
-test "format: bare $" {
+test "format: bare $ is literal text" {
   let segs = @format.format_string("$", {}, @terminal.Style::default())
-  assert_eq(segs.length(), 0)
+  assert_eq(segs.length(), 1)
+  assert_eq(segs[0].text, "$")
 }
 
 ///|
@@ -816,7 +817,7 @@ test "format: escape at end of string" {
 ///|
 test "format: multiple dollar signs" {
   let segs = @format.format_string("$$name", {}, @terminal.Style::default())
-  assert_eq(segs.length(), 0)
+  assert_eq(segs.map(fn(s) { s.text }).join(""), "$")
 }
 
 ///|

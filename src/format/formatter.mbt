@@ -19,17 +19,6 @@ fn evaluate(
   default_style : @terminal.Style,
   palette : Map[String, String],
 ) -> Array[Segment] {
-  evaluate_inner(nodes, vars, default_style, palette, reparse_vars=true)
-}
-
-///|
-fn evaluate_inner(
-  nodes : Array[FormatNode],
-  vars : Map[String, String],
-  default_style : @terminal.Style,
-  palette : Map[String, String],
-  reparse_vars~ : Bool,
-) -> Array[Segment] {
   nodes
   .iter()
   .flat_map(fn(node) {
@@ -40,13 +29,7 @@ fn evaluate_inner(
       Variable(name) =>
         match vars.get(name) {
           Some(val) =>
-            if reparse_vars {
-              evaluate(parse_format(val), {}, default_style, palette).iter()
-            } else if not(val.is_empty()) {
-              Iter::singleton(Segment::new(val, style=default_style))
-            } else {
-              Iter::empty()
-            }
+            evaluate(parse_format(val), {}, default_style, palette).iter()
           None => Iter::empty()
         }
       EnvVar(name) => {
@@ -59,13 +42,7 @@ fn evaluate_inner(
       }
       Styled(content_nodes, style_spec) => {
         let resolved_style = resolve_style(style_spec, vars, palette)
-        let segs = evaluate_inner(
-          content_nodes,
-          vars,
-          resolved_style,
-          palette,
-          reparse_vars=false,
-        )
+        let segs = evaluate(content_nodes, vars, resolved_style, palette)
 
         if segs.is_empty() {
           Iter::empty()
@@ -75,13 +52,7 @@ fn evaluate_inner(
       }
       Conditional(content_nodes) =>
         if has_any_string_var(content_nodes, vars) {
-          evaluate_inner(
-            content_nodes,
-            vars,
-            default_style,
-            palette,
-            reparse_vars~,
-          ).iter()
+          evaluate(content_nodes, vars, default_style, palette).iter()
         } else {
           Iter::empty()
         }

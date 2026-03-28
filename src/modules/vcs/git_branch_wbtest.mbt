@@ -25,7 +25,8 @@ async test "render_branch: detached HEAD shows commit hash" {
     fail("expected Output")
   }
 
-  assert_true(out.render().contains("(abc1234)"))
+  let text = out.segments.map(fn(s) { s.text }).join("")
+  assert_true(text.contains("(abc1234)"))
 }
 
 ///|
@@ -298,8 +299,8 @@ async test "render_branch: detached HEAD shows short hash" {
   guard m.render_branch("", true, "abc1234def5678", "", "") is Output(out) else {
     fail("expected Output")
   }
-  let rendered = out.render()
-  assert_true(rendered.contains("abc1234"))
+  let text = out.segments.map(fn(s) { s.text }).join("")
+  assert_true(text.contains("abc1234"))
 }
 
 ///|
