@@ -87,11 +87,8 @@ fn hash_path(path : String) -> String {
 fn ensure_dir(path : String) -> Unit {
   guard not(@fs.path_exists(path)) else { return }
 
-  path
-  .split("/")
-  .map(fn(v) { v.to_string() })
-  .fold(init="", fn(current, part) {
-    let next = if part.is_empty() {
+  for part in path.split("/"); current = "" {
+    let next = if part.to_string().is_empty() {
       "/"
     } else if current == "/" {
       "/\{part}"
@@ -105,7 +102,6 @@ fn ensure_dir(path : String) -> Unit {
       }
     }
 
-    next
-  })
-  |> ignore
+    continue next
+  }
 }

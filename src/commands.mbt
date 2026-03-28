@@ -401,15 +401,14 @@ fn module_to_toml_string(name : String, table : @config.ModuleTable) -> String {
   let keys = table.0.keys().collect()
   keys.sort()
 
-  let lines : Array[String] = ["[\{name}]"]
-  for key in keys {
-    match table.0.get(key) {
-      Some(v) => lines.push("\{key} = \{config_value_literal(v)}")
-      None => ()
-    }
-  }
+  let key_lines = keys
+    .iter()
+    .filter_map(fn(key) {
+      table.0.get(key).map(fn(v) { "\{key} = \{config_value_literal(v)}" })
+    })
+    .collect()
 
-  lines.join("\n")
+  ["\{name}]", ..key_lines].join("\n")
 }
 
 ///|

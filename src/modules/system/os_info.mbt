@@ -132,20 +132,18 @@ async fn get_uname() -> String {
 ///|
 fn parse_os_symbols(table : @config.ModuleTable) -> Map[String, String] {
   match table.0.get("symbols") {
-    Some(@config.CTable(sym_table)) =>
-      sym_table
-      .iter()
-      .fold(init=(Map::new() : Map[String, String]), fn(acc, pair) {
-        match pair.1 {
-          @config.CString(val) => {
-            // Starship uses PascalCase OS names, moonship uses lowercase
-            let key = pair.0.to_lower()
-            acc[key] = val
-            acc
-          }
-          _ => acc
+    Some(@config.CTable(sym_table)) => {
+      let result : Map[String, String] = {}
+
+      for k, v in sym_table {
+        if v is @config.CString(val) {
+          // Starship uses PascalCase OS names, moonship uses lowercase
+          result[k.to_lower()] = val
         }
-      })
+      }
+
+      result
+    }
     _ => {}
   }
 }

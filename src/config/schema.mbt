@@ -83,13 +83,7 @@ fn stringify_val(v : JVal, depth : Int, indent : Int) -> String {
 
 ///|
 fn pad(depth : Int, indent : Int) -> String {
-  let buf = StringBuilder::new()
-
-  for _ in 0..<(depth * indent) {
-    buf.write_char(' ')
-  }
-
-  buf.to_string()
+  String::make(depth * indent, ' ')
 }
 
 ///|

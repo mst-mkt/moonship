@@ -77,16 +77,15 @@ pub fn ModuleTable::get_string_map(
 ) -> Map[String, String] {
   guard self.0.get(key) is Some(CTable(map_table)) else { return {} }
 
-  map_table
-  .iter()
-  .filter_map(fn(pair) {
-    guard pair.1 is CString(val) else { return None }
-    Some((pair.0, val))
-  })
-  .fold(init=(Map::new() : Map[String, String]), fn(acc, pair) {
-    acc[pair.0] = pair.1
-    acc
-  })
+  let result : Map[String, String] = {}
+
+  for k, v in map_table {
+    if v is CString(val) {
+      result[k] = val
+    }
+  }
+
+  result
 }
 
 ///|
@@ -214,17 +213,13 @@ fn parse_config_table(table : Map[String, ConfigValue]) -> Config {
   let profiles = parse_profiles(table)
   let top_level_tables : Array[String] = ["palettes", "profiles"]
 
-  let raw_modules = table
-    .iter()
-    .fold(init=(Map::new() : Map[String, ModuleTable]), fn(acc, pair) {
-      let (name, value) = pair
-      match value {
-        CTable(mod_table) if not(top_level_tables.contains(name)) =>
-          acc.set(name, ModuleTable(mod_table))
-        _ => ()
-      }
-      acc
-    })
+  let raw_modules : Map[String, ModuleTable] = {}
+
+  for name, value in table {
+    if value is CTable(mod_table) && not(top_level_tables.contains(name)) {
+      raw_modules[name] = ModuleTable(mod_table)
+    }
+  }
 
   {
     format,
@@ -382,36 +377,38 @@ fn parse_palettes(
 ) -> Map[String, Map[String, String]] {
   guard table.get("palettes") is Some(CTable(palettes_table)) else { return {} }
 
-  palettes_table
-  .iter()
-  .fold(init=(Map::new() : Map[String, Map[String, String]]), fn(acc, pair) {
-    let (name, value) = pair
-    guard value is CTable(palette_table) else { return acc }
+  let result : Map[String, Map[String, String]] = {}
 
-    let colors : Map[String, String] = palette_table
-      .iter()
-      .fold(init=Map::new(), fn(m, kv) {
-        guard kv.1 is CString(color_val) else { return m }
-        m[kv.0] = color_val
-        m
-      })
+  for name, value in palettes_table {
+    guard value is CTable(palette_table) else { continue }
 
-    acc[name] = colors
-    acc
-  })
+    let colors : Map[String, String] = {}
+
+    for k, v in palette_table {
+      if v is CString(color_val) {
+        colors[k] = color_val
+      }
+    }
+
+    result[name] = colors
+  }
+
+  result
 }
 
 ///|
 fn parse_profiles(table : Map[String, ConfigValue]) -> Map[String, String] {
   guard table.get("profiles") is Some(CTable(profiles_table)) else { return {} }
 
-  profiles_table
-  .iter()
-  .fold(init=(Map::new() : Map[String, String]), fn(acc, pair) {
-    guard pair.1 is CString(format) else { return acc }
-    acc[pair.0] = format
-    acc
-  })
+  let result : Map[String, String] = {}
+
+  for name, value in profiles_table {
+    if value is CString(format) {
+      result[name] = format
+    }
+  }
+
+  result
 }
 
 // --- JSON conversion ---
@@ -443,14 +440,15 @@ fn json_to_config(v : Json) -> ConfigValue {
 
 ///|
 fn json_table_to_config(table : Map[String, Json]) -> Map[String, ConfigValue] {
-  table
-  .iter()
-  .filter(fn(pair) { not(pair.1 is Null) })
-  .fold(init=(Map::new() : Map[String, ConfigValue]), fn(acc, pair) {
-    let (key, value) = pair
-    acc[key] = json_to_config(value)
-    acc
-  })
+  let result : Map[String, ConfigValue] = {}
+
+  for key, value in table {
+    if not(value is Null) {
+      result[key] = json_to_config(value)
+    }
+  }
+
+  result
 }
 
 // --- TOML conversion ---
@@ -472,11 +470,11 @@ fn toml_to_config(v : @toml.TomlValue) -> ConfigValue {
 fn toml_table_to_config(
   table : Map[String, @toml.TomlValue],
 ) -> Map[String, ConfigValue] {
-  table
-  .iter()
-  .fold(init=(Map::new() : Map[String, ConfigValue]), fn(acc, pair) {
-    let (key, value) = pair
-    acc[key] = toml_to_config(value)
-    acc
-  })
+  let result : Map[String, ConfigValue] = {}
+
+  for key, value in table {
+    result[key] = toml_to_config(value)
+  }
+
+  result
 }

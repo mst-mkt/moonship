@@ -66,13 +66,13 @@ fn expand_all(
 ) -> String {
   guard format.contains("$all") else { return format }
 
-  let explicit = @ms.extract_module_names(format)
-    .iter()
-    .filter(fn(name) { name != "all" })
-    .fold(init=Map::new(), fn(set, name) {
-      set[name] = true
-      set
-    })
+  let explicit : Map[String, Bool] = {}
+
+  for name in @ms.extract_module_names(format) {
+    if name != "all" {
+      explicit[name] = true
+    }
+  }
 
   let expansion = module_order
     .iter()
