@@ -16,7 +16,7 @@ pub fn SpackModule::default() -> SpackModule {
     format: "via [$symbol$environment]($style) ",
     style: "blue bold",
     symbol: "🅢 ",
-    truncation_length: 2147483647,
+    truncation_length: 1,
   }
 }
 

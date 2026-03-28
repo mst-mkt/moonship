@@ -21,3 +21,9 @@ test "basename: path" {
 test "basename: no slash" {
   assert_eq(@exec.basename("myenv"), "myenv")
 }
+
+///|
+test "default: truncation_length is 1" {
+  let m = SpackModule::default()
+  assert_eq(m.truncation_length, 1)
+}
